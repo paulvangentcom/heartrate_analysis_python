@@ -114,6 +114,9 @@ hb.plotter(dataset)
 
 Measures are only calculated for non-rejected peaks and intervals between two non-rejected peaks.
 
+## License
+The module is licensed under the [GNU General Public License Version3, GPL-v3](https://opensource.org/licenses/GPL-3.0)
+
 ## To-do
 
 The module is still in active development. The to-do for the coming months is:
