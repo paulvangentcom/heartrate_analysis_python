@@ -7,6 +7,7 @@ The module is described in my tutorial series:
 * [Analyzing a Discrete Heart Rate Signal Using Python - Part 1](http://www.paulvangent.com/2016/03/15/analyzing-a-discrete-heart-rate-signal-using-python-part-1/)
 * [Analyzing a Discrete Heart Rate Signal Using Python - Part 2](http://www.paulvangent.com/2016/03/21/analyzing-a-discrete-heart-rate-signal-using-python-part-2/)
 * [Analyzing a Discrete Heart Rate Signal Using Python - Part 3](http://www.paulvangent.com/2016/03/30/analyzing-a-discrete-heart-rate-signal-using-python-part-3/)
+* Analysing a Discrete Heart Rate Signal Using Python - Part 4: in development
 
 
 The module takes a discrete heart rate signal and outputs time-domain and frequency-domain measures often found in scientific literature:
