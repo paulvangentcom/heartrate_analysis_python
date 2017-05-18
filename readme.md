@@ -40,7 +40,7 @@ data = hb.get_data("yourdata.csv")
 
 This creates a pandas dataframe containing the data from your file.
 
-Analysis requires the sample rate for your file. If you know this _a priori_, supply it when calling the `process()` function, which returns a dictionary with all measures:
+Analysis requires the sampling rate for your data. If you know this _a priori_, supply it when calling the `process()` function, which returns a `dict{}` object containing all measures:
 
 ```python
 import heartBeat as hb
@@ -54,7 +54,7 @@ measures = hb.process(data, 0.75, fs)
 * **hrw:** the algorithm uses a moving average during peak detection. `hrw` is the window size used for the calculation. The windowsize is `hrw * samplerate`;
 * **fs**: The samplerate of the signal in Hz, how many rows of data there are per second.
 
-A dictionary object is returned containing all measures, and stored in the module. Access as such:
+A `dict{}` object is returned containing all measures, and stored in the module. Access as such:
 
 ```python
 import heartBeat as hb
