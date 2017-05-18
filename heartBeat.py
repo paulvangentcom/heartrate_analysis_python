@@ -183,6 +183,7 @@ def plotter(dataset):
 	rejectedpeaks_y = measures['removed_beats_y']
 	plt.title("Heart Rate Signal Peak Detection")
 	plt.plot(dataset.hr, alpha=0.5, color='blue', label="heart rate signal")
+	plt.plot(measures['rolmean'], color ='grey', label="moving average")
 	plt.scatter(peaklist, ybeat, color='green', label="BPM:%.2f" %(measures['bpm']))
 	plt.scatter(rejectedpeaks, rejectedpeaks_y, color='red', label="rejected peaks")
 	plt.legend(loc=4, framealpha=0.6) 
