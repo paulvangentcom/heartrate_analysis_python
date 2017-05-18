@@ -202,6 +202,5 @@ def process(dataset, hrw, fs):
 
 if __name__ == "__main__":
 	dataset = get_data("data2.csv")
-	#dataset = dataset[4500:].reset_index(drop=True)
 	process(dataset, 0.75, get_samplerate_mstimer(dataset))
 	plotter(dataset)
