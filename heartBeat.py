@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 from scipy.interpolate import interp1d
-from scipy.signal import butter, lfilter, detrend
+from scipy.signal import butter, lfilter, detrend, convolve
 from datetime import datetime
 
 measures = {}
@@ -16,8 +16,8 @@ def get_data(filename):
 	return dataset
 
 def get_samplerate_mstimer(dataset):
-	sampletimer = [x for x in dataset.datetime]
-	fs = ((len(sampletimer) / sampletimer[-1])*1000)
+	sampletimer = [x for x in dataset.timer]
+	fs = ((len(sampletimer) / (sampletimer[-1]-sampletimer[0]))*1000)
 	measures['fs'] = fs
 	return fs
 
@@ -29,9 +29,8 @@ def get_samplerate_datetime(dataset):
 	return fs
 
 def rolmean(dataset, hrw, fs):
-	mov_avg = dataset.rolling(window=int(hrw*fs), center=False)['hr'].mean()
 	avg_hr = (np.mean(dataset.hr)) 
-	mov_avg = [avg_hr if math.isnan(x) else x for x in mov_avg]
+	mov_avg = dataset.rolling(window=int(hrw*fs), center=False)['hr'].mean().fillna(avg_hr)
 	mov_avg = [x*1.1 for x in mov_avg]
 	dataset['hr_rollingmean'] = mov_avg
 
@@ -46,30 +45,29 @@ def butter_lowpass_filter(data, cutoff, fs, order):
 	y = lfilter(b, a, data)
 	return y    
 
-def filtersignal(data, cutoff, fs, order):
-	hr = [math.pow(x, 3) for x in dataset.hr]
+def filtersignal(hrdata, cutoff, fs, order):
+	hr = np.power(np.array(hrdata), 3)
 	hrfiltered = butter_lowpass_filter(hr, cutoff, fs, order)
-	dataset['hr'] = hrfiltered
+	return hrfiltered
 
 #Peak detection
 def detect_peaks(dataset, ma_perc, fs):
-	rolmean = [(x+((x/100)*ma_perc)) for x in dataset.hr_rollingmean]
-	window = []
+	rm = np.array(dataset.hr_rollingmean)
+	rolmean = rm+((rm/100)*ma_perc)
+	hr = np.array(dataset.hr)
+	peaksx = np.where((hr > rolmean))[0]
+	peaksy = hr[np.where((hr > rolmean))[0]]
+	peakedges = np.concatenate((np.array([0]), (np.where(np.diff(peaksx) > 1)[0]), np.array([len(peaksx)])))
 	peaklist = []
-	listpos = 0 
-	for datapoint in dataset.hr:
-		rollingmean = rolmean[listpos]
-		if (datapoint <= rollingmean) and (len(window) <= 1):
-			listpos += 1
-		elif (datapoint > rollingmean):
-			window.append(datapoint)
-			listpos += 1
-		else:
-			maximum = max(window)
-			beatposition = listpos - len(window) + (window.index(max(window)))
-			peaklist.append(beatposition)
-			window = []
-			listpos += 1
+	ybeat = []
+	
+	for i in range(0, len(peakedges)-1):
+		try:
+			y = peaksy[peakedges[i]:peakedges[i+1]].tolist()
+			peaklist.append(peaksx[peakedges[i] + y.index(max(y))])
+		except:
+			pass
+	
 	measures['peaklist'] = peaklist
 	measures['ybeat'] = [dataset.hr[x] for x in peaklist]
 	measures['rolmean'] = rolmean
@@ -80,66 +78,38 @@ def fit_peaks(dataset, fs):
 	ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
 	rrsd = []
 	valid_ma = []
-	for x in ma_perc_list:
+	for x in ma_perc_list: #This is where multiprocessing goes
 		detect_peaks(dataset, x, fs)
 		bpm = ((len(measures['peaklist'])/(len(dataset.hr)/fs))*60)
 		rrsd.append([measures['rrsd'], bpm, x])
 
 	for x,y,z in rrsd:
-		print x, y, z
-		if ((x > 1) and ((y > 30) and (y < 130))):
+		if ((x > 1) and ((y > 40) and (y < 150))): #if more than one peak detected, and bpm between 40 and 150
 			valid_ma.append([x, z])
 	
 	measures['best'] = min(valid_ma, key = lambda t: t[0])[1]
 	detect_peaks(dataset, min(valid_ma, key = lambda t: t[0])[1], fs)
 
 def check_peaks(dataset):
-	RR_list = measures['RR_list']
-	peaklist = measures['peaklist']
-	ybeat = measures['ybeat']
-	
-	upper_threshold = np.mean(RR_list) + 300
-	lower_threshold = np.mean(RR_list) - 300
-	
-	removed_beats = []
-	removed_beats_y = []
-	RR_list_cor = []
-	peaklist_cor = [peaklist[0]]
-	
-	cnt = 0
-	while cnt < len(RR_list):
-		if (RR_list[cnt] < upper_threshold) and (RR_list[cnt] > lower_threshold):
-			RR_list_cor.append(RR_list[cnt])
-			peaklist_cor.append(peaklist[cnt+1]) 
-			cnt += 1
-		else:	
-			removed_beats.append(peaklist[cnt+1])
-			removed_beats_y.append(ybeat[cnt+1])
-			cnt += 1
+	RR_arr = np.array(measures['RR_list'])
+	peaklist = np.array(measures['peaklist'])
+	peaklist2 = measures['peaklist']
+	ybeat = np.array(measures['ybeat'])
+	upper_threshold = np.mean(RR_arr) + 300
+	lower_threshold = np.mean(RR_arr) - 300
 
-	measures['RR_list_cor'] = RR_list_cor
-	measures['peaklist_cor'] = peaklist_cor
-	measures['removed_beats'] = removed_beats
-	measures['removed_beats_y'] = removed_beats_y
+	measures['RR_list_cor'] = RR_arr[np.where((RR_arr > lower_threshold) & (RR_arr < upper_threshold))]
+	peaklist_cor = peaklist[np.where((RR_arr > lower_threshold) & (RR_arr < upper_threshold))[0]+1]
+	measures['peaklist_cor'] = np.insert(peaklist_cor, 0, peaklist[0])
+	measures['removed_beats'] = peaklist[np.where((RR_arr <= lower_threshold) | (RR_arr >= upper_threshold))[0]+1]
+	measures['removed_beats_y'] = removed_beats_y = ybeat[np.where((RR_arr <= lower_threshold) | (RR_arr >= upper_threshold))[0]+1]
 
 #Calculating all measures
 def calc_RR(dataset, fs):
-	peaklist = measures['peaklist']
-	RR_list = []
-	cnt = 0
-	while (cnt < (len(peaklist)-1)):
-		RR_interval = (peaklist[cnt+1] - peaklist[cnt])
-		ms_dist = ((RR_interval / fs) * 1000.0)
-		RR_list.append(ms_dist)
-		cnt += 1
-
-	RR_diff = []
-	RR_sqdiff = []
-	cnt = 0 
-	while (cnt < (len(RR_list)-1)): 
-		RR_diff.append(abs(RR_list[cnt] - RR_list[cnt+1])) 
-		RR_sqdiff.append(math.pow(RR_list[cnt] - RR_list[cnt+1], 2))
-		cnt += 1
+	peaklist = np.array(measures['peaklist'])
+	RR_list = (np.diff(peaklist) / fs) * 1000.0
+	RR_diff = np.abs(np.diff(RR_list))
+	RR_sqdiff = np.power(RR_diff, 2)
 	measures['RR_list'] = RR_list
 	measures['RR_diff'] = RR_diff
 	measures['RR_sqdiff'] = RR_sqdiff
@@ -174,6 +144,7 @@ def calc_fd_measures(dataset, fs):
 	Y = Y[range(n/2)]
 	measures['lf'] = np.trapz(abs(Y[(frq>=0.04) & (frq<=0.15)]))
 	measures['hf'] = np.trapz(abs(Y[(frq>=0.16) & (frq<=0.5)]))
+	measures['lf/hf'] = measures['lf'] / measures['hf']
 
 #Plotting it
 def plotter(dataset):
@@ -191,16 +162,10 @@ def plotter(dataset):
 
 #Wrapper function
 def process(dataset, hrw, fs):
-	filtersignal(dataset, 2.5, fs, 5)
+	dataset['hr'] = filtersignal(dataset.hr, 2.5, fs, 5)
 	rolmean(dataset, hrw, fs)
 	fit_peaks(dataset, fs)
 	calc_RR(dataset, fs)
 	check_peaks(dataset)
 	calc_ts_measures(dataset)
 	calc_fd_measures(dataset, fs)
-
-
-if __name__ == "__main__":
-	dataset = get_data("data2.csv")
-	process(dataset, 0.75, get_samplerate_mstimer(dataset))
-	plotter(dataset)

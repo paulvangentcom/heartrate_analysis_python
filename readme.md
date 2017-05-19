@@ -46,12 +46,12 @@ Analysis requires the sampling rate for your data. If you know this _a priori_, 
 ```python
 import heartBeat as hb
 
-data = gb.get_data("yourdata.csv")
+data = hb.get_data("yourdata.csv")
 measures = hb.process(data, 0.75, fs)
 ```
 
 `process(dataset, hrw, fs)` requires three arguments:
-* **dataset:** the dataset you imported using `get_data`. Alternatively, you can supply a standard pandas dataframe. The heart rate data column should be labeled `hr`. If you wish to use the built-in sameple rate detection, the time column should be labeled `datetime`;
+* **dataset:** the dataset you imported using `get_data`. Alternatively, you can supply a standard pandas dataframe. The heart rate data column should be labeled `hr`. If you wish to use the built-in sample rate detection, the time column should be labeled `datetime`;
 * **hrw:** the algorithm uses a moving average during peak detection. `hrw` is the window size used for the calculation. The windowsize is `hrw * samplerate`;
 * **fs**: The samplerate of the signal in Hz, how many rows of data there are per second.
 
@@ -74,7 +74,8 @@ print(hb.measures['lf']/measures['hf']) # returns LF:HF ratio
 
 ## Estimating Sample Rate
 
-The toolkit has a simple built-in sample-rate detection. It can handle ms-based timers (starting at 0, incrementing with each data row), and datetime-based timers (in the format: `2016-03-06 09:14:40.650000`, or `yyyy-mm-dd HH:MM:SS.f`
+The toolkit has a simple built-in sample-rate detection. It can handle ms-based timers ([0.0, 10.0, 20.0, N] for a 100Hz signal), and datetime-based timers (in the format: `2016-03-06 09:14:40.650000`, or `yyyy-mm-dd HH:MM:SS.f).
+The ms-based timer expects the timer column to be labeled "timer", the datetime timer expects the column named "datetime"
 
 ```python
 import heartBeat as hb
@@ -88,6 +89,8 @@ fs = hb.get_samplerate_mstimer(data)
 fs = hb.get_samplerate_datetime(data)
 ```
 In addition to being returned, the samplerate is also stored in the module measures `dict{}`: `print(hb.measures['fs'])`
+
+**Please note:** When using a ms-based timer, 
 
 ## Plotting your signal
 A basic plotting function is included. It plots the original signal, the moving average, the detected peaks and the rejected peaks (if any were rejected). Usage example with the included `data.csv` example file (recorded at 100Hz):
@@ -112,7 +115,7 @@ hb.plotter(dataset)
 
 ![output 1 of HR analysis](http://www.paulvangent.com/github/output2.jpeg)
 
-Measures are only calculated for non-rejected peaks and intervals between two non-rejected peaks.
+Measures are only calculated for non-rejected peaks and intervals between two non-rejected peaks. Rejected detections do not influence the calculated measures.
 
 ## License
 The module is licensed under the [GNU General Public License Version3, GPL-v3](https://opensource.org/licenses/GPL-3.0)
@@ -123,4 +126,6 @@ The module is still in active development. The to-do for the coming months is:
 
 1. Replace pandas data handling with numpy data handling, to increase speed of processing
 2. Implement data handler function, recognising most used formats and parsing correctly
-3. Improve accuracy of peak detection/rejection with an FFT-based implementation."# heartrate_analysis_python" 
+3. Increase versatility of sampling rate detection
+4. Improve accuracy of peak detection/rejection with an FFT-based implementation."
+5. Add MAD time-domain measure
