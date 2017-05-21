@@ -7,7 +7,7 @@ The module is described in my tutorial series:
 * [Analyzing a Discrete Heart Rate Signal Using Python - Part 1](http://www.paulvangent.com/2016/03/15/analyzing-a-discrete-heart-rate-signal-using-python-part-1/)
 * [Analyzing a Discrete Heart Rate Signal Using Python - Part 2](http://www.paulvangent.com/2016/03/21/analyzing-a-discrete-heart-rate-signal-using-python-part-2/)
 * [Analyzing a Discrete Heart Rate Signal Using Python - Part 3](http://www.paulvangent.com/2016/03/30/analyzing-a-discrete-heart-rate-signal-using-python-part-3/)
-* Analysing a Discrete Heart Rate Signal Using Python - Part 4: in development
+* Analyzing a Discrete Heart Rate Signal Using Python - Part 4: in development
 
 
 The module takes a discrete heart rate signal and outputs time-domain and frequency-domain measures often found in scientific literature:
@@ -53,7 +53,7 @@ measures = hb.process(data, 0.75, fs)
 `process(dataset, hrw, fs)` requires three arguments:
 * **dataset:** the dataset you imported using `get_data`. Alternatively, you can supply a standard pandas dataframe. The heart rate data column should be labeled `hr`. If you wish to use the built-in sample rate detection, the time column should be labeled `datetime`;
 * **hrw:** the algorithm uses a moving average during peak detection. `hrw` is the window size used for the calculation. The windowsize is `hrw * samplerate`;
-* **fs**: The samplerate of the signal in Hz, how many rows of data there are per second.
+* **fs**: The samplerate of the signal in Hz.
 
 A `dict{}` object is returned containing all measures, and stored in the module. Access as such:
 
@@ -64,11 +64,11 @@ data = gb.get_data("yourdata.csv")
 measures = hb.process(data, 0.75, fs)
 
 print(measures['bpm']) #returns BPM value
-print(measures['lf']/measures['hf']) # returns LF:HF ratio
+print(measures['lf/hf'] # returns LF:HF ratio
 
 #Alternatively, use dictionary stored in module:
 print(hb.measures['bpm']) #returns BPM value
-print(hb.measures['lf']/measures['hf']) # returns LF:HF ratio
+print(hb.measures['lf/hf'] # returns LF:HF ratio
 ```
 
 
@@ -124,7 +124,7 @@ The module is licensed under the [GNU General Public License Version3, GPL-v3](h
 
 The module is still in active development. The to-do for the coming months is:
 
-1. Replace pandas data handling with numpy data handling, to increase speed of processing
+1. ~~Replace pandas data handling with numpy data handling, to increase speed of processing~~
 2. Implement data handler function, recognising most used formats and parsing correctly
 3. Increase versatility of sampling rate detection
 4. Improve accuracy of peak detection/rejection with an FFT-based implementation."

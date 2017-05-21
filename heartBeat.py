@@ -1,10 +1,11 @@
-import pandas as pd
+from datetime import datetime
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
-import math
+import pandas as pd
 from scipy.interpolate import interp1d
-from scipy.signal import butter, lfilter, detrend, convolve
-from datetime import datetime
+from scipy.signal import butter, lfilter
 
 measures = {}
 
@@ -78,13 +79,13 @@ def fit_peaks(dataset, fs):
 	ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
 	rrsd = []
 	valid_ma = []
-	for x in ma_perc_list: #This is where multiprocessing goes
+	for x in ma_perc_list:
 		detect_peaks(dataset, x, fs)
 		bpm = ((len(measures['peaklist'])/(len(dataset.hr)/fs))*60)
 		rrsd.append([measures['rrsd'], bpm, x])
 
 	for x,y,z in rrsd:
-		if ((x > 1) and ((y > 40) and (y < 150))): #if more than one peak detected, and bpm between 40 and 150
+		if ((x > 1) and ((y > 40) and (y < 150))):
 			valid_ma.append([x, z])
 	
 	measures['best'] = min(valid_ma, key = lambda t: t[0])[1]
@@ -97,7 +98,6 @@ def check_peaks(dataset):
 	ybeat = np.array(measures['ybeat'])
 	upper_threshold = np.mean(RR_arr) + 300
 	lower_threshold = np.mean(RR_arr) - 300
-
 	measures['RR_list_cor'] = RR_arr[np.where((RR_arr > lower_threshold) & (RR_arr < upper_threshold))]
 	peaklist_cor = peaklist[np.where((RR_arr > lower_threshold) & (RR_arr < upper_threshold))[0]+1]
 	measures['peaklist_cor'] = np.insert(peaklist_cor, 0, peaklist[0])
@@ -169,3 +169,4 @@ def process(dataset, hrw, fs):
 	check_peaks(dataset)
 	calc_ts_measures(dataset)
 	calc_fd_measures(dataset, fs)
+	return measures
