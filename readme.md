@@ -124,8 +124,9 @@ The module is licensed under the [GNU General Public License Version3, GPL-v3](h
 
 The module is still in active development. The to-do for the coming months is:
 
-1. ~~Replace pandas data handling with numpy data handling, to increase speed of processing~~
-2. Implement data handler function, recognising most used formats and parsing correctly
-3. Increase versatility of sampling rate detection
-4. Improve accuracy of peak detection/rejection with an FFT-based implementation."
-5. Add MAD time-domain measure
+1. ~~Replace numerical functions with numpy data handling, to increase speed of processing~~
+2. Drop dependency on pandas
+3. Implement data handler function, recognising most used formats and parsing correctly
+4. Increase versatility of sampling rate detection
+5. Improve accuracy of peak detection/rejection with an FFT-based implementation."
+6. Add MAD time-domain measure
