@@ -129,4 +129,5 @@ The module is still in active development. The to-do for the coming months is:
 3. Implement data handler function, recognising most used formats and parsing correctly
 4. Increase versatility of sampling rate detection
 5. Improve accuracy of peak detection/rejection with an FFT-based implementation."
-6. Add MAD time-domain measure
+6. ~~Add MAD time-domain measure~~
+
