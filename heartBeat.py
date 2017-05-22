@@ -136,6 +136,7 @@ def calc_ts_measures():
 	measures['nn50'] = NN50
 	measures['pnn20'] = float(len(NN20)) / float(len(RR_diff))
 	measures['pnn50'] = float(len(NN50)) / float(len(RR_diff))
+	measures['hr_mad'] = np.median(np.abs(RR_list-np.median(RR_list)))
 
 def calc_fd_measures(hrdata, fs):
 	peaklist = working_data['peaklist_cor']
