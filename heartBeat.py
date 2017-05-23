@@ -1,11 +1,13 @@
 from datetime import datetime
 import time
-import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.signal import butter, lfilter
+
+__author__ = "Paul van Gent"
+__version__ = "Version 0.9"
 
 measures = {}
 working_data = {}
@@ -14,22 +16,16 @@ working_data = {}
 def get_data(filename, delim = ',', column_name = 'None'):
 	file_ext = filename.split('.')[-1]
 	if file_ext == 'csv' or file_ext == 'txt':
-		print('getting csv/txt file')
-		with open(filename, 'r') as f:
-			header = f.readline().strip().split(',')
-		if (column_name != 'None') and (column_name in header):
-			hrdata = np.loadtxt(filename, delimiter=delim, skiprows=1)
-			if len(header) > 1:
-				hrdata = hrdata[:,header.index(column_name)]
-		elif (column_name == 'None'):
+		if (column_name != 'None'):
+			hrdata = np.genfromtxt(filename, delimiter=delim, names=True, dtype=None)
 			try:
-				hrdata = np.loadtxt(filename, delimiter=delim)
-			except Exception as e:
-				print("\nError loading delimited %s file. This usually means no header column is specified while header information is present in the file\n\nThe application reported: %s" %(file_ext, e))
-				sys.exit()
+				hrdata = hrdata[column_name]
+			except:
+				print('\nError loading column "%s" from file "%s". Is column name specified correctly?' %(column_name, filename))
+		elif (column_name == 'None'):
+			hrdata = np.genfromtxt(filename, delimiter=delim, dtype = np.float64)
 		else:
-			print('\nError: column name "%s" not found in header of "%s".' %(column_name, filename))
-			sys.exit()
+			print('\nError: column name "%s" not found in header of "%s".\n' %(column_name, filename))
 	elif file_ext == 'mat':
 		print('getting matlab file')
 		import scipy.io
@@ -37,8 +33,7 @@ def get_data(filename, delim = ',', column_name = 'None'):
 		if (column_name != "None"):
 			hrdata = np.array(data[column_name][:,0], dtype=np.float64)
 		else:
-			print("\nError: column name required for Matlab .mat files")
-			sys.exit()
+			print("\nError: column name required for Matlab .mat files\n\n")
 	else:
 		print('unknown file format')
 		hrdata = np.nan
