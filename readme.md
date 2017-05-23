@@ -162,7 +162,7 @@ hb.plotter()
 ```
 This returns:
 
-![output 1 of HR analysis](http://www.paulvangent.com/github/output1.jpeg)
+![output 1 of HR analysis](https://github.com/paulvangentcom/heartrate_analysis_python/blob/master/images/output1.jpeg)
 
 `plotter(show = True, title = 'Heart Rate Signal Peak Detection')` has two optional arguments:
 * **show** _optional_: if set to True a plot is visualised, if set to False a matplotlib.pyplot object is returned. Default show = True;
@@ -181,7 +181,7 @@ hb.process(dataset, hb.get_samplerate_mstimer(timerdata))
 hb.plotter(title='Heart Beat Detection on Noisy Signal')
 ```
 
-![output 1 of HR analysis](http://www.paulvangent.com/github/output2.jpeg)
+![output 1 of HR analysis](https://github.com/paulvangentcom/heartrate_analysis_python/blob/master/images/output2.jpeg)
 
 Measures are only calculated for non-rejected peaks and intervals between two non-rejected peaks. Rejected detections do not influence the calculated measures.
 
