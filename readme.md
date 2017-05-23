@@ -215,20 +215,10 @@ The module is licensed under the [GNU General Public License Version3, GPL-v3](h
 
 The module is still in active development. The to-do for the coming months is:
 
-<<<<<<< HEAD
-1. ~~Replace numerical functions with numpy data handling, to increase speed of processing~~
-2. Drop dependency on pandas
-3. Implement data handler function, recognising most used formats and parsing correctly
-4. Increase versatility of sampling rate detection
-5. Improve accuracy of peak detection/rejection with an FFT-based implementation."
-6. Add MAD time-domain measure
-=======
 - [X] Replace numerical work with numpy functions, to increase speed of processing
 - [X] Drop dependency on pandas
 - [X] Implement data handler function, recognising most used formats and parsing correctly
 - [ ] Make values for inaccurate bpm rejection settable
-- [ ] Increase versatility of sampling rate detection
+- [X] Increase versatility of sampling rate detection
 - [ ] Improve accuracy of peak detection/rejection with an FFT-based implementation.
 - [X] Add MAD time-domain measure
-
->>>>>>> dev
