@@ -20,6 +20,7 @@ Time domain:
 * standard deviation of successive differences between adjacent R-R intervals, SDSD
 * root mean square of successive differences between adjacend R-R intervals, RMSSD
 * proportion of differences between R-R intervals greater than 20ms, 50ms, pNN20, pNN50
+* median absolute deviation, MAD
 
 
 Frequency domain
@@ -36,31 +37,31 @@ Import the `heartBeat` module and load a file
 ```python
 import heartBeat as hb
 
-data = hb.get_data("yourdata.csv")
+hrdata = hb.get_data('yourdata.csv', column_name = 'hr')
 ```
 
-This creates a pandas dataframe containing the data from your file.
+This returns a numpy.ndarray.
 
 Analysis requires the sampling rate for your data. If you know this _a priori_, supply it when calling the `process()` function, which returns a `dict{}` object containing all measures:
 
 ```python
 import heartBeat as hb
 
-data = hb.get_data("yourdata.csv")
-measures = hb.process(data, 0.75, fs)
+data = hb.get_data('yourdata.csv')
+measures = hb.process(data, 100.0)
 ```
 
-`process(dataset, hrw, fs)` requires three arguments:
-* **dataset:** the dataset you imported using `get_data`. Alternatively, you can supply a standard pandas dataframe. The heart rate data column should be labeled `hr`. If you wish to use the built-in sample rate detection, the time column should be labeled `datetime`;
-* **hrw:** the algorithm uses a moving average during peak detection. `hrw` is the window size used for the calculation. The windowsize is `hrw * samplerate`;
-* **fs**: The samplerate of the signal in Hz.
+`process(dataset, fs, hrw = 0.75)` requires two arguments:
+* **dataset:** An 1-dimensional list, numpy array or array-like object containing the heart rate data;
+* **fs**: The samplerate of the signal in Hz;
+* **hrw:** _optional_ `hrw` is the window size used for the calculation of the moving average. The windowsize is defined as `hrw * samplerate`. Default hrw = 0.75.
 
-A `dict{}` object is returned containing all measures, and stored in the module. Access as such:
+A `dict{}` object is returned containing all measures. The object is also stored in the module. Access as such:
 
 ```python
 import heartBeat as hb
 
-data = gb.get_data("yourdata.csv")
+data = gb.get_data('yourdata.csv')
 measures = hb.process(data, 0.75, fs)
 
 print(measures['bpm']) #returns BPM value
@@ -71,51 +72,112 @@ print(hb.measures['bpm']) #returns BPM value
 print(hb.measures['lf/hf'] # returns LF:HF ratio
 ```
 
+## Getting data from files
 
-## Estimating Sample Rate
-
-The toolkit has a simple built-in sample-rate detection. It can handle ms-based timers ([0.0, 10.0, 20.0, N] for a 100Hz signal), and datetime-based timers (in the format: `2016-03-06 09:14:40.650000`, or `yyyy-mm-dd HH:MM:SS.f).
-The ms-based timer expects the timer column to be labeled "timer", the datetime timer expects the column named "datetime"
+The toolkit has functionality to open and parse delimited .csv and .txt files, as well as matlab .mat files. Opening a file is done by the `get_data()` function:
 
 ```python
 import heartBeat as hb
 
-data = hb.get_data("yourdata.csv")
+data = hb.process('data.csv')
+```
+
+This returns a 1-dimensional `numpy.ndarray` containing the heart rate data.
+
+`get_data(filename, delim = ',', column_name = 'None')` requires one argument:
+* **filename:** absolute or relative path to a valid (delimited .csv/.txt or matlab .mat) file;
+* **delim** _optional_: when loading a delimited .csv or .txt file, this specifies the delimiter used. Default delim = ','
+* **column_name** _optional_: In delimited files with header: specifying column_name will return data from that column. Not specifying column_name for delimited files will lead to an error if a header is present. For matlab files: column_name specifies the table name in the matlab file.
+
+
+Examples:
+```python
+import heartBeat as hb
+
+#load a delimited file without header info
+headerless_data = hb.get_data('data.csv')
+
+#load a delimited file with header info, from column 'hr'
+headered_data = hb.get_data('data.csv', column_name = 'hr')
+
+```
+
+
+## Estimating Sample Rate
+
+The toolkit has a simple built-in sample-rate detection. It can handle ms-based timers and datetime-based timers.
+
+```python
+import heartBeat as hb
 
 #if you have a ms-based timer:
-fs = hb.get_samplerate_mstimer(data)
+fs = hb.get_samplerate_mstimer(mstimer_data)
 
 #if you have a datetime-based timer:
-fs = hb.get_samplerate_datetime(data)
+fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:)
 ```
-In addition to being returned, the samplerate is also stored in the module measures `dict{}`: `print(hb.measures['fs'])`
+In addition to being returned, the samplerate is also stored in the measures `dict{}` in the module: 
+```python
+import heartBeat as hb
+
+measures = hb.process(hrdata, 100.0)
+
+print(measures['fs'])
+print(hb.measures['fs'])`
+
+```
 
 **Please note:** When using a ms-based timer, 
 
 ## Plotting your signal
-A basic plotting function is included. It plots the original signal, the moving average, the detected peaks and the rejected peaks (if any were rejected). Usage example with the included `data.csv` example file (recorded at 100Hz):
+A basic plotting function is included. It plots the original signal and overlays the detected peaks and the rejected peaks (if any were rejected). 
+
+Usage example with the included `data.csv` example file (recorded at 100Hz):
 
 ```python
 import heartBeat as hb
 
-data = hb.get_data("data.csv")
-measures = hb.process(data, 0.75, 100.0)
-hb.plotter(data)
+data = hb.get_data('data.csv')
+measures = hb.process(data, 100.0)
+hb.plotter()
 ```
 This returns:
 
 ![output 1 of HR analysis](http://www.paulvangent.com/github/output1.jpeg)
 
-Using the much more noisy data2.csv (containing  only noise for the first 40 sec, then a few noise segments between the signal):
+The title of the plot can be set by passing a `title=` argument. Using the much more noisy data2.csv (containing  only noise for the first 40 sec, then a few noise segments between the signal):
 
 ```python
 hb.process(dataset, 0.75, get_samplerate_mstimer(dataset))
-hb.plotter(dataset)
+hb.plotter(title='Heart Beat Detection on Noisy Signal)
 ```
 
 ![output 1 of HR analysis](http://www.paulvangent.com/github/output2.jpeg)
 
 Measures are only calculated for non-rejected peaks and intervals between two non-rejected peaks. Rejected detections do not influence the calculated measures.
+
+By default a plot is visualised when plotter() is called. The function returns a matplotlib.pyplot object if the argument show=False is passed:
+
+```python
+hb.process(dataset, 0.75, get_samplerate_mstimer(dataset))
+hb.plotter(show=False)
+```
+This returns:
+```
+<module 'matplotlib.pyplot' from '<pythonpath>\lib\site-packages\matplotlib\pyplot.pyc'>
+```
+
+Object can then be saved or visualised:
+```python
+hb.process(dataset, 0.75, get_samplerate_mstimer(dataset))
+plot_object = hb.plotter(show=False)
+
+plot_object.savefig('plot_1.jpg') #saves the plot as JPEG image.
+
+plt.object.show() #displays plot
+```
+
+
 
 ## License
 The module is licensed under the [GNU General Public License Version3, GPL-v3](https://opensource.org/licenses/GPL-3.0)
@@ -124,10 +186,10 @@ The module is licensed under the [GNU General Public License Version3, GPL-v3](h
 
 The module is still in active development. The to-do for the coming months is:
 
-1. ~~Replace pandas data handling with numpy data handling, to increase speed of processing~~
-2. ~~Drop dependency on pandas~~
-3. Implement data handler function, recognising most used formats and parsing correctly
-4. Increase versatility of sampling rate detection
-5. Improve accuracy of peak detection/rejection with an FFT-based implementation."
-6. ~~Add MAD time-domain measure~~
+- [X] Replace numerical work with numpy functions, to increase speed of processing
+- [X] Drop dependency on pandas
+- [X] Implement data handler function, recognising most used formats and parsing correctly
+- [ ] Increase versatility of sampling rate detection
+- [ ] Improve accuracy of peak detection/rejection with an FFT-based implementation.
+- [X] Add MAD time-domain measure
 
