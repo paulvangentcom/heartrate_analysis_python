@@ -1,4 +1,6 @@
 from datetime import datetime
+import time
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,21 +10,47 @@ from scipy.signal import butter, lfilter
 measures = {}
 working_data = {}
 
-#Preprocessing
-def get_data(filename):
-	if filename.split(".")[-1] == "csv":
-		print "getting csv file"
-		hrdata = np.loadtxt(filename, delimiter=",", skiprows=1)
-	
-	print "file gotten"
+#Data handling
+def get_data(filename, delim = ',', column_name = 'None'):
+	file_ext = filename.split('.')[-1]
+	if file_ext == 'csv' or file_ext == 'txt':
+		print('getting csv/txt file')
+		with open(filename, 'r') as f:
+			header = f.readline().strip().split(',')
+		if (column_name != 'None') and (column_name in header):
+			hrdata = np.loadtxt(filename, delimiter=delim, skiprows=1)
+			if len(header) > 1:
+				hrdata = hrdata[:,header.index(column_name)]
+		elif (column_name == 'None'):
+			try:
+				hrdata = np.loadtxt(filename, delimiter=delim)
+			except Exception as e:
+				print("\nError loading delimited %s file. This usually means no header column is specified while header information is present in the file\n\nThe application reported: %s" %(file_ext, e))
+				sys.exit()
+		else:
+			print('\nError: column name "%s" not found in header of "%s".' %(column_name, filename))
+			sys.exit()
+	elif file_ext == 'mat':
+		print('getting matlab file')
+		import scipy.io
+		data = scipy.io.loadmat(filename)
+		if (column_name != "None"):
+			hrdata = np.array(data[column_name][:,0], dtype=np.float64)
+		else:
+			print("\nError: column name required for Matlab .mat files")
+			sys.exit()
+	else:
+		print('unknown file format')
+		hrdata = np.nan
 	return hrdata
 
+#Preprocessing
 def get_samplerate_mstimer(timerdata):
 	fs = ((len(timerdata) / (timerdata[-1]-timerdata[0]))*1000)
 	working_data['fs'] = fs
 	return fs
 
-def get_samplerate_datetime(datetimedata, timeformat="%H:%M:%S.%f"):
+def get_samplerate_datetime(datetimedata, timeformat='%H:%M:%S.%f'):
 	elapsed = ((datetime.strptime(datetimedata[-1], timeformat) - datetime.strptime(datetimedata[0], timeformat)).total_seconds())
 	fs = (len(datetimedata) / elapsed)
 	working_data['fs'] = fs
@@ -37,7 +65,7 @@ def rolmean(hrdata, hrw, fs):
 	avg_hr = (np.mean(hrdata)) 
 	hrarr = np.array(hrdata)
 	rol_mean = np.mean(rollwindow(hrarr, int(hrw*fs)), axis=1)
-	ln = np.array([avg_hr for i in range(0,(len(hrarr)-len(rol_mean))/2)])
+	ln = np.array([avg_hr for i in range(0,abs(len(hrarr)-len(rol_mean))/2)])
 	rol_mean = np.insert(rol_mean, 0, ln)
 	rol_mean = np.append(rol_mean, ln)
 	rol_mean = rol_mean * 1.1
@@ -68,7 +96,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, fs):
 	peakedges = np.concatenate((np.array([0]), (np.where(np.diff(peaksx) > 1)[0]), np.array([len(peaksx)])))
 	peaklist = []
 	ybeat = []
-	
+
 	for i in range(0, len(peakedges)-1):
 		try:
 			y = peaksy[peakedges[i]:peakedges[i+1]].tolist()
@@ -80,7 +108,10 @@ def detect_peaks(hrdata, rol_mean, ma_perc, fs):
 	working_data['ybeat'] = [hrdata[x] for x in peaklist]
 	working_data['rolmean'] = rolmean
 	calc_RR(fs)
-	working_data['rrsd'] = np.std(working_data['RR_list'])
+	if len(working_data['RR_list']):
+		working_data['rrsd'] = np.std(working_data['RR_list'])
+	else:
+		working_data['rrsd'] = np.inf
 
 def fit_peaks(hrdata, rol_mean, fs):
 	ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
@@ -155,20 +186,24 @@ def calc_fd_measures(hrdata, fs):
 	measures['lf/hf'] = measures['lf'] / measures['hf']
 
 #Plotting it
-def plotter():
+def plotter(show=True, title='Heart Rate Signal Peak Detection'):
 	peaklist = working_data['peaklist']
 	ybeat = working_data['ybeat']
 	rejectedpeaks = working_data['removed_beats']
 	rejectedpeaks_y = working_data['removed_beats_y']
-	plt.title("Heart Rate Signal Peak Detection")
-	plt.plot(working_data['hr'], alpha=0.5, color='blue', label="heart rate signal")
-	plt.scatter(peaklist, ybeat, color='green', label="BPM:%.2f" %(measures['bpm']))
-	plt.scatter(rejectedpeaks, rejectedpeaks_y, color='red', label="rejected peaks")
+	plt.title(title)
+	plt.plot(working_data['hr'], alpha=0.5, color='blue', label='heart rate signal')
+	plt.scatter(peaklist, ybeat, color='green', label='BPM:%.2f' %(measures['bpm']))
+	plt.scatter(rejectedpeaks, rejectedpeaks_y, color='red', label='rejected peaks')
 	plt.legend(loc=4, framealpha=0.6) 
-	plt.show() 
+	if show == True:
+		plt.show() 
+	else:
+		return plt
 
 #Wrapper function
-def process(hrdata, hrw, fs):
+def process(hrdata, fs, hrw = 0.75):
+	t1 = time.clock()
 	hrdata = filtersignal(hrdata, 4, fs, 5)
 	working_data['hr'] = hrdata
 	rol_mean = rolmean(hrdata, hrw, fs)
@@ -177,4 +212,5 @@ def process(hrdata, hrw, fs):
 	check_peaks()
 	calc_ts_measures()
 	calc_fd_measures(hrdata, fs)
+	print('\nFinished in %.4fsec' %(time.clock()-t1))
 	return measures
