@@ -61,8 +61,10 @@ A `dict{}` object is returned containing all measures. The object is also stored
 ```python
 import heartBeat as hb
 
-data = gb.get_data('yourdata.csv')
-measures = hb.process(data, 0.75, fs)
+data = gb.get_data('data.csv') 
+fs = 100.0 #example file 'data.csv' is sampled at 100.0 Hz
+
+measures = hb.process(data, fs)
 
 print(measures['bpm']) #returns BPM value
 print(measures['lf/hf'] # returns LF:HF ratio
@@ -70,7 +72,16 @@ print(measures['lf/hf'] # returns LF:HF ratio
 #Alternatively, use dictionary stored in module:
 print(hb.measures['bpm']) #returns BPM value
 print(hb.measures['lf/hf'] # returns LF:HF ratio
+
+#You can also use Pandas if you so desire
+import pandas as pd
+df = pd.read_csv("data.csv")
+measures = hb.process(df['hr'].values, fs)
+print("measures['bpm'])
+print("measures['lf/hf'])
 ```
+
+
 
 ## Getting data from files
 
@@ -86,20 +97,22 @@ This returns a 1-dimensional `numpy.ndarray` containing the heart rate data.
 
 `get_data(filename, delim = ',', column_name = 'None')` requires one argument:
 * **filename:** absolute or relative path to a valid (delimited .csv/.txt or matlab .mat) file;
-* **delim** _optional_: when loading a delimited .csv or .txt file, this specifies the delimiter used. Default delim = ','
-* **column_name** _optional_: In delimited files with header: specifying column_name will return data from that column. Not specifying column_name for delimited files will lead to an error if a header is present. For matlab files: column_name specifies the table name in the matlab file.
+* **delim** _optional_: when loading a delimited .csv or .txt file, this specifies the delimiter used. Default delim = ',';
+* **column_name** _optional_: In delimited files with header: specifying column_name will return data from that column. Not specifying column_name for delimited files will assume the file contains only numerical data, returning np.nan values where data is not numerical. For matlab files: column_name specifies the table name in the matlab file.
 
 
 Examples:
 ```python
 import heartBeat as hb
 
-#load a delimited file without header info
+#load data from a delimited file without header info
 headerless_data = hb.get_data('data.csv')
 
-#load a delimited file with header info, from column 'hr'
+#load data from column labeles 'hr' in a delimited file with header info
 headered_data = hb.get_data('data.csv', column_name = 'hr')
 
+#load matlab file
+matlabdata = hb.get_data('data2.mat', column_name = 'hr')
 ```
 
 
@@ -114,7 +127,7 @@ import heartBeat as hb
 fs = hb.get_samplerate_mstimer(mstimer_data)
 
 #if you have a datetime-based timer:
-fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:)
+fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:%s.%f')
 ```
 In addition to being returned, the samplerate is also stored in the measures `dict{}` in the module: 
 ```python
@@ -124,15 +137,21 @@ measures = hb.process(hrdata, 100.0)
 
 print(measures['fs'])
 print(hb.measures['fs'])`
-
 ```
 
-**Please note:** When using a ms-based timer, 
+`get_samplerate_mstimer(timerdata)` requires one argument:
+* **timerdata:** a list, numpy array or array-like object containing ms-based timestamps (float or int).
+
+
+`get_samplerate_datetime(datetimedata, timeformat = '%H:%M:%S.f')` requires one argument:
+* **datetimedata:** a list, numpy array or array-like object containing datetime-based timestamps (string);
+* **timeformat** _optional_: the format of the datetime-strings in datetimedata. Default timeformat = '%H:%M:%S.f', 24-hour based time including ms: 21:43:12.569.
 
 ## Plotting your signal
-A basic plotting function is included. It plots the original signal and overlays the detected peaks and the rejected peaks (if any were rejected). 
 
-Usage example with the included `data.csv` example file (recorded at 100Hz):
+A plotting function is included. It plots the original signal and overlays the detected peaks and the rejected peaks (if any were rejected). 
+
+Example with the included `data.csv` example file (recorded at 100.0Hz):
 
 ```python
 import heartBeat as hb
@@ -145,11 +164,21 @@ This returns:
 
 ![output 1 of HR analysis](http://www.paulvangent.com/github/output1.jpeg)
 
-The title of the plot can be set by passing a `title=` argument. Using the much more noisy data2.csv (containing  only noise for the first 40 sec, then a few noise segments between the signal):
+`plotter(show = True, title = 'Heart Rate Signal Peak Detection')` has two optional arguments:
+* **show** _optional_: if set to True a plot is visualised, if set to False a matplotlib.pyplot object is returned. Default show = True;
+* **title** _optional_: Sets the title of the plot. If not specified, default title is used.
+
+Examples:
 
 ```python
-hb.process(dataset, 0.75, get_samplerate_mstimer(dataset))
-hb.plotter(title='Heart Beat Detection on Noisy Signal)
+import heartBeat as hb
+hrdata = hb.get_data('data2.csv', column_name = 'hr')
+timerdata = hb.get_data('data2.csv., column_name = 'timer')
+
+hb.process(dataset, hb.get_samplerate_mstimer(timerdata))
+
+#plot with different title
+hb.plotter(title='Heart Beat Detection on Noisy Signal')
 ```
 
 ![output 1 of HR analysis](http://www.paulvangent.com/github/output2.jpeg)
@@ -189,6 +218,7 @@ The module is still in active development. The to-do for the coming months is:
 - [X] Replace numerical work with numpy functions, to increase speed of processing
 - [X] Drop dependency on pandas
 - [X] Implement data handler function, recognising most used formats and parsing correctly
+- [ ] Make values for inaccurate bpm rejection settable
 - [ ] Increase versatility of sampling rate detection
 - [ ] Improve accuracy of peak detection/rejection with an FFT-based implementation.
 - [X] Add MAD time-domain measure
