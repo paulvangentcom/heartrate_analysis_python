@@ -61,7 +61,7 @@ A `dict{}` object is returned containing all measures. The object is also stored
 ```python
 import heartBeat as hb
 
-data = gb.get_data('data.csv') 
+data = hb.get_data('data.csv') 
 fs = 100.0 #example file 'data.csv' is sampled at 100.0 Hz
 
 measures = hb.process(data, fs)
@@ -129,15 +129,7 @@ fs = hb.get_samplerate_mstimer(mstimer_data)
 #if you have a datetime-based timer:
 fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:%s.%f')
 ```
-In addition to being returned, the samplerate is also stored in the measures `dict{}` in the module: 
-```python
-import heartBeat as hb
 
-measures = hb.process(hrdata, 100.0)
-
-print(measures['fs'])
-print(hb.measures['fs'])`
-```
 
 `get_samplerate_mstimer(timerdata)` requires one argument:
 * **timerdata:** a list, numpy array or array-like object containing ms-based timestamps (float or int).
