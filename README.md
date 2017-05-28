@@ -90,7 +90,7 @@ The toolkit has functionality to open and parse delimited .csv and .txt files, a
 ```python
 import heartBeat as hb
 
-data = hb.process('data.csv')
+data = hb.get_data('data.csv')
 ```
 
 This returns a 1-dimensional `numpy.ndarray` containing the heart rate data.
