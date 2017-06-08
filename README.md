@@ -31,11 +31,11 @@ Frequency domain
 
 ## Basic analysis example
 
-Import the `heartBeat` module and load a file
+Import the `heartbeat` module and load a file
 
 
 ```python
-import heartBeat as hb
+import heartbeat as hb
 
 hrdata = hb.get_data('yourdata.csv', column_name = 'hr')
 ```
@@ -45,7 +45,7 @@ This returns a numpy.ndarray.
 Analysis requires the sampling rate for your data. If you know this _a priori_, supply it when calling the `process()` function, which returns a `dict{}` object containing all measures:
 
 ```python
-import heartBeat as hb
+import heartbeat as hb
 
 data = hb.get_data('yourdata.csv')
 measures = hb.process(data, 100.0)
@@ -59,7 +59,7 @@ measures = hb.process(data, 100.0)
 A `dict{}` object is returned containing all measures. The object is also stored in the module. Access as such:
 
 ```python
-import heartBeat as hb
+import heartbeat as hb
 
 data = hb.get_data('data.csv') 
 fs = 100.0 #example file 'data.csv' is sampled at 100.0 Hz
@@ -88,7 +88,7 @@ print("measures['lf/hf'])
 The toolkit has functionality to open and parse delimited .csv and .txt files, as well as matlab .mat files. Opening a file is done by the `get_data()` function:
 
 ```python
-import heartBeat as hb
+import heartbeat as hb
 
 data = hb.get_data('data.csv')
 ```
@@ -103,7 +103,7 @@ This returns a 1-dimensional `numpy.ndarray` containing the heart rate data.
 
 Examples:
 ```python
-import heartBeat as hb
+import heartbeat as hb
 
 #load data from a delimited file without header info
 headerless_data = hb.get_data('data.csv')
@@ -121,7 +121,7 @@ matlabdata = hb.get_data('data2.mat', column_name = 'hr')
 The toolkit has a simple built-in sample-rate detection. It can handle ms-based timers and datetime-based timers.
 
 ```python
-import heartBeat as hb
+import heartbeat as hb
 
 #if you have a ms-based timer:
 fs = hb.get_samplerate_mstimer(mstimer_data)
@@ -146,7 +146,7 @@ A plotting function is included. It plots the original signal and overlays the d
 Example with the included `data.csv` example file (recorded at 100.0Hz):
 
 ```python
-import heartBeat as hb
+import heartbeat as hb
 
 data = hb.get_data('data.csv')
 measures = hb.process(data, 100.0)
@@ -163,7 +163,7 @@ This returns:
 Examples:
 
 ```python
-import heartBeat as hb
+import heartbeat as hb
 hrdata = hb.get_data('data2.csv', column_name = 'hr')
 timerdata = hb.get_data('data2.csv., column_name = 'timer')
 
