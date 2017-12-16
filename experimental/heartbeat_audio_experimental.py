@@ -9,7 +9,7 @@ critical scientific work in its current form.\n \
 ---------------------------------------------')
 
 from scipy.io import wavfile
-from scipy.signal import resample, decimate
+from scipy.signal import resample
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -78,13 +78,14 @@ def process(filename):
     wv_data = abs(wv_data)
     wavlength = len(wv_data) / samplerate
 
-    wv_data = decimate(wv_data, 10)
+    wv_data = resample(wv_data, int(1000*wavlength))
     new_samplerate = len(wv_data) / wavlength
 
     print('detecting peaks')
     hb.working_data['hr'] = wv_data
     hb.working_data['hr'] = hb.butter_lowpass_filter(hb.working_data['hr'], 5, new_samplerate, 2)
     rol_mean = hb.rolmean(hb.working_data['hr'], 0.75, new_samplerate)
+    hb.working_data['hr'] = np.resize(hb.working_data['hr'], rol_mean.shape)
     hb.fit_peaks(hb.working_data['hr'], rol_mean, new_samplerate)
     mark_audio_peaks(hb.working_data['peaklist'], new_samplerate)
     hb.working_data['peaklist_cor'] = hb.working_data['peaklist']
