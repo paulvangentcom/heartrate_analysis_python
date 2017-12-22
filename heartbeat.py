@@ -16,7 +16,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.signal import butter, lfilter
+from scipy.signal import butter, filtfilt
 
 __author__ = "Paul van Gent"
 __version__ = "Version 0.9"
@@ -82,6 +82,7 @@ def get_samplerate_datetime(datetimedata, timeformat='%H:%M:%S.%f'):
     timeformat -- the format of the datetime-strings in datetimedata
     default('%H:%M:%S.f', 24-hour based time including ms: 21:43:12.569)
     '''
+    datetimedata = np.asarray(datetimedata, dtype='str') #cast as str in case of np.bytes type
     elapsed = ((datetime.strptime(datetimedata[-1], timeformat) -
                 datetime.strptime(datetimedata[0], timeformat)).total_seconds())
     sample_rate = (len(datetimedata) / elapsed)
@@ -136,7 +137,7 @@ def butter_lowpass_filter(data, cutoff, sample_rate, order):
     order -- the filter order (default 2)
     '''
     b, a = butter_lowpass(cutoff, sample_rate, order=order)
-    filtered_data = lfilter(b, a, data)
+    filtered_data = filtfilt(b, a, data)
     return filtered_data
 
 def filtersignal(data, cutoff, sample_rate, order):
@@ -317,7 +318,7 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
         return plt
 
 #Wrapper function
-def process(hrdata, sample_rate, windowsize=0.75):
+def process(hrdata, sample_rate, windowsize=0.75, report_time = False):
     '''Processed the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
@@ -333,5 +334,13 @@ def process(hrdata, sample_rate, windowsize=0.75):
     check_peaks()
     calc_ts_measures()
     calc_fd_measures(hrdata, sample_rate)
-    print('\nFinished in %.8s sec' %(time.clock()-t1))
+    if report_time:
+        print('\nFinished in %.8s sec' %(time.clock()-t1))
     return measures
+
+if __name__ == '__main__':
+    hrdata = get_data('data.csv')
+    hrdata = filtersignal(hrdata, cutoff=2, sample_rate=100.0, order=2)
+    measures = process(hrdata, 100.0, report_time=True)
+    for m in measures.keys():
+        print(m + ': ' + str(measures[m]))
