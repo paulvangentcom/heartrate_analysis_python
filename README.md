@@ -37,7 +37,7 @@ Import the `heartbeat` module and load a file
 ```python
 import heartbeat as hb
 
-hrdata = hb.get_data('yourdata.csv', column_name = 'hr')
+hrdata = hb.get_data('yourdata.csv', column_name='hr')
 ```
 
 This returns a numpy.ndarray.
@@ -51,10 +51,11 @@ data = hb.get_data('yourdata.csv')
 measures = hb.process(data, 100.0)
 ```
 
-`process(dataset, fs, hrw = 0.75)` requires two arguments:
+`process(dataset, fs, hrw=0.75, report_time=False)` requires two arguments:
 * **dataset:** An 1-dimensional list, numpy array or array-like object containing the heart rate data;
 * **fs**: The samplerate of the signal in Hz;
-* **hrw:** _optional_ `hrw` is the window size used for the calculation of the moving average. The windowsize is defined as `hrw * samplerate`. Default hrw = 0.75.
+* **hrw:** _optional_ `hrw` is the window size used for the calculation of the moving average. The windowsize is defined as `hrw * samplerate`. Default hrw=0.75.
+* **report_time:** _optional_ whether to report total processing time of process() loop.
 
 A `dict{}` object is returned containing all measures. The object is also stored in the module. Access as such:
 
@@ -127,7 +128,7 @@ import heartbeat as hb
 fs = hb.get_samplerate_mstimer(mstimer_data)
 
 #if you have a datetime-based timer:
-fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:%s.%f')
+fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:%S.%f')
 ```
 
 
@@ -137,7 +138,7 @@ fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:%s.%f'
 
 `get_samplerate_datetime(datetimedata, timeformat = '%H:%M:%S.f')` requires one argument:
 * **datetimedata:** a list, numpy array or array-like object containing datetime-based timestamps (string);
-* **timeformat** _optional_: the format of the datetime-strings in datetimedata. Default timeformat = '%H:%M:%S.f', 24-hour based time including ms: 21:43:12.569.
+* **timeformat** _optional_: the format of the datetime-strings in datetimedata. Default timeformat='%H:%M:%S.f', 24-hour based time including ms: 21:43:12.569.
 
 ## Plotting your signal
 
@@ -164,8 +165,8 @@ Examples:
 
 ```python
 import heartbeat as hb
-hrdata = hb.get_data('data2.csv', column_name = 'hr')
-timerdata = hb.get_data('data2.csv., column_name = 'timer')
+hrdata = hb.get_data('data2.csv', column_name='hr')
+timerdata = hb.get_data('data2.csv., column_name='timer')
 
 hb.process(dataset, hb.get_samplerate_mstimer(timerdata))
 
