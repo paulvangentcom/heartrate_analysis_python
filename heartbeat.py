@@ -15,7 +15,7 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.interpolate import interp1d
+from scipy.interpolate import UnivariateSpline
 from scipy.signal import butter, filtfilt
 
 __author__ = "Paul van Gent"
@@ -282,7 +282,7 @@ def calc_fd_measures(hrdata, sample_rate):
     rr_x = peaklist[1:]
     rr_y = rr_list
     rr_x_new = np.linspace(rr_x[0], rr_x[-1], rr_x[-1])
-    interpolated_func = interp1d(rr_x, rr_y, kind='cubic')
+    interpolated_func = UnivariateSpline(rr_x, rr_y, k=5)
     datalen = len(hrdata)
     frq = np.fft.fftfreq(len(hrdata), d=((1/sample_rate)))
     frq = frq[range(int(datalen/2))]
