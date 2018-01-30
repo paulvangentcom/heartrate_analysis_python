@@ -64,6 +64,44 @@ def get_data(filename, delim=',', column_name='None'):
     return hrdata
 
 #Preprocessing
+def scale_data(data):
+    '''Scales data between 0 and 1024 for analysis
+    
+    Keyword arguments:
+    data -- numpy array or list to be scaled
+    '''
+    range = np.max(data) - np.min(data)
+    minimum = np.min(data)
+    data = 1024 * ((data - minimum) / range)
+    return data
+
+def enhance_peaks(hrdata, iterations=3):
+    '''Attempts to enhance the signal-noise ratio by accentuating the highest peaks
+    note: denoise first
+    
+    Keyword arguments:
+    hrdata -- numpy array or list containing heart rate data
+    iterations -- the number of scaling steps to perform (default=3)
+    '''
+    scale_data(hrdata)
+    for i in range(iterations):
+        hrdata = np.power(hrdata, 2)
+        hrdata = scale_data(hrdata)
+    return hrdata    
+
+def raw_to_ecg(hrdata, enhancepeaks=False):
+    '''Flips raw signal with negative mV peaks to normal ECG
+
+    Keyword arguments:
+    hrdata -- numpy array or list containing raw heart rate data
+    enhancepeaks -- boolean, whether to apply peak accentuation (default False)
+    '''
+    hrmean = np.mean(hrdata)
+    hrdata = (hrmean - hrdata) + hrmean
+    if enhancepeaks:
+        hrdata = enhance_peaks(hrdata)
+    return hrdata
+
 def get_samplerate_mstimer(timerdata):
     '''Determines sample rate of data from ms-based timer.
 
@@ -115,6 +153,15 @@ def rolmean(data, windowsize, sample_rate):
     rol_mean = np.insert(rol_mean, 0, missing_vals)
     rol_mean = np.append(rol_mean, missing_vals)
     rol_mean = rol_mean * 1.1
+
+    if len(rol_mean) != len(data):
+        print('error in length')
+        lendiff = len(rol_mean) - len(data)
+        print('diff is %s' %lendiff)
+        if lendiff < 0:
+            rol_mean = np.append(rol_mean, 0)
+        else:
+            rol_mean = rol_mean[:-1]            
     return rol_mean
 
 def butter_lowpass(cutoff, sample_rate, order=2):
@@ -158,7 +205,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate):
     '''Detects heartrate peaks in the given dataset.
 
     Keyword arguments:
-   hr data -- 1-dimensional numpy array or list containing the heart rate data
+    hr data -- 1-dimensional numpy array or list containing the heart rate data
     rol_mean -- 1-dimensional numpy array containing the rolling mean of the heart rate signal
     ma_perc -- the percentage with which to raise the rolling mean,
     used for fitting detection solutions to data
@@ -197,7 +244,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate):
     rol_mean -- 1-dimensional numpy array containing the rolling mean of the heart rate signal
     sample_rate -- the sample rate of the data set
     '''
-    ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
+    ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300, 600, 1000, 2000, 3000, 10000]
     rrsd = []
     valid_ma = []
     for ma_perc in ma_perc_list:
@@ -206,7 +253,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate):
         rrsd.append([working_data['rrsd'], bpm, ma_perc])
 
     for _rrsd, _bpm, _ma_perc in rrsd:
-        if (_rrsd > 1) and ((_bpm > 40) and (_ma_perc < 150)):
+        if (_rrsd > 1) and ((40 <= _bpm <= 180)):
             valid_ma.append([_rrsd, _ma_perc])
 
     working_data['best'] = min(valid_ma, key=lambda t: t[0])[1]
@@ -219,8 +266,6 @@ def check_peaks():
     ybeat = np.array(working_data['ybeat'])
     upper_threshold = np.mean(rr_arr) + 300
     lower_threshold = np.mean(rr_arr) - 300
-    working_data['RR_list_cor'] = rr_arr[np.where((rr_arr > lower_threshold) &
-                                                  (rr_arr < upper_threshold))]
     peaklist_cor = peaklist[np.where((rr_arr > lower_threshold) &
                                      (rr_arr < upper_threshold))[0]+1]
     working_data['peaklist_cor'] = np.insert(peaklist_cor, 0, peaklist[0])
@@ -228,6 +273,10 @@ def check_peaks():
                                                       (rr_arr >= upper_threshold))[0]+1]
     working_data['removed_beats_y'] = ybeat[np.where((rr_arr <= lower_threshold) |
                                                      (rr_arr >= upper_threshold))[0]+1]
+    working_data['binary_peaklist'] = [0 if x in working_data['removed_beats'] 
+                                       else 1 for x in working_data['peaklist']]
+    update_rr()
+
 
 #Calculating all measures
 def calc_rr(sample_rate):
@@ -247,6 +296,22 @@ def calc_rr(sample_rate):
     working_data['RR_diff'] = rr_diff
     working_data['RR_sqdiff'] = rr_sqdiff
 
+def update_rr():
+    '''Updates RR differences and RR squared differences based on corrected RR list
+
+    Uses information about rejected peaks to update RR_list_cor, and RR_diff, RR_sqdiff
+    in the working_data{} dict.
+    '''
+    rr_source = working_data['RR_list']
+    b_peaks = working_data['binary_peaklist']
+    rr_list = [rr_source[i] for i in range(len(rr_source)) if b_peaks[i] + b_peaks[i+1] == 2]
+    rr_diff = np.abs(np.diff(rr_list))
+    rr_sqdiff = np.power(rr_diff, 2)
+    
+    working_data['RR_list_cor'] = rr_list
+    working_data['RR_diff'] = rr_diff
+    working_data['RR_sqdiff'] = rr_sqdiff
+
 def calc_ts_measures():
     '''Calculates the time-series measurements.
 
@@ -257,6 +322,7 @@ def calc_ts_measures():
     rr_list = working_data['RR_list_cor']
     rr_diff = working_data['RR_diff']
     rr_sqdiff = working_data['RR_sqdiff']
+    
     measures['bpm'] = 60000 / np.mean(rr_list)
     measures['ibi'] = np.mean(rr_list)
     measures['sdnn'] = np.std(rr_list)
@@ -268,7 +334,8 @@ def calc_ts_measures():
     measures['nn50'] = nn50
     measures['pnn20'] = float(len(nn20)) / float(len(rr_diff))
     measures['pnn50'] = float(len(nn50)) / float(len(rr_diff))
-    measures['hr_mad'] = np.median(np.abs(rr_list-np.median(rr_list)))
+    med_mad = np.median(rr_list)
+    measures['hr_mad'] = np.median(np.abs(rr_list - med_mad))
 
 def calc_fd_measures(hrdata, sample_rate):
     '''Calculates the frequency-domain measurements.
@@ -277,20 +344,31 @@ def calc_fd_measures(hrdata, sample_rate):
     the frequency-domain measurements of the heart rate signal.
     Stores results in the measures{} dict object.
     '''
-    peaklist = working_data['peaklist_cor']
+    peaklist = working_data['peaklist']
     rr_list = working_data['RR_list_cor']
-    rr_x = peaklist[1:]
+    b_peaks = working_data['binary_peaklist']
+    b_peaks.append(0) #append rejected flag at end for iteration purposes
+    peaklist_upd = [peaklist[i] for i in range(len(peaklist)) if 
+                    (b_peaks[i] == 1 and b_peaks[i+1] == 1) or 
+                    (b_peaks[i] == 1 and b_peaks[i-1] == 0)]
+
+    rr_x = peaklist_upd
     rr_y = rr_list
     rr_x_new = np.linspace(rr_x[0], rr_x[-1], rr_x[-1])
     interpolated_func = UnivariateSpline(rr_x, rr_y, k=5)
+    
     datalen = len(hrdata)
     frq = np.fft.fftfreq(len(hrdata), d=((1/sample_rate)))
     frq = frq[range(int(datalen/2))]
     Y = np.fft.fft(interpolated_func(rr_x_new))/datalen
     Y = Y[range(int(datalen/2))]
+    
     measures['lf'] = np.trapz(abs(Y[(frq >= 0.04) & (frq <= 0.15)]))
     measures['hf'] = np.trapz(abs(Y[(frq >= 0.16) & (frq <= 0.5)]))
     measures['lf/hf'] = measures['lf'] / measures['hf']
+    plt.plot(rr_x_new, interpolated_func(rr_x_new))
+    plt.plot(peaklist_upd, rr_list)
+    plt.show()
 
 #Plotting it
 def plotter(show=True, title='Heart Rate Signal Peak Detection'):
@@ -318,7 +396,7 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
         return plt
 
 #Wrapper function
-def process(hrdata, sample_rate, windowsize=0.75, report_time=False):
+def process(hrdata, sample_rate, windowsize=0.75, report_time=False, calc_fft=True):
     '''Processed the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
@@ -333,7 +411,8 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False):
     calc_rr(sample_rate)
     check_peaks()
     calc_ts_measures()
-    calc_fd_measures(hrdata, sample_rate)
+    if calc_fft:
+        calc_fd_measures(hrdata, sample_rate)
     if report_time:
         print('\nFinished in %.8s sec' %(time.clock()-t1))
     return measures

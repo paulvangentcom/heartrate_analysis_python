@@ -215,3 +215,10 @@ The module is still in active development. The to-do for the coming months is:
 - [X] Increase versatility of sampling rate detection
 - [ ] Improve accuracy of peak detection/rejection with an FFT-based implementation.
 - [X] Add MAD time-domain measure
+- [X] Add scaling function to handle raw ADC data
+- [X] Fix issue where in some cases, RR-intervals including a rejected peak are used in calculation of measures
+- [ ] Validate performance on Physionet datasets
+- [ ] Add R-position interpolation ('high accuracy' mode)
+- [ ] Always reject first beat if within 0.3 sec (signal could start mid-beat, which creates slight inaccuracy)
+- [ ] Add check and auto-correction for negative values
+- [ ] Handle cases where strong T-peak in signal is present
