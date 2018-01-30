@@ -366,9 +366,8 @@ def calc_fd_measures(hrdata, sample_rate):
     measures['lf'] = np.trapz(abs(Y[(frq >= 0.04) & (frq <= 0.15)]))
     measures['hf'] = np.trapz(abs(Y[(frq >= 0.16) & (frq <= 0.5)]))
     measures['lf/hf'] = measures['lf'] / measures['hf']
-    plt.plot(rr_x_new, interpolated_func(rr_x_new))
-    plt.plot(peaklist_upd, rr_list)
-    plt.show()
+    measures['interp_rr_function'] = interpolated_func
+    measures['interp_rr_linspace'] = (rr_x[0], rr_x[-1], rr_x[-1])
 
 #Plotting it
 def plotter(show=True, title='Heart Rate Signal Peak Detection'):
