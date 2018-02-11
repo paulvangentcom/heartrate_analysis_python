@@ -152,7 +152,6 @@ def rolmean(data, windowsize, sample_rate):
     missing_vals = np.array([avg_hr for i in range(0, int(abs(len(data_arr) - len(rol_mean))/2))])
     rol_mean = np.insert(rol_mean, 0, missing_vals)
     rol_mean = np.append(rol_mean, missing_vals)
-    rol_mean = rol_mean * 1.1
 
     if len(rol_mean) != len(data):
         print('error in length')
@@ -212,7 +211,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate):
     sample_rate -- the sample rate of the data set
     '''
     rmean = np.array(rol_mean)
-    rol_mean = rmean+((rmean/100)*ma_perc)
+    rol_mean = rmean + ((rmean / 100) * ma_perc)
     peaksx = np.where((hrdata > rol_mean))[0]
     peaksy = hrdata[np.where((hrdata > rol_mean))[0]]
     peakedges = np.concatenate((np.array([0]),
@@ -244,7 +243,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate):
     rol_mean -- 1-dimensional numpy array containing the rolling mean of the heart rate signal
     sample_rate -- the sample rate of the data set
     '''
-    ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300, 600, 1000, 2000, 3000, 10000]
+    ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
     rrsd = []
     valid_ma = []
     for ma_perc in ma_perc_list:
@@ -253,7 +252,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate):
         rrsd.append([working_data['rrsd'], bpm, ma_perc])
 
     for _rrsd, _bpm, _ma_perc in rrsd:
-        if (_rrsd > 1) and ((40 <= _bpm <= 180)):
+        if (_rrsd > 0.1) and ((40 <= _bpm <= 180)):
             valid_ma.append([_rrsd, _ma_perc])
 
     working_data['best'] = min(valid_ma, key=lambda t: t[0])[1]
@@ -276,7 +275,6 @@ def check_peaks():
     working_data['binary_peaklist'] = [0 if x in working_data['removed_beats'] 
                                        else 1 for x in working_data['peaklist']]
     update_rr()
-
 
 #Calculating all measures
 def calc_rr(sample_rate):
@@ -344,21 +342,17 @@ def calc_fd_measures(hrdata, sample_rate):
     the frequency-domain measurements of the heart rate signal.
     Stores results in the measures{} dict object.
     '''
-    peaklist = working_data['peaklist']
     rr_list = working_data['RR_list_cor']
-    b_peaks = working_data['binary_peaklist']
-    b_peaks.append(0) #append rejected flag at end for iteration purposes
-    peaklist_upd = [peaklist[i] for i in range(len(peaklist)) if 
-                    (b_peaks[i] == 1 and b_peaks[i+1] == 1) or 
-                    (b_peaks[i] == 1 and b_peaks[i-1] == 0)]
-
-    rr_x = peaklist_upd
-    rr_y = rr_list
+    rr_x = []
+    pointer = 0
+    for x in rr_list:
+        pointer += x
+        rr_x.append(pointer)
     rr_x_new = np.linspace(rr_x[0], rr_x[-1], rr_x[-1])
-    interpolated_func = UnivariateSpline(rr_x, rr_y, k=5)
+    interpolated_func = UnivariateSpline(rr_x, rr_list, k=5)
     
-    datalen = len(hrdata)
-    frq = np.fft.fftfreq(len(hrdata), d=((1/sample_rate)))
+    datalen = len(rr_x_new)
+    frq = np.fft.fftfreq(datalen, d=((1/1000.0)))
     frq = frq[range(int(datalen/2))]
     Y = np.fft.fft(interpolated_func(rr_x_new))/datalen
     Y = Y[range(int(datalen/2))]
@@ -418,7 +412,9 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False, calc_fft=Tr
 
 if __name__ == '__main__':
     hrdata = get_data('data.csv')
-    hrdata = filtersignal(hrdata, cutoff=2, sample_rate=100.0, order=2)
     measures = process(hrdata, 100.0, report_time=True)
+
     for m in measures.keys():
         print(m + ': ' + str(measures[m]))
+    
+    plotter()
