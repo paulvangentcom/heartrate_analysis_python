@@ -154,9 +154,7 @@ def rolmean(data, windowsize, sample_rate):
     rol_mean = np.append(rol_mean, missing_vals)
 
     if len(rol_mean) != len(data):
-        print('error in length')
         lendiff = len(rol_mean) - len(data)
-        print('diff is %s' %lendiff)
         if lendiff < 0:
             rol_mean = np.append(rol_mean, 0)
         else:
@@ -263,8 +261,8 @@ def check_peaks():
     rr_arr = np.array(working_data['RR_list'])
     peaklist = np.array(working_data['peaklist'])
     ybeat = np.array(working_data['ybeat'])
-    upper_threshold = np.mean(rr_arr) + 300
-    lower_threshold = np.mean(rr_arr) - 300
+    upper_threshold = np.mean(rr_arr) + (0.3 * np.mean(rr_arr))
+    lower_threshold = np.mean(rr_arr) - (0.3 * np.mean(rr_arr))
     peaklist_cor = peaklist[np.where((rr_arr > lower_threshold) &
                                      (rr_arr < upper_threshold))[0]+1]
     working_data['peaklist_cor'] = np.insert(peaklist_cor, 0, peaklist[0])
