@@ -222,3 +222,7 @@ The module is still in active development. The to-do for the coming months is:
 - [ ] Always reject first beat if within 0.3 sec (signal could start mid-beat, which creates slight inaccuracy)
 - [ ] Add check and auto-correction for negative values
 - [ ] Handle cases where strong T-peak in signal is present
+- [ ] Implement clipping detection -> curve fitting peak reconstrucion
+- [ ] Cluster rejections close together
+- [X] Implement subsegment rejection
+- [ ] Fix issue with peak at index 0
