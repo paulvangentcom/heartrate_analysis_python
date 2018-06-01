@@ -1,0 +1,254 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Quickstart Guide &#8212; Python Heart Rate Analysis Toolkit 0.8 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to Python Heart Rate Analysis Toolkit’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="quickstart-guide">
+<h1>Quickstart Guide<a class="headerlink" href="#quickstart-guide" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="basic-example">
+<h2>Basic Example<a class="headerlink" href="#basic-example" title="Permalink to this headline">¶</a></h2>
+<p>Import the <cite>heartbeat</cite> module and load a file</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="n">hrdata</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;yourdata.csv&#39;</span><span class="p">,</span> <span class="n">column_name</span><span class="o">=</span><span class="s1">&#39;hr&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This returns a <cite>numpy.ndarray</cite>.</p>
+<p>Analysis requires the sampling rate for your data. If you know this _a <a href="#id1"><span class="problematic" id="id2">priori_</span></a>, supply it when calling the <cite>process()</cite> function, which returns a <cite>dict{}</cite> object containing all measures:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;yourdata.csv&#39;</span><span class="p">)</span>
+<span class="n">measures</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><cite>process(dataset, fs, hrw=0.75, report_time=False)</cite> requires two arguments:</p>
+<ul class="simple">
+<li><strong>dataset:</strong> An 1-dimensional list, numpy array or array-like object containing the heart rate data;</li>
+<li><strong>fs</strong>: The samplerate of the signal in Hz;</li>
+<li><strong>hrw:</strong> _optional_ <cite>hrw</cite> is the window size used for the calculation of the moving average. The windowsize is defined as <cite>hrw * samplerate</cite>. Default hrw=0.75.</li>
+<li><strong>report_time:</strong> _optional_ whether to report total processing time of process() loop.</li>
+</ul>
+<p>A <cite>dict{}</cite> object is returned containing all measures. The object is also stored in the module. Access as such:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;data.csv&#39;</span><span class="p">)</span>
+<span class="n">fs</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="c1">#example file &#39;data.csv&#39; is sampled at 100.0 Hz</span>
+
+<span class="n">measures</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">measures</span><span class="p">[</span><span class="s1">&#39;bpm&#39;</span><span class="p">])</span> <span class="c1">#returns BPM value</span>
+<span class="k">print</span><span class="p">(</span><span class="n">measures</span><span class="p">[</span><span class="s1">&#39;lf/hf&#39;</span><span class="p">]</span> <span class="c1"># returns LF:HF ratio</span>
+
+<span class="c1">#Alternatively, use dictionary stored in module:</span>
+<span class="k">print</span><span class="p">(</span><span class="n">hb</span><span class="o">.</span><span class="n">measures</span><span class="p">[</span><span class="s1">&#39;bpm&#39;</span><span class="p">])</span> <span class="c1">#returns BPM value</span>
+<span class="k">print</span><span class="p">(</span><span class="n">hb</span><span class="o">.</span><span class="n">measures</span><span class="p">[</span><span class="s1">&#39;lf/hf&#39;</span><span class="p">]</span> <span class="c1"># returns LF:HF ratio</span>
+
+<span class="c1">#You can also use Pandas if you so desire</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data.csv&quot;</span><span class="p">)</span>
+<span class="n">measures</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;hr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;measures[&#39;bpm&#39;])</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;measures[&#39;lf/hf&#39;])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-data-from-files">
+<h2>Getting Data From Files<a class="headerlink" href="#getting-data-from-files" title="Permalink to this headline">¶</a></h2>
+<p>The toolkit has functionality to open and parse delimited .csv and .txt files, as well as matlab .mat files. Opening a file is done by the <cite>get_data()</cite> function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;data.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This returns a 1-dimensional <cite>numpy.ndarray</cite> containing the heart rate data.</p>
+<p><cite>get_data(filename, delim = ‘,’, column_name = ‘None’)</cite> requires one argument:</p>
+<ul class="simple">
+<li><strong>filename:</strong> absolute or relative path to a valid (delimited .csv/.txt or matlab .mat) file;</li>
+<li><strong>delim</strong> _optional_: when loading a delimited .csv or .txt file, this specifies the delimiter used. Default delim = ‘,’;</li>
+<li><strong>column_name</strong> _optional_: In delimited files with header: specifying column_name will return data from that column. Not specifying column_name for delimited files will assume the file contains only numerical data, returning np.nan values where data is not numerical. For matlab files: column_name specifies the table name in the matlab file.</li>
+</ul>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="c1">#load data from a delimited file without header info</span>
+<span class="n">headerless_data</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;data.csv&#39;</span><span class="p">)</span>
+
+<span class="c1">#load data from column labeles &#39;hr&#39; in a delimited file with header info</span>
+<span class="n">headered_data</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;data.csv&#39;</span><span class="p">,</span> <span class="n">column_name</span> <span class="o">=</span> <span class="s1">&#39;hr&#39;</span><span class="p">)</span>
+
+<span class="c1">#load matlab file</span>
+<span class="n">matlabdata</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;data2.mat&#39;</span><span class="p">,</span> <span class="n">column_name</span> <span class="o">=</span> <span class="s1">&#39;hr&#39;</span><span class="p">)</span>
+<span class="c1">#note that the column_name here represents the table name in the matlab file</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="estimating-sample-rate">
+<h2>Estimating Sample Rate<a class="headerlink" href="#estimating-sample-rate" title="Permalink to this headline">¶</a></h2>
+<p>The toolkit has a simple built-in sample-rate detection. It can handle ms-based timers and datetime-based timers.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="c1">#if you have a ms-based timer:</span>
+<span class="n">fs</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_samplerate_mstimer</span><span class="p">(</span><span class="n">mstimer_data</span><span class="p">)</span>
+
+<span class="c1">#if you have a datetime-based timer:</span>
+<span class="n">fs</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_samplerate_datetime</span><span class="p">(</span><span class="n">datetime_data</span><span class="p">,</span> <span class="n">timeformat</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><cite>get_samplerate_mstimer(timerdata)</cite> requires one argument:</p>
+<ul class="simple">
+<li><strong>timerdata:</strong> a list, numpy array or array-like object containing ms-based timestamps (float or int).</li>
+</ul>
+<p><cite>get_samplerate_datetime(datetimedata, timeformat = ‘%H:%M:%S.f’)</cite> requires one argument:</p>
+<ul class="simple">
+<li><strong>datetimedata:</strong> a list, numpy array or array-like object containing datetime-based timestamps (string);</li>
+<li><strong>timeformat</strong> _optional_: the format of the datetime-strings in your dataset. Default timeformat=’%H:%M:%S.f’, 24-hour based time including ms: 21:43:12.569.</li>
+</ul>
+</div>
+<div class="section" id="plotting-results">
+<h2>Plotting Results<a class="headerlink" href="#plotting-results" title="Permalink to this headline">¶</a></h2>
+<p>A plotting function is included. It plots the original signal and overlays the detected peaks and the rejected peaks (if any were rejected).</p>
+<p>Example with the included <cite>data.csv</cite> example file (recorded at 100.0Hz):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;data.csv&#39;</span><span class="p">)</span>
+<span class="n">measures</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">)</span>
+<span class="n">hb</span><span class="o">.</span><span class="n">plotter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This returns:</p>
+<img alt="_images/output1.jpeg" src="_images/output1.jpeg" />
+<p><cite>plotter(show = True, title = ‘Heart Rate Signal Peak Detection’)</cite> has two optional arguments:</p>
+<ul class="simple">
+<li><strong>show</strong> _optional_: if set to True a plot is visualised, if set to False a matplotlib.pyplot object is returned. Default show = True;</li>
+<li><strong>title</strong> _optional_: Sets the title of the plot. If not specified, default title is used.</li>
+</ul>
+<div class="section" id="examples">
+<h3>Examples:<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+<span class="n">hrdata</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;data2.csv&#39;</span><span class="p">,</span> <span class="n">column_name</span><span class="o">=</span><span class="s1">&#39;hr&#39;</span><span class="p">)</span>
+<span class="n">timerdata</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;data2.csv., column_name=&#39;</span><span class="n">timer</span><span class="s1">&#39;)</span>
+
+<span class="n">hb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">hb</span><span class="o">.</span><span class="n">get_samplerate_mstimer</span><span class="p">(</span><span class="n">timerdata</span><span class="p">))</span>
+
+<span class="c1">#plot with different title</span>
+<span class="n">hb</span><span class="o">.</span><span class="n">plotter</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Heart Beat Detection on Noisy Signal&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/output2.jpeg" src="_images/output2.jpeg" />
+<p>Measures are only calculated for non-rejected peaks and intervals between two non-rejected peaks. Rejected detections do not influence the calculated measures.</p>
+<p>By default a plot is visualised when plotter() is called. The function returns a matplotlib.pyplot object if the argument show=False is passed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">get_samplerate_mstimer</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
+<span class="n">hb</span><span class="o">.</span><span class="n">plotter</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This returns:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;matplotlib.pyplot&#39;</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Object can then be saved or visualised:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">get_samplerate_mstimer</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
+<span class="n">plot_object</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">plotter</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="n">plot_object</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;plot_1.jpg&#39;</span><span class="p">)</span> <span class="c1">#saves the plot as JPEG image.</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> <span class="c1">#displays plot</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Quickstart Guide</a><ul>
+<li><a class="reference internal" href="#basic-example">Basic Example</a></li>
+<li><a class="reference internal" href="#getting-data-from-files">Getting Data From Files</a></li>
+<li><a class="reference internal" href="#estimating-sample-rate">Estimating Sample Rate</a></li>
+<li><a class="reference internal" href="#plotting-results">Plotting Results</a><ul>
+<li><a class="reference internal" href="#examples">Examples:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Python Heart Rate Analysis Toolkit’s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/quickstart.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Paul van Gent.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/quickstart.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
