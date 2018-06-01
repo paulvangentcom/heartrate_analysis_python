@@ -75,7 +75,7 @@ def scale_data(data):
     data = 1024 * ((data - minimum) / range)
     return data
 
-def enhance_peaks(hrdata, iterations=3):
+def enhance_peaks(hrdata, iterations=2):
     '''Attempts to enhance the signal-noise ratio by accentuating the highest peaks
     note: denoise first
     

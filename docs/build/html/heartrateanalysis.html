@@ -1,0 +1,229 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Heart Rate Analysis &#8212; Python Heart Rate Analysis Toolkit 0.8 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="apiref.html" />
+    <link rel="prev" title="Quickstart Guide" href="quickstart.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="heart-rate-analysis">
+<h1>Heart Rate Analysis<a class="headerlink" href="#heart-rate-analysis" title="Permalink to this headline">¶</a></h1>
+<p>A complete description of the algorithm can be found in: &lt;ref embedded paper&gt;.</p>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>The Python Heart Rate Analysis Toolkit has been designed mainly with PPG signals in mind. The Raspberry Pi and the Arduino platforms have enabled more diverse data collection methods by providing affordable open hardware platforms. This is great for researchers, especially because traditional ECG may be considered to invasive or too disruptive for experiments.</p>
+<div class="section" id="measuring-the-heart-rate-signal">
+<h3>Measuring the heart rate signal<a class="headerlink" href="#measuring-the-heart-rate-signal" title="Permalink to this headline">¶</a></h3>
+<p>Two often used ways of measuring the heart rate are the electrocardiogram (ECG) and the Photoplethysmogram (PPG). Many of the online available algorithms are designed for ECG measurements. Applying an ECG algorithm (like the famous Pan-Tompkins one <a class="footnote-reference" href="#id5" id="id1">[1]</a>) to PPG data does not necessarily make sense. Although both the ECG and PPG are measures for cardiac activity, they measure very different constructs to estimate it.</p>
+<p>The ECG measures the electrical activations that lead to the contraction of the heart muscle, using electrodes attached to the body, usually at the chest. The PPG uses a small optical sensor in conjunction with a light source to measure the discoloration of the skin as blood perfuses through it after each heartbeat.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<img alt="_images/ppg_ecg.jpg" src="_images/ppg_ecg.jpg" />
+<p><em>Figure 1: a. and b. display the ECG and PPG waveform morphology, respectively. The ECG is divided into distinct waves (a, I-V), of which the R-wave (a, II) is used for heart beat extraction. With the PPG wave, the systolic peak (b, I) is used. The plot in c. shows the relationship between ECG and PPG signals.</em></p>
+<p>Most notably in the ECG is the QRS-complex (Fig 1a, I-III), which represents the electrical activation that leads to the ventricles contracting and expelling blood from the heart muscle. The R-peak is the point of largest amplitude in the signal. When extracting heart beats, these peaks are marked in the ECG. Advantages of the ECG are that it provides a good signal/noise ratio, and the R-peak that is of interest generally has a large amplitude compared to the surrounding data points (Fig 1c). The main disadvantage is that the measurement of the ECG is invasive. It requires the attachment of wired electrodes to the chest of the participant, which can interfere with experimental tasks such as driving.</p>
+<p>The PPG measures the discoloration of the skin as blood perfuses through the capillaries and arteries after each heartbeat. The signal consists of the systolic peak (Fig 1-b, I), dicrotic notch (II), and the diastolic peak (III). When extracting heart beats, the systolic peaks (I) are used. PPG sensors offer a less invasive way of measuring heart rate data, which is one of their main advantages. Usually the sensors are placed at the fingertip, earlobe, or on the wrist using a bracelet. Contactless camera-based systems have recently been demonstrated <a class="footnote-reference" href="#id6" id="id2">[2]</a>, <a class="footnote-reference" href="#id7" id="id3">[3]</a>, <a class="footnote-reference" href="#id8" id="id4">[4]</a>. These offer non-intrusive ways of acquiring the PPG signal. PPG signals have the disadvantages of showing more noise, large amplitude variations, and the morphology of the peaks displays broader variation (Figure 2b, c). This complicates analysis of the signal, especially when using software designed for ECG, which the available open source tools generally are.</p>
+<img alt="_images/ECG_PPG_Comparison.jpg" src="_images/ECG_PPG_Comparison.jpg" />
+<p><em>Figure 2 – The ECG signal (a.) shows a strong QRS complex together with little amplitude variation. The PPG signal measured simultaneously while the patient is at rest in a hospital bed (b.) shows some amplitude variation but relatively stable morphology. When measuring PPG in a driving simulator using low-cost sensors (c.), strong amplitude and waveform morphology variation is visible.</em></p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+</div>
+<div class="section" id="pre-processing">
+<h2>Pre-processing<a class="headerlink" href="#pre-processing" title="Permalink to this headline">¶</a></h2>
+<p>Various options are available for pre-processing.</p>
+<div class="section" id="outlier-detection">
+<h3>Outlier detection<a class="headerlink" href="#outlier-detection" title="Permalink to this headline">¶</a></h3>
+<p>peak enhancement and FIR filtering. Outlier detection and rejection is implemented based on a Hampel Filter [20].</p>
+</div>
+<div class="section" id="clipping-detection-and-interpolation">
+<h3>Clipping detection and interpolation<a class="headerlink" href="#clipping-detection-and-interpolation" title="Permalink to this headline">¶</a></h3>
+<p>Whenever a measured property exceeds a sensor’s sensitivity range, or when digitising an analog signal, clipping can occur. Clipping in this case means the peaks are flattened off because they continue outside the boundaries of the sensor you’re using:</p>
+<a class="reference internal image-reference" href="_images/clipping.jpg"><img alt="_images/clipping.jpg" class="align-center" src="_images/clipping.jpg" style="width: 300px; height: 300px;" /></a>
+<p>Clipping functions by detecting (almost) flat parts of the signal near its maximum, preceded and followed by a steep angle on both ends</p>
+</div>
+<div class="section" id="peak-enhancement">
+<h3>Peak enhancement<a class="headerlink" href="#peak-enhancement" title="Permalink to this headline">¶</a></h3>
+<p>A peak enhancement function is available that attempts to normalise the amplitude, then increase R-peak amplitude relative to the rest of the signal. It runs a predefined number of iterations. Generally two iterations are sufficient. Be cautious not to over-iterate as this will start to suppress peaks of interest as well.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="n">enhanced</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">enhance_peaks</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/peaknorm.jpeg" src="_images/peaknorm.jpeg" />
+</div>
+<div class="section" id="butterworth-filter">
+<h3>Butterworth filter<a class="headerlink" href="#butterworth-filter" title="Permalink to this headline">¶</a></h3>
+<p>A Butterworth filter implementation is available to remove high frequency noise.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">heartbeat</span> <span class="kn">as</span> <span class="nn">hb</span>
+
+<span class="n">filtered</span> <span class="o">=</span> <span class="n">hb</span><span class="o">.</span><span class="n">butter_lowpass_filter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/butterworth.jpeg" src="_images/butterworth.jpeg" />
+</div>
+</div>
+<div class="section" id="peak-detection">
+<h2>Peak detection<a class="headerlink" href="#peak-detection" title="Permalink to this headline">¶</a></h2>
+<p>The peak detection phase attempts to accommodate amplitude variation and morphology changes of the PPG complexes by using an adaptive peak detection threshold (Fig 3, III), followed by several steps of outlier detection and rejection. To identify heartbeats, a moving average is calculated using a window of 0.75 seconds on both sides of each data point. The first and last 0.75 seconds of the signal are populated with the signal’s mean, no moving average is generated for these sections. Regions of interest (ROI) are marked between two points of intersection where the signal amplitude is larger than the moving average (Fig 3, I-II), which is a standard way of detecting peaks. R-peaks are marked at the maximum of each ROI.</p>
+<img alt="_images/fitresultsimg.jpg" src="_images/fitresultsimg.jpg" />
+<p><em>Figure 3 - Figure showing the process of peak extraction. A moving average is used as an intersection threshold (II). Candidate peaks are marked at the maximum between intersections (III). The moving average is adjusted stepwise to compensate for varying PPG waveform morphology (I).</em></p>
+<p>A special case arises when the signal clips, which can happen for example when a sensor has constraints on the range of the signal it can measure, or when digitising the signal. The algorithm has clipping detection for R-peaks and will attempt to reconstruct the waveform by spline interpolation whenever an R-peak displays clipping.  An example of the process is shown in Figure 3-IV.</p>
+<p>During the peak detection phase, the algorithm adjusts the amplitude of the calculated threshold stepwise. To find the best fit, the standard deviation between successive differences (SDSD, see also 2.2) is minimised and the signal’s BPM is checked. This represents a fast method of approximating the optimal threshold by exploiting the relative regularity of the heart rate signal. As shown in Figure 5, missing one R-peak (III.) already leads to a substantial increase in SDSD compared to the optimal fit (II.). Marking incorrect R-peaks also leads to an increase in SDSD (I.). The lowest SDSD value that is not zero, in combination with a likely BPM value, is selected as the best fit. The BPM must lie within a predetermined range (default: 40 &lt;= BPM &lt;= 180, range settable by user). When analysing segments in sequence from</p>
+</div>
+<div class="section" id="peak-rejection">
+<h2>Peak rejection<a class="headerlink" href="#peak-rejection" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="calculation-of-measures">
+<h2>Calculation of measures<a class="headerlink" href="#calculation-of-measures" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="time-series">
+<h3>Time-series<a class="headerlink" href="#time-series" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="frequency-domain">
+<h3>Frequency Domain<a class="headerlink" href="#frequency-domain" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Pan, J., &amp; Tompkins, W. J. A simple real-time QRS detection algorithm. IEEE TRANSACTIONS ON BIOMEDICAL ENGINEERING, BME-32(3), 230–236, 1985. <a class="reference external" href="https://doi.org/10.1109/IEMBS.1996.647473">https://doi.org/10.1109/IEMBS.1996.647473</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td><ol class="first last upperalpha simple" start="25">
+<li>Sun, S. Hu, V. Azorin-Peris, R. Kalawsky, and S. Greenwald, “Noncontact imaging photoplethysmography to effectively access pulse rate variability,” J. Biomed. Opt., vol. 18, no. 6, p. 61205, 2012.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td><ol class="first last upperalpha simple" start="13">
+<li>Lewandowska, J. Ruminsky, T. Kocejko, and J. Nowak, “Measuring Pulse Rate with a Webcam - a Non-contact Method for Evaluating Cardiac Activity,” in Proceedings of the Federated Conference on Computer Science and Information Systems, 2011, no. January, pp. 405–410.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id8" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td><ol class="first last upperalpha simple" start="6">
+<li>Bousefsaf, C. Maaoui, and  a. Pruski, “Remote detection of mental workload changes using cardiac parameters assessed with a low-cost webcam,” Comput. Biol. Med., vol. 53, pp. 1–10, 2014.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Heart Rate Analysis</a><ul>
+<li><a class="reference internal" href="#background">Background</a><ul>
+<li><a class="reference internal" href="#measuring-the-heart-rate-signal">Measuring the heart rate signal</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pre-processing">Pre-processing</a><ul>
+<li><a class="reference internal" href="#outlier-detection">Outlier detection</a></li>
+<li><a class="reference internal" href="#clipping-detection-and-interpolation">Clipping detection and interpolation</a></li>
+<li><a class="reference internal" href="#peak-enhancement">Peak enhancement</a></li>
+<li><a class="reference internal" href="#butterworth-filter">Butterworth filter</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#peak-detection">Peak detection</a></li>
+<li><a class="reference internal" href="#peak-rejection">Peak rejection</a></li>
+<li><a class="reference internal" href="#calculation-of-measures">Calculation of measures</a><ul>
+<li><a class="reference internal" href="#time-series">Time-series</a></li>
+<li><a class="reference internal" href="#frequency-domain">Frequency Domain</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="quickstart.html" title="previous chapter">Quickstart Guide</a></li>
+      <li>Next: <a href="apiref.html" title="next chapter">API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/heartrateanalysis.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Paul van Gent.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/heartrateanalysis.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
