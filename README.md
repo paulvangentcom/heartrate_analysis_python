@@ -205,7 +205,13 @@ plot_object.savefig('plot_1.jpg') #saves the plot as JPEG image.
 plt.object.show() #displays plot
 ```
 
+## Clipping detection
 
+By default, parts where the provided heart rate signal clips are identified and corrected. Peak detection then continues normally. To illustrate:
+
+![interpolation of clipping](images/clipping_correct.jpg)
+
+More information to follow soon in the official docs.
 
 ## License
 The module is licensed under the [GNU General Public License Version3, GPL-v3](https://opensource.org/licenses/GPL-3.0)
