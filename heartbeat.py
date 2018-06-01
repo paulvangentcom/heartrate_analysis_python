@@ -261,8 +261,9 @@ def check_peaks():
     rr_arr = np.array(working_data['RR_list'])
     peaklist = np.array(working_data['peaklist'])
     ybeat = np.array(working_data['ybeat'])
-    upper_threshold = np.mean(rr_arr) + (0.3 * np.mean(rr_arr))
-    lower_threshold = np.mean(rr_arr) - (0.3 * np.mean(rr_arr))
+    mean_rr = np.mean(rr_arr)
+    upper_threshold = mean_rr + 300 if (0.3 * mean_rr) <= 300 else mean_rr + (0.3 * mean_rr)
+    lower_threshold = mean_rr - 300 if (0.3 * mean_rr) <= 300 else mean_rr - (0.3 * mean_rr)
     peaklist_cor = peaklist[np.where((rr_arr > lower_threshold) &
                                      (rr_arr < upper_threshold))[0]+1]
     working_data['peaklist_cor'] = np.insert(peaklist_cor, 0, peaklist[0])
