@@ -89,6 +89,73 @@ def enhance_peaks(hrdata, iterations=2):
         hrdata = scale_data(hrdata)
     return hrdata    
 
+def mark_clipping(hrdata, threshold):
+    '''function that marks start and end of clipping part
+    it detects the start and end of clipping segments and returns them
+    
+    keyword arguments:
+    - data: 1d list or numpy array containing heart rate data
+    - threshold: the threshold for clipping, recommended to
+                 be a few data points below ADC or sensor max value, 
+                 to compensate for signal noise (default 1020)
+    
+    '''
+    clip_binary = np.where(hrdata > threshold)
+    clipping_edges = np.where(np.diff(clip_binary) > 1)[1]
+
+    clipping_segments = []
+
+    for i in range(0, len(clipping_edges)):
+        if i == 0: #if first clipping segment
+            clipping_segments.append((clip_binary[0][0], 
+                                      clip_binary[0][clipping_edges[0]]))
+        elif i == len(clipping_edges):
+            #append last entry
+            clipping_segments.append((clip_binary[0][clipping_edges[i]+1],
+                                      clip_binary[0][-1]))    
+        else:
+            clipping_segments.append((clip_binary[0][clipping_edges[i-1] + 1],
+                                      clip_binary[0][clipping_edges[i]]))
+
+    return clipping_segments
+
+def interpolate_peaks(hrdata, sample_rate, threshold=1020):
+    '''function that interpolates peaks between
+    the clipping segments using cubic spline interpolation.
+    
+    It takes the clipping start +/- 100ms to calculate the spline.
+    
+    Returns full data array with interpolated segments patched in
+    
+    keyword arguments:
+    data - 1d list or numpy array containing heart rate data
+    clipping_segments - list containing tuples of start- and 
+                        end-points of clipping segments.
+    '''
+    clipping_segments = mark_clipping(hrdata, threshold)
+    num_datapoints = int(0.1 * sample_rate)
+    newx = []
+    newy = []
+    
+    for segment in clipping_segments:
+        antecedent = hrdata[segment[0] - num_datapoints : segment[0]]
+        consequent = hrdata[segment[1] : segment[1] + num_datapoints]
+        segment_data = np.concatenate((antecedent, consequent))
+        
+        interpdata_x = np.concatenate(([x for x in range(segment[0] - num_datapoints, segment[0])],
+                                       [x for x in range(segment[1], segment[1] + num_datapoints)]))
+        x_new = np.linspace(segment[0] - num_datapoints,
+                            segment[1] + num_datapoints,
+                            ((segment[1] - segment[0]) + (2 * num_datapoints)))
+        
+        interp_func = UnivariateSpline(interpdata_x, segment_data, k=3)
+        interp_data = interp_func(x_new)
+        
+        hrdata[segment[0] - num_datapoints :
+             segment[1] + num_datapoints] = interp_data
+       
+    return hrdata
+
 def raw_to_ecg(hrdata, enhancepeaks=False):
     '''Flips raw signal with negative mV peaks to normal ECG
 
@@ -246,7 +313,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate):
     valid_ma = []
     for ma_perc in ma_perc_list:
         detect_peaks(hrdata, rol_mean, ma_perc, sample_rate)
-        bpm = ((len(working_data['peaklist'])/(len(working_data['hr'])/sample_rate))*60)
+        bpm = ((len(working_data['peaklist'])/(len(hrdata)/sample_rate))*60)
         rrsd.append([working_data['rrsd'], bpm, ma_perc])
 
     for _rrsd, _bpm, _ma_perc in rrsd:
@@ -348,8 +415,7 @@ def calc_fd_measures(hrdata, sample_rate):
         pointer += x
         rr_x.append(pointer)
     rr_x_new = np.linspace(rr_x[0], rr_x[-1], rr_x[-1])
-    interpolated_func = UnivariateSpline(rr_x, rr_list, k=5)
-    
+    interpolated_func = UnivariateSpline(rr_x, rr_list, k=3)
     datalen = len(rr_x_new)
     frq = np.fft.fftfreq(datalen, d=((1/1000.0)))
     frq = frq[range(int(datalen/2))]
@@ -388,7 +454,8 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
         return plt
 
 #Wrapper function
-def process(hrdata, sample_rate, windowsize=0.75, report_time=False, calc_fft=True):
+def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
+            calc_fft=False, interp_clipping=False, interp_threshold=1020):
     '''Processed the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
@@ -399,6 +466,11 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False, calc_fft=Tr
     t1 = time.clock()
     working_data['hr'] = hrdata
     rol_mean = rolmean(hrdata, windowsize, sample_rate)
+    if interp_clipping:
+        hrdata = scale_data(hrdata)
+        hrdata = interpolate_peaks(hrdata, sample_rate, threshold=interp_threshold)
+        working_data['hr'] = hrdata
+
     fit_peaks(hrdata, rol_mean, sample_rate)
     calc_rr(sample_rate)
     check_peaks()
@@ -411,7 +483,13 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False, calc_fft=Tr
 
 if __name__ == '__main__':
     hrdata = get_data('data.csv')
-    measures = process(hrdata, 100.0, report_time=True)
+    fs = 100.0
+
+    #hrdata = get_data('data3.csv', column_name = 'hr')
+    #fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
+    #                               timeformat='%Y-%m-%d %H:%M:%S.%f')
+
+    measures = process(hrdata, fs, report_time=True, calc_fft=True, interp_clipping=True)
 
     for m in measures.keys():
         print(m + ': ' + str(measures[m]))
