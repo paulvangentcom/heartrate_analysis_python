@@ -1,0 +1,5 @@
+V0.8.1
+- Added changelog to repository
+- Implemented clipping detection and interpolation functionality
+- Changed FFT calculation flag to default False, as in some cases the FFT takes very long to compute. Possible causes and fixes to be investigated
+- Pushed readthedocs.io documentation source structure to repository
