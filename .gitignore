@@ -3,3 +3,6 @@
 
 physionet/
 experimental/.ipynb_checkpoints
+docs/build
+docs/make.bat
+docs/Makefile
