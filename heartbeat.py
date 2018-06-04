@@ -13,7 +13,6 @@ http://www.paulvangent.com/2016/03/30/analyzing-a-discrete-heart-rate-signal-usi
 from datetime import datetime
 import time
 
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import butter, filtfilt
@@ -264,6 +263,45 @@ def filtersignal(data, cutoff, sample_rate, order):
     filtered_data = butter_lowpass_filter(data, cutoff, sample_rate, order)
     return filtered_data
 
+def MAD(data):
+    '''function to compute median absolute deviation of data slice
+       https://en.wikipedia.org/wiki/Median_absolute_deviation
+    
+    keyword arguments:
+    - data: 1-dimensional numpy array containing data
+    '''
+    med = np.median(data)
+    return np.median(np.abs(data - med))
+
+def hampelfilt(data, filtsize=6):
+    '''function to detect outliers based on hampel filter
+       filter takes datapoint and six surrounding samples.
+       Detect outliers based on being more than 3std from window mean
+    
+    keyword arguments:
+    - data: 1-dimensional numpy array containing data
+    - filtsize: the filter size expressed the number of datapoints
+                taken surrounding the analysed datapoint. a filtsize
+                of 6 means three datapoints on each side are taken.
+                total filtersize is thus filtsize + 1 (datapoint evaluated)
+    '''
+    output = [x for x in data] #generate second list to prevent overwriting first
+    onesided_filt = filtsize // 2
+    madarray = [0 for x in range(0, onesided_filt)]
+    for i in range(onesided_filt, len(data) - onesided_filt - 1):
+        dataslice = output[i - onesided_filt : i + onesided_filt]
+        mad = MAD(dataslice)
+        median = np.median(dataslice)
+        if output[i] > median + (3 * mad):
+            output[i] = median
+    return output
+
+def hampel_correcter(data, sample_rate, filtsize=6):
+    '''eturns difference between data and large windowed hampel median filter.
+       Results in strong noise suppression, but relatively expensive to compute.
+    '''
+    return data - hampelfilt(data, filtsize=int(sample_rate))
+
 #Peak detection
 def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate):
     '''Detects heartrate peaks in the given dataset.
@@ -301,7 +339,9 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate):
         working_data['rrsd'] = np.inf
 
 def fit_peaks(hrdata, rol_mean, sample_rate):
-    '''Runs variations in peak detection given a noisy heart rate signal
+    '''Runs fitting with varying peak detection thresholds given a heart rate signal.
+       Results in relatively noise-robust, temporally accuract peak detection, as no
+       non-linear transformations are involved that might shift peak positions.
 
     Keyword arguments:
     hrdata - 1-dimensional numpy array or list containing the heart rate data
@@ -369,9 +409,13 @@ def update_rr():
     rr_source = working_data['RR_list']
     b_peaks = working_data['binary_peaklist']
     rr_list = [rr_source[i] for i in range(len(rr_source)) if b_peaks[i] + b_peaks[i+1] == 2]
-    rr_diff = np.abs(np.diff(rr_list))
+    rr_mask = [0 if (b_peaks[i] + b_peaks[i+1] == 2) else 1 for i in range(len(rr_source))]
+    rr_masked = np.ma.array(rr_source, mask=rr_mask)
+    rr_diff = np.abs(np.diff(rr_masked))
+    rr_diff = rr_diff[~rr_diff.mask]
     rr_sqdiff = np.power(rr_diff, 2)
     
+    working_data['RR_masklist'] = rr_mask
     working_data['RR_list_cor'] = rr_list
     working_data['RR_diff'] = rr_diff
     working_data['RR_sqdiff'] = rr_sqdiff
@@ -398,8 +442,7 @@ def calc_ts_measures():
     measures['nn50'] = nn50
     measures['pnn20'] = float(len(nn20)) / float(len(rr_diff))
     measures['pnn50'] = float(len(nn50)) / float(len(rr_diff))
-    med_mad = np.median(rr_list)
-    measures['hr_mad'] = np.median(np.abs(rr_list - med_mad))
+    measures['hr_mad'] = MAD(rr_list)
 
 def calc_fd_measures(hrdata, sample_rate):
     '''Calculates the frequency-domain measurements.
@@ -439,6 +482,8 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
     show -- whether to display the plot (True) or return a plot object (False) (default True)
     title -- the title used in the plot
     '''
+    import matplotlib.pyplot as plt
+
     peaklist = working_data['peaklist']
     ybeat = working_data['ybeat']
     rejectedpeaks = working_data['removed_beats']
@@ -455,7 +500,8 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
 
 #Wrapper function
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
-            calc_fft=False, interp_clipping=True, interp_threshold=1020):
+            calc_fft=False, interp_clipping=True, interp_threshold=1020,
+            hampel_correct=False):
     '''Processed the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
@@ -464,13 +510,17 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     windowsize -- the window size to use, in seconds (calculated as windowsize * sample_rate)
     '''
     t1 = time.clock()
-    working_data['hr'] = hrdata
-    rol_mean = rolmean(hrdata, windowsize, sample_rate)
+
     if interp_clipping:
         hrdata = scale_data(hrdata)
         hrdata = interpolate_peaks(hrdata, sample_rate, threshold=interp_threshold)
-        working_data['hr'] = hrdata
 
+    if hampel_correct:
+        hrdata = enhance_peaks(hrdata)
+        hrdata = hampel_correcter(hrdata, sample_rate, filtsize=sample_rate)
+
+    working_data['hr'] = hrdata
+    rol_mean = rolmean(hrdata, windowsize, sample_rate)
     fit_peaks(hrdata, rol_mean, sample_rate)
     calc_rr(sample_rate)
     check_peaks()
@@ -489,7 +539,7 @@ if __name__ == '__main__':
     #fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
     #                               timeformat='%Y-%m-%d %H:%M:%S.%f')
 
-    measures = process(hrdata, fs, report_time=True, calc_fft=True, interp_clipping=True)
+    measures = process(hrdata, fs, report_time=True, calc_fft=False, interp_clipping=True, hampel_correct=True)
 
     for m in measures.keys():
         print(m + ': ' + str(measures[m]))
