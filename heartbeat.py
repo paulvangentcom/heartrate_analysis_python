@@ -25,7 +25,7 @@ measures = {}
 working_data = {}
 
 #Data handling
-def get_data(filename, delim=',', column_name='None'):
+def get_data(filename, delim=',', column_name='None', encoding=None):
     '''Loads data from a .CSV or .MAT file into numpy array.
 
     Keyword Arguments:
@@ -38,7 +38,7 @@ def get_data(filename, delim=',', column_name='None'):
     file_ext = filename.split('.')[-1]
     if file_ext == 'csv' or file_ext == 'txt':
         if column_name != 'None':
-            hrdata = np.genfromtxt(filename, delimiter=delim, names=True, dtype=None)
+            hrdata = np.genfromtxt(filename, delimiter=delim, names=True, dtype=None, encoding=None)
             try:
                 hrdata = hrdata[column_name]
             except Exception as error:
