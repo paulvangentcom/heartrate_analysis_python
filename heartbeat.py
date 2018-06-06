@@ -561,9 +561,9 @@ if __name__ == '__main__':
     hrdata = get_data('data.csv')
     fs = 100.0
 
-    hrdata = get_data('data3.csv', column_name = 'hr')
-    fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
-                                   timeformat='%Y-%m-%d %H:%M:%S.%f')
+    #hrdata = get_data('data3.csv', column_name = 'hr')
+    #fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
+    #                               timeformat='%Y-%m-%d %H:%M:%S.%f')
 
     measures = process(hrdata, fs, report_time=True, calc_fft=False, interp_clipping=True, hampel_correct=False)
 
