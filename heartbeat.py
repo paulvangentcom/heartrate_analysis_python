@@ -303,7 +303,7 @@ def hampel_correcter(data, sample_rate, filtsize=6):
     return data - hampelfilt(data, filtsize=int(sample_rate))
 
 #Peak detection
-def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate):
+def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True):
     '''Detects heartrate peaks in the given dataset.
 
     Keyword arguments:
@@ -312,6 +312,9 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate):
     ma_perc -- the percentage with which to raise the rolling mean,
     used for fitting detection solutions to data
     sample_rate -- the sample rate of the data set
+    update_dict -- whether to update the peak information in the module's data structure
+                   Setting this to False (default True) allows peak function to be re-used for
+                   example by the breath analysis module.
     '''
     rmean = np.array(rol_mean)
     rol_mean = rmean + ((rmean / 100) * ma_perc)
@@ -329,14 +332,17 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate):
         except:
             pass
 
-    working_data['peaklist'] = peaklist
-    working_data['ybeat'] = [hrdata[x] for x in peaklist]
-    working_data['rolmean'] = rol_mean
-    calc_rr(sample_rate)
-    if len(working_data['RR_list']):
-        working_data['rrsd'] = np.std(working_data['RR_list'])
+    if update_dict:
+        working_data['peaklist'] = peaklist
+        working_data['ybeat'] = [hrdata[x] for x in peaklist]
+        working_data['rolmean'] = rol_mean
+        calc_rr(sample_rate)
+        if len(working_data['RR_list']):
+            working_data['rrsd'] = np.std(working_data['RR_list'])
+        else:
+            working_data['rrsd'] = np.inf
     else:
-        working_data['rrsd'] = np.inf
+        return peaklist
 
 def fit_peaks(hrdata, rol_mean, sample_rate):
     '''Runs fitting with varying peak detection thresholds given a heart rate signal.
@@ -471,6 +477,26 @@ def calc_fd_measures(hrdata, sample_rate):
     measures['interp_rr_function'] = interpolated_func
     measures['interp_rr_linspace'] = (rr_x[0], rr_x[-1], rr_x[-1])
 
+def calc_breathing(sample_rate):
+    '''function to estimate breathing rate from heart rate signal.
+    
+    Upsamples the list of detected rr_intervals by interpolation
+    then tries to extract breathing peaks in the signal.
+
+    keyword arguments:
+    sample_rate -- sample rate of the heart rate signal
+    '''
+    rrlist = working_data['RR_list_cor']
+    x = np.linspace(0, len(rrlist), len(rrlist))
+    x_new = np.linspace(0, len(rrlist), len(rrlist)*10)
+    interp = UnivariateSpline(x, rrlist, k=3)
+    breathing = interp(x_new)
+    breathing_rolmean = rolmean(breathing, 0.75, 100.0)
+    peaks = detect_peaks(breathing, breathing_rolmean, 1, sample_rate, update_dict=False)
+    
+    signaltime = len(working_data['hr']) / sample_rate
+    measures['breathingrate'] = len(peaks) / signaltime
+
 #Plotting it
 def plotter(show=True, title='Heart Rate Signal Peak Detection'):
     '''Plots the analysis results.
@@ -483,7 +509,6 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
     title -- the title used in the plot
     '''
     import matplotlib.pyplot as plt
-
     peaklist = working_data['peaklist']
     ybeat = working_data['ybeat']
     rejectedpeaks = working_data['removed_beats']
@@ -525,6 +550,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     calc_rr(sample_rate)
     check_peaks()
     calc_ts_measures()
+    calc_breathing(sample_rate)
     if calc_fft:
         calc_fd_measures(hrdata, sample_rate)
     if report_time:
@@ -535,11 +561,11 @@ if __name__ == '__main__':
     hrdata = get_data('data.csv')
     fs = 100.0
 
-    #hrdata = get_data('data3.csv', column_name = 'hr')
-    #fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
-    #                               timeformat='%Y-%m-%d %H:%M:%S.%f')
+    hrdata = get_data('data3.csv', column_name = 'hr')
+    fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
+                                   timeformat='%Y-%m-%d %H:%M:%S.%f')
 
-    measures = process(hrdata, fs, report_time=True, calc_fft=False, interp_clipping=True, hampel_correct=True)
+    measures = process(hrdata, fs, report_time=True, calc_fft=False, interp_clipping=True, hampel_correct=False)
 
     for m in measures.keys():
         print(m + ': ' + str(measures[m]))

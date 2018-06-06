@@ -10,3 +10,4 @@ V0.8.2
 - Moved matplotlib import statement so that it is no longer necessary unless calling the plot functionality, reduces need to install irrelevant dependencies when plotting functionality not needed
 - Added Hampel Filter with settable filtersize
 - Added method to suppress noisy segments called 'Hampel Corrector', called such as it's simply a Hampel Filter with large window size. Computationally on the expensive side so disabled by default, but very good at suppressing noisy segments without influencing peak positions in the rest of the signal.
+- Added breathing rate extraction method. Stores estimated breathing rate in measures['breathingrate']
