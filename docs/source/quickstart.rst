@@ -1,3 +1,5 @@
+.. _quickstart:
+
 ****************
 Quickstart Guide
 ****************
@@ -16,7 +18,7 @@ Import the `heartbeat` module and load a file
 
 This returns a `numpy.ndarray`.
 
-Analysis requires the sampling rate for your data. If you know this _a priori_, supply it when calling the `process()` function, which returns a `dict{}` object containing all measures:
+Analysis requires the sampling rate for your data. If you know this *a priori*, supply it when calling the `process()` function, which returns a `dict{}` object containing all measures:
 
 .. code-block:: python
 

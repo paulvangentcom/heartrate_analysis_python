@@ -1,3 +1,5 @@
+.. _heart rate analysis:
+
 *******************
 Heart Rate Analysis
 *******************
@@ -93,7 +95,7 @@ The peak detection phase attempts to accommodate amplitude variation and morphol
 
 *Figure 3 - Figure showing the process of peak extraction. A moving average is used as an intersection threshold (II). Candidate peaks are marked at the maximum between intersections (III). The moving average is adjusted stepwise to compensate for varying PPG waveform morphology (I).*
 
-A special case arises when the signal clips, which can happen for example when a sensor has constraints on the range of the signal it can measure, or when digitising the signal. The algorithm has clipping detection for R-peaks and will attempt to reconstruct the waveform by spline interpolation whenever an R-peak displays clipping.  An example of the process is shown in Figure 3-IV.
+and will attempt to reconstruct the waveform by spline interpolation whenever an R-peak displays clipping. This is discussed under `Clipping detection and interpolation`_
 
 During the peak detection phase, the algorithm adjusts the amplitude of the calculated threshold stepwise. To find the best fit, the standard deviation between successive differences (SDSD, see also 2.2) is minimised and the signal’s BPM is checked. This represents a fast method of approximating the optimal threshold by exploiting the relative regularity of the heart rate signal. As shown in Figure 5, missing one R-peak (III.) already leads to a substantial increase in SDSD compared to the optimal fit (II.). Marking incorrect R-peaks also leads to an increase in SDSD (I.). The lowest SDSD value that is not zero, in combination with a likely BPM value, is selected as the best fit. The BPM must lie within a predetermined range (default: 40 <= BPM <= 180, range settable by user). When analysing segments in sequence from 
 
@@ -115,6 +117,35 @@ Frequency Domain
 ~~~~~~~~~~~~~~~~
 
 
+Estimating breathing rate
+~~~~~~~~~~~~~~~~~~~~~~~~~
+One interesting property of the heart is that the frequency with which it beats is strongly influenced by breathing, through the autonomous nervous system. It is one of the reasons why deep breaths can calm nerves. We can also exploit this relationship to extract breathing rate from a segment of heart rate data. For example, using a dataset from [5]_ which contains both CO2 capnometry signals as well as PPG signals, we can see the relationship between breathing and the RR-intervals clearly. Below are plotted the CO2 capnometry signal (breathing signal measured at the nose), as well as the RR-intervals:
+
+.. image:: images/CO2_RRbreath.jpg
+   :height: 361px
+   :width: 413px
+   :align: center
+
+The problem is now reduced to one of peak finding. Breathing rate can be extracted using the toolkit. After calling the 'process' function, breathing rate (in Hz) is available in the models object that is returned.
+
+.. code-block:: python
+
+    import heartbeat as hb
+    
+    data = hb.get_data('data.csv')
+    fs = 100.0
+    measures = hb.process(data, fs, report_time=True)
+    print('breathing rate is: %s Hz' %measures['breathingrate'])
+    
+This will result in:
+
+.. code-block:: python
+    
+    breathing rate is: 0.16109544905356424 Hz
+    
+
+
+
 
 References
 ==========
@@ -126,3 +157,5 @@ References
 .. [3] M. Lewandowska, J. Ruminsky, T. Kocejko, and J. Nowak, “Measuring Pulse Rate with a Webcam - a Non-contact Method for Evaluating Cardiac Activity,” in Proceedings of the Federated Conference on Computer Science and Information Systems, 2011, no. January, pp. 405–410.
 
 .. [4] F. Bousefsaf, C. Maaoui, and  a. Pruski, “Remote detection of mental workload changes using cardiac parameters assessed with a low-cost webcam,” Comput. Biol. Med., vol. 53, pp. 1–10, 2014.
+
+.. [5] W. Karlen, S. Raman, J. M. Ansermino, and G. A. Dumont, “Multiparameter respiratory rate estimation from the photoplethysmogram,” IEEE transactions on bio-medical engineering, vol. 60, no. 7, pp. 1946–53, 2013. DOI: 10.1109/TBME.2013.2246160 PMED: http://www.ncbi.nlm.nih.gov/pubmed/23399950
