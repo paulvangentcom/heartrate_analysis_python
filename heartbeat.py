@@ -494,8 +494,11 @@ def calc_breathing(sample_rate):
     breathing_rolmean = rolmean(breathing, 0.75, 100.0)
     peaks = detect_peaks(breathing, breathing_rolmean, 1, sample_rate, update_dict=False)
     
-    signaltime = len(working_data['hr']) / sample_rate
-    measures['breathingrate'] = len(peaks) / signaltime
+    if len(peaks) > 1:
+        signaltime = len(working_data['hr']) / sample_rate
+        measures['breathingrate'] = len(peaks) / signaltime
+    else:
+        measures['breathingrate'] = np.nan
 
 #Plotting it
 def plotter(show=True, title='Heart Rate Signal Peak Detection'):
