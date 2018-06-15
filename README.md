@@ -1,6 +1,8 @@
 # A note to our friends from the Humanist 2018 conference
 
-This is the package presented at the Humanist 2018 conference in the Hague, Netherlands. Note that it is always in active development. Whenever including it in your research, pull the latest version from this GitHub. Support is always available at: P.vanGent@tudelft.nl
+This is the package presented at the Humanist 2018 conference in the Hague, Netherlands. Note that it is always in active development. Whenever including it in your research, pull the latest version from this GitHub. Support is always available at: P.vanGent@tudelft.nl.
+
+The official documentation will be published next week. The quickstart can be found below.
 
 **Thank you for your interest**
 
