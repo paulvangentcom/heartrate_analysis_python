@@ -85,18 +85,18 @@ fs = 100.0 #example file 'data.csv' is sampled at 100.0 Hz
 measures = hb.process(data, fs)
 
 print(measures['bpm']) #returns BPM value
-print(measures['lf/hf'] # returns LF:HF ratio
+print(measures['rmssd'] # returns rmssd variability measure
 
 #Alternatively, use dictionary stored in module:
 print(hb.measures['bpm']) #returns BPM value
-print(hb.measures['lf/hf'] # returns LF:HF ratio
+print(hb.measures['sdsd'] # returns sdsd variability measure
 
 #You can also use Pandas if you so desire
 import pandas as pd
 df = pd.read_csv("data.csv")
 measures = hb.process(df['hr'].values, fs)
 print("measures['bpm'])
-print("measures['lf/hf'])
+print("measures['pnn20']) #returns pNN20 variability measure
 ```
 
 
