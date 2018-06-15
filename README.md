@@ -37,6 +37,7 @@ Frequency domain
 * low frequency component (0.04-0.15Hz), LF
 * high frequency component (0.16-0.5Hz), HF
 * lf/hf ratio, Lf/HF
+
 **Note on Frequency Domain measures:** the frequency measures (HF, LF, HF/LF) are optional at this time. The package uses the squared output of the FFT as an estimator for the periodogram. This is not the best available estimation. It will be updated in a future version. For now only the instantaneous heart rate and variability measures are recommended for scientific work.
 
 ## Basic analysis example
