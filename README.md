@@ -234,7 +234,7 @@ The module is still in active development. The to-do for the coming months is:
 - [X] Replace numerical work with numpy functions, to increase speed of processing
 - [X] Drop dependency on pandas
 - [X] Implement data handler function, recognising most used formats and parsing correctly
-- [ ] Make values for inaccurate bpm rejection settable
+- [X] Make values for inaccurate bpm rejection settable
 - [X] Increase versatility of sampling rate detection
 - [ ] Improve accuracy of peak detection/rejection with an FFT-based implementation.
 - [X] Add MAD time-domain measure
@@ -245,7 +245,7 @@ The module is still in active development. The to-do for the coming months is:
 - [ ] Always reject first beat if within 0.3 sec (signal could start mid-beat, which creates slight inaccuracy)
 - [ ] Add check and auto-correction for negative values
 - [ ] Handle cases where strong T-peak in signal is present
-- [ ] Implement clipping detection -> curve fitting peak reconstrucion
+- [X] Implement clipping detection -> curve fitting peak reconstrucion
 - [ ] Cluster rejections close together
 - [X] Implement subsegment rejection
 - [ ] Fix issue with peak at index 0

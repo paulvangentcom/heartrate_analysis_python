@@ -16,7 +16,7 @@ Import the `heartbeat` module and load a file
     hrdata = hb.get_data('yourdata.csv', column_name='hr')
 
 
-This returns a `numpy.ndarray`.
+This returns a :code:`numpy.ndarray`.
 
 Analysis requires the sampling rate for your data. If you know this *a priori*, supply it when calling the `process()` function, which returns a `dict{}` object containing all measures:
 
@@ -28,7 +28,7 @@ Analysis requires the sampling rate for your data. If you know this *a priori*, 
     measures = hb.process(data, 100.0)
 
 
-`process(dataset, fs, hrw=0.75, report_time=False)` requires two arguments:
+:code:`process(dataset, fs, hrw=0.75, report_time=False)` requires two arguments:
 
 * **dataset:** An 1-dimensional list, numpy array or array-like object containing the heart rate data;
 * **fs**: The samplerate of the signal in Hz;
@@ -36,7 +36,7 @@ Analysis requires the sampling rate for your data. If you know this *a priori*, 
 * **report_time:** _optional_ whether to report total processing time of process() loop.
 
 
-A `dict{}` object is returned containing all measures. The object is also stored in the module. Access as such:
+A :code:`dict{}` object is returned containing all measures. The object is also stored in the module. Access as such:
 
 .. code-block:: python
 
@@ -45,26 +45,27 @@ A `dict{}` object is returned containing all measures. The object is also stored
     data = hb.get_data('data.csv') 
     fs = 100.0 #example file 'data.csv' is sampled at 100.0 Hz
 
-    measures = hb.process(data, fs)
+    measures = hb.process(data, fs, report_time=True)
 
     print(measures['bpm']) #returns BPM value
-    print(measures['lf/hf'] # returns LF:HF ratio
+    print(measures['rmssd'] # returns RMSSD HRV measure
         
     #Alternatively, use dictionary stored in module:
     print(hb.measures['bpm']) #returns BPM value
-    print(hb.measures['lf/hf'] # returns LF:HF ratio
+    print(hb.measures['sdsd'] # returns SDSD HRV measure
 
     #You can also use Pandas if you so desire
     import pandas as pd
     df = pd.read_csv("data.csv")
-    measures = hb.process(df['hr'].values, fs)
+    #note we need calc_fft if we want frequency-domain measures
+    measures = hb.process(df['hr'].values, fs, calc_fft=True)
     print("measures['bpm'])
     print("measures['lf/hf'])
 
     
 Getting Data From Files
 =======================
-The toolkit has functionality to open and parse delimited .csv and .txt files, as well as matlab .mat files. Opening a file is done by the `get_data()` function:
+The toolkit has functionality to open and parse delimited .csv and .txt files, as well as matlab .mat files. Opening a file is done by the :code:`get_data()` function:
 
 .. code-block:: python
 
@@ -72,9 +73,9 @@ The toolkit has functionality to open and parse delimited .csv and .txt files, a
 
     data = hb.get_data('data.csv')
 
-This returns a 1-dimensional `numpy.ndarray` containing the heart rate data.
+This returns a 1-dimensional :code:`numpy.ndarray` containing the heart rate data.
 
-`get_data(filename, delim = ',', column_name = 'None')` requires one argument:
+:code:`get_data(filename, delim = ',', column_name = 'None')` requires one argument:
 
 * **filename:** absolute or relative path to a valid (delimited .csv/.txt or matlab .mat) file;
 * **delim** _optional_: when loading a delimited .csv or .txt file, this specifies the delimiter used. Default delim = ',';
@@ -113,12 +114,12 @@ The toolkit has a simple built-in sample-rate detection. It can handle ms-based 
     fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:%S.%f')
 
 
-`get_samplerate_mstimer(timerdata)` requires one argument:
+:code:`get_samplerate_mstimer(timerdata)` requires one argument:
 
 * **timerdata:** a list, numpy array or array-like object containing ms-based timestamps (float or int).
 
 
-`get_samplerate_datetime(datetimedata, timeformat = '%H:%M:%S.f')` requires one argument:
+:code:`get_samplerate_datetime(datetimedata, timeformat = '%H:%M:%S.f')` requires one argument:
 
 * **datetimedata:** a list, numpy array or array-like object containing datetime-based timestamps (string);
 * **timeformat** _optional_: the format of the datetime-strings in your dataset. Default timeformat='%H:%M:%S.f', 24-hour based time including ms: 21:43:12.569.
@@ -142,7 +143,7 @@ This returns:
 
 .. image:: images/output1.jpeg
 
-`plotter(show = True, title = 'Heart Rate Signal Peak Detection')` has two optional arguments:
+:code:`plotter(show = True, title = 'Heart Rate Signal Peak Detection')` has two optional arguments:
 
 * **show** _optional_: if set to True a plot is visualised, if set to False a matplotlib.pyplot object is returned. Default show = True;
 * **title** _optional_: Sets the title of the plot. If not specified, default title is used.

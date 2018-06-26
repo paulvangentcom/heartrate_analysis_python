@@ -18,7 +18,7 @@ from scipy.interpolate import UnivariateSpline
 from scipy.signal import butter, filtfilt
 
 __author__ = "Paul van Gent"
-__version__ = "Version 0.9"
+__version__ = "Version 0.8.2"
 
 measures = {}
 working_data = {}
@@ -297,7 +297,7 @@ def hampelfilt(data, filtsize=6):
     return output
 
 def hampel_correcter(data, sample_rate, filtsize=6):
-    '''eturns difference between data and large windowed hampel median filter.
+    '''Returns difference between data and large windowed hampel median filter.
        Results in strong noise suppression, but relatively expensive to compute.
     '''
     return data - hampelfilt(data, filtsize=int(sample_rate))
@@ -344,7 +344,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True):
     else:
         return peaklist
 
-def fit_peaks(hrdata, rol_mean, sample_rate):
+def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180):
     '''Runs fitting with varying peak detection thresholds given a heart rate signal.
        Results in relatively noise-robust, temporally accuract peak detection, as no
        non-linear transformations are involved that might shift peak positions.
@@ -353,6 +353,8 @@ def fit_peaks(hrdata, rol_mean, sample_rate):
     hrdata - 1-dimensional numpy array or list containing the heart rate data
     rol_mean -- 1-dimensional numpy array containing the rolling mean of the heart rate signal
     sample_rate -- the sample rate of the data set
+    bpmmin -- minimum value of bpm to see as likely (default 40)
+    bpmmax -- maximum value of bpm to see as likely (default 180)
     '''
     ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
     rrsd = []
@@ -363,8 +365,9 @@ def fit_peaks(hrdata, rol_mean, sample_rate):
         rrsd.append([working_data['rrsd'], bpm, ma_perc])
 
     for _rrsd, _bpm, _ma_perc in rrsd:
-        if (_rrsd > 0.1) and ((40 <= _bpm <= 180)):
+        if (_rrsd > 0.1) and ((bpmmin <= _bpm <= bpmmax)):
             valid_ma.append([_rrsd, _ma_perc])
+
 
     working_data['best'] = min(valid_ma, key=lambda t: t[0])[1]
     detect_peaks(hrdata, rol_mean, min(valid_ma, key=lambda t: t[0])[1], sample_rate)
@@ -470,6 +473,7 @@ def calc_fd_measures(hrdata, sample_rate):
     frq = frq[range(int(datalen/2))]
     Y = np.fft.fft(interpolated_func(rr_x_new))/datalen
     Y = Y[range(int(datalen/2))]
+    Y = np.power(Y, 2)
     
     measures['lf'] = np.trapz(abs(Y[(frq >= 0.04) & (frq <= 0.15)]))
     measures['hf'] = np.trapz(abs(Y[(frq >= 0.16) & (frq <= 0.5)]))
@@ -529,13 +533,24 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
 #Wrapper function
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
             calc_fft=False, interp_clipping=True, interp_threshold=1020,
-            hampel_correct=False):
+            hampel_correct=False, bpmmin=40, bpmmax=180):
     '''Processed the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
     hrdata -- 1-dimensional numpy array or list containing heart rate data
     sample_rate -- the sample rate of the heart rate data
     windowsize -- the window size to use, in seconds (calculated as windowsize * sample_rate)
+    report_time -- whether to report total processing time of algorithm (default True)
+    calc_fft -- whether to compute time-series measurements (default False)
+    interp_clipping -- whether to detect and interpolate clipping segments of the signal 
+                       (default True)
+    intep_threshold -- threshold to use to detect clipping segments. Recommended to be a few
+                       datapoints below the sensor or ADC's maximum value (to account for
+                       slight data line noise). Default 1020, 4 below max of 1024 for 10-bit ADC
+    hampel_correct -- whether to reduce noisy segments using large median filter. Disabled by
+                      default due to computational complexity, and generally it is not necessary
+    bpmmin -- minimum value to see as likely for BPM when fitting peaks
+    bpmmax -- maximum value to see as likely for BPM when fitting peaks
     '''
     t1 = time.clock()
 

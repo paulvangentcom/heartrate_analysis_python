@@ -6,6 +6,7 @@ Heart Rate Analysis
 
 A complete description of the algorithm can be found in: <ref embedded paper>.
 
+
 Background
 ==========
 
@@ -13,11 +14,11 @@ The Python Heart Rate Analysis Toolkit has been designed mainly with PPG signals
 
 
 Measuring the heart rate signal
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===============================
 
 Two often used ways of measuring the heart rate are the electrocardiogram (ECG) and the Photoplethysmogram (PPG). Many of the online available algorithms are designed for ECG measurements. Applying an ECG algorithm (like the famous Pan-Tompkins one [1]_) to PPG data does not necessarily make sense. Although both the ECG and PPG are measures for cardiac activity, they measure very different constructs to estimate it.
 
-The ECG measures the electrical activations that lead to the contraction of the heart muscle, using electrodes attached to the body, usually at the chest. The PPG uses a small optical sensor in conjunction with a light source to measure the discoloration of the skin as blood perfuses through it after each heartbeat.
+The ECG measures the electrical activations that lead to the contraction of the heart muscle, using electrodes attached to the body, usually at the chest. The PPG uses a small optical sensor in conjunction with a light source to measure the discoloration of the skin as blood perfuses through it after each heartbeat. This measuring of electrical activation and pressure waves respectively, leads to very different signal and noise properties, that require specialised tools to process. This toolkit specialises in PPG data.
 
 |
 
@@ -36,115 +37,38 @@ The PPG measures the discoloration of the skin as blood perfuses through the cap
 |
 
 
+On the Accuracy of Peak Position
+================================
+When analysing heart rate, the main crux lies in the accuracy of the peak position labeling being used. When extracting instantaneous heart rate (BPM), accurate peak placement is not crucial. The BPM is an aggregate measure, which is calculated as the average beat-beat interval across the entire analysed signal (segment). This makes it quite robust to outliers. 
 
+However, when extracting heart rate variability (HRV) measures, the peak positions are crucial. Take as an example two often used variability measures, the RMSSD (root mean square of successive differences) and the SDSD (standard deviation of successive differences). Given a segment of heart rate data as displayed in the figure below, the RMSSD is calculated as shown. The SDSD is the standard deviation between successive differences.
 
-Pre-processing
-==============
-Various options are available for pre-processing.
+.. image:: images/peakdetection_rmssd.jpg
+    :align: center
 
+*Figure 3 - Image displaying the desired peak detection result, as well as the calculation of the RMSSD measure. The SDSD measure is the standard deviation between successive differences*
 
-Outlier detection
-~~~~~~~~~~~~~~~~~
-peak enhancement and FIR filtering. Outlier detection and rejection is implemented based on a Hampel Filter [20]. 
+|
 
+Now consider that two mistakes are possible: either a beat is not detected at all (missed), or a beat is placed at an incorrect time position (incorrectly placed). These will have an effect on the calculated output measures, which are highly sensitive to outliers as they are designed to capture the slight natural variation between peak-peak intervals in the heart rate signal!
 
-Clipping detection and interpolation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Whenever a measured property exceeds a sensor's sensitivity range, or when digitising an analog signal, clipping can occur. Clipping in this case means the peaks are flattened off because the signal continues outside the boundaries of the sensor you're using:
+To illustrate the problem we have run a few simulations. We took a sample of a heart rate signal which was annotated manually, and introduced two types of errors:
 
-.. image:: images/clipping.jpg
-   :height: 300px
-   :width: 300px
-   :align: center
-   
-Clipping functions by detecting (almost) flat parts of the signal near its maximum, preceded and followed by a steep angle on both ends.
+- We randomly dropped n% of peaks from the signal, than re-ran the analysis considering only intervals between two peaks where no missing value occurred.
+- We introduced a random error (0.1% - 10% of peak position, meaning between about 1ms and 100ms deviation) in n% of peaks.
+- The simulation ran bootstrapped for 10,000 iterations, with values n=[5, 10, 20].
 
-Peak enhancement
-~~~~~~~~~~~~~~~~
-A peak enhancement function is available that attempts to normalise the amplitude, then increase R-peak amplitude relative to the rest of the signal. It runs a predefined number of iterations. Generally two iterations are sufficient. Be cautious not to over-iterate as this will start to suppress peaks of interest as well.
+Results show that the effect of incorrect beat placements **far outweigh** those of missing values. As described earlier, the instantaneous heart rate (BPM) is not sensitive to outliers, as is shown in the plots as well, where almost no discernible deviation is visible.
 
-.. code-block:: python
-
-    import heartbeat as hb
+.. image:: images/bootstrapped_errors.jpg
+    :align: center
     
-    enhanced = hb.enhance_peaks(data, iterations=2)
-
-.. image:: images/peaknorm.jpeg
-        
-
-Butterworth filter
-~~~~~~~~~~~~~~~~~~
-A Butterworth filter implementation is available to remove high frequency noise. 
-
-.. code-block:: python
-    
-    import heartbeat as hb
-    
-    filtered = hb.butter_lowpass_filter(data, cutoff=5, sample_rate=100.0, order=3)
-    
-.. image:: images/butterworth.jpeg
+*Figure 4 - Results for manually anotated measures (ground truth), and error induction of n% missed beats, as well as error induction on the detected position of n% beats (random error 0.1% - 10%, or 1-100ms).*
 
 
+Take into consideration that the scale for RMSSD doesn't typically exceed +/- 130, SDSD doesn't differ by much. This means that even a few incorrectly detected peaks are already introducing large measurement errors into the output variables. The algorithm described here is specifically designed to handle noisy PPG data from cheap sensors. The main design criteria was to minimise the number of incorrectly placed peaks as to minimise the error introduced into the output measures.
 
-
-Peak detection
-==============
-The peak detection phase attempts to accommodate amplitude variation and morphology changes of the PPG complexes by using an adaptive peak detection threshold (Fig 3, III), followed by several steps of outlier detection and rejection. To identify heartbeats, a moving average is calculated using a window of 0.75 seconds on both sides of each data point. The first and last 0.75 seconds of the signal are populated with the signal’s mean, no moving average is generated for these sections. Regions of interest (ROI) are marked between two points of intersection where the signal amplitude is larger than the moving average (Fig 3, I-II), which is a standard way of detecting peaks. R-peaks are marked at the maximum of each ROI. 
-
-.. image:: images/fitresultsimg.jpg
-
-*Figure 3 - Figure showing the process of peak extraction. A moving average is used as an intersection threshold (II). Candidate peaks are marked at the maximum between intersections (III). The moving average is adjusted stepwise to compensate for varying PPG waveform morphology (I).*
-
-and will attempt to reconstruct the waveform by spline interpolation whenever an R-peak displays clipping. This is discussed under `Clipping detection and interpolation`_
-
-During the peak detection phase, the algorithm adjusts the amplitude of the calculated threshold stepwise. To find the best fit, the standard deviation between successive differences (SDSD, see also 2.2) is minimised and the signal’s BPM is checked. This represents a fast method of approximating the optimal threshold by exploiting the relative regularity of the heart rate signal. As shown in Figure 5, missing one R-peak (III.) already leads to a substantial increase in SDSD compared to the optimal fit (II.). Marking incorrect R-peaks also leads to an increase in SDSD (I.). The lowest SDSD value that is not zero, in combination with a likely BPM value, is selected as the best fit. The BPM must lie within a predetermined range (default: 40 <= BPM <= 180, range settable by user). When analysing segments in sequence from 
-
-
-
-Peak rejection
-==============
-
-
-Calculation of measures
-=======================
-
-
-Time-series
-~~~~~~~~~~~
-
-
-Frequency Domain
-~~~~~~~~~~~~~~~~
-
-
-Estimating breathing rate
-~~~~~~~~~~~~~~~~~~~~~~~~~
-One interesting property of the heart is that the frequency with which it beats is strongly influenced by breathing, through the autonomous nervous system. It is one of the reasons why deep breaths can calm nerves. We can also exploit this relationship to extract breathing rate from a segment of heart rate data. For example, using a dataset from [5]_ which contains both CO2 capnometry signals as well as PPG signals, we can see the relationship between breathing and the RR-intervals clearly. Below are plotted the CO2 capnometry signal (breathing signal measured at the nose), as well as the RR-intervals:
-
-.. image:: images/CO2_RRbreath.jpg
-   :height: 361px
-   :width: 413px
-   :align: center
-
-The problem is now reduced to one of peak finding. Breathing rate can be extracted using the toolkit. After calling the 'process' function, breathing rate (in Hz) is available in the models object that is returned.
-
-.. code-block:: python
-
-    import heartbeat as hb
-    
-    data = hb.get_data('data.csv')
-    fs = 100.0
-    measures = hb.process(data, fs, report_time=True)
-    print('breathing rate is: %s Hz' %measures['breathingrate'])
-    
-This will result in:
-
-.. code-block:: python
-    
-    breathing rate is: 0.16109544905356424 Hz
-    
-
-
+More information on the functioning can be found in the rest of the documentation, as well as the **embedded paper**. Information on the valiation can be found in [5]_.
 
 
 References
@@ -158,4 +82,4 @@ References
 
 .. [4] F. Bousefsaf, C. Maaoui, and  a. Pruski, “Remote detection of mental workload changes using cardiac parameters assessed with a low-cost webcam,” Comput. Biol. Med., vol. 53, pp. 1–10, 2014.
 
-.. [5] W. Karlen, S. Raman, J. M. Ansermino, and G. A. Dumont, “Multiparameter respiratory rate estimation from the photoplethysmogram,” IEEE transactions on bio-medical engineering, vol. 60, no. 7, pp. 1946–53, 2013. DOI: 10.1109/TBME.2013.2246160 PMED: http://www.ncbi.nlm.nih.gov/pubmed/23399950
+.. [5] van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). “Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data.“ In proceedings of the Humanist 2018 conference, 2018, pp.173-17
