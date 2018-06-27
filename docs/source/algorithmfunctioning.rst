@@ -114,19 +114,19 @@ Time series measurements are computed from detected peaks. The output measures a
 
 Frequency Domain
 ~~~~~~~~~~~~~~~~
-Frequency domain measures computed are
+Frequency domain measures computed are:
 
 - low-frequency, frequency spectrum between 0.05-0.15Hz (LF)
 - high-frequency, frequency spectrum between 0.15-0.5Hz (HF)
 - the ration high frequency / low frequency (HF/LF)
+
+The measures are computed from the PSD (Power Spectral Density), which itself is estimated using either FFT-based, Periodogram-based, or Welch-based methods. The default is Welch's method.
 
 Estimating breathing rate
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 One interesting property of the heart is that the frequency with which it beats is strongly influenced by breathing, through the autonomous nervous system. It is one of the reasons why deep breaths can calm nerves. We can also exploit this relationship to extract breathing rate from a segment of heart rate data. For example, using a dataset from [1]_ which contains both CO2 capnometry signals as well as PPG signals, we can see the relationship between breathing and the RR-intervals clearly. Below are plotted the CO2 capnometry signal (breathing signal measured at the nose), as well as the RR-intervals:
 
 .. image:: images/CO2_RRbreath.jpg
-   :height: 361px
-   :width: 413px
    :align: center
 
 The problem is now reduced to one of peak finding. Breathing rate can be extracted using the toolkit. After calling the 'process' function, breathing rate (in Hz) is available in the models object that is returned.
