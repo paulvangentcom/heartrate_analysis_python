@@ -578,7 +578,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     check_peaks()
     calc_ts_measures()
     calc_breathing(sample_rate)
-    if calc_fft:
+    if calc_freq:
         calc_fd_measures(hrdata, sample_rate)
     if report_time:
         print('\nFinished in %.8s sec' %(time.clock()-t1))
@@ -592,7 +592,7 @@ if __name__ == '__main__':
     #fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
     #                               timeformat='%Y-%m-%d %H:%M:%S.%f')
 
-    measures = process(hrdata, fs, report_time=True, calc_fft=True, interp_clipping=True, hampel_correct=False)
+    measures = process(hrdata, fs, report_time=True, calc_freq =True, interp_clipping=True, hampel_correct=False)
 
     for m in measures.keys():
         print(m + ': ' + str(measures[m]))
