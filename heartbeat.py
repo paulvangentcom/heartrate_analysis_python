@@ -15,7 +15,7 @@ import time
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline
-from scipy.signal import butter, filtfilt
+from scipy.signal import butter, filtfilt, welch, periodogram
 
 __author__ = "Paul van Gent"
 __version__ = "Version 0.8.2"
@@ -453,7 +453,7 @@ def calc_ts_measures():
     measures['pnn50'] = float(len(nn50)) / float(len(rr_diff))
     measures['hr_mad'] = MAD(rr_list)
 
-def calc_fd_measures(hrdata, sample_rate):
+def calc_fd_measures(hrdata, sample_rate, method='welch'):
     '''Calculates the frequency-domain measurements.
 
     Uses calculated measures stored in the working_data{} dict to calculate
@@ -468,15 +468,24 @@ def calc_fd_measures(hrdata, sample_rate):
         rr_x.append(pointer)
     rr_x_new = np.linspace(rr_x[0], rr_x[-1], rr_x[-1])
     interpolated_func = UnivariateSpline(rr_x, rr_list, k=3)
-    datalen = len(rr_x_new)
-    frq = np.fft.fftfreq(datalen, d=((1/1000.0)))
-    frq = frq[range(int(datalen/2))]
-    Y = np.fft.fft(interpolated_func(rr_x_new))/datalen
-    Y = Y[range(int(datalen/2))]
-    Y = np.power(Y, 2)
     
-    measures['lf'] = np.trapz(abs(Y[(frq >= 0.04) & (frq <= 0.15)]))
-    measures['hf'] = np.trapz(abs(Y[(frq >= 0.16) & (frq <= 0.5)]))
+    if method=='fft':
+        datalen = len(rr_x_new)
+        frq = np.fft.fftfreq(datalen, d=((1/1000.0)))
+        frq = frq[range(int(datalen/2))]
+        Y = np.fft.fft(interpolated_func(rr_x_new))/datalen
+        Y = Y[range(int(datalen/2))]
+        psd = np.power(Y, 2)
+    elif method=='periodogram':
+        frq, psd = periodogram(interpolated_func(rr_x_new), fs=1000.0)
+    elif method=='welch':
+        frq, psd = welch(interpolated_func(rr_x_new), fs=1000.0, nperseg=100000)
+    else:
+        print("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
+        raise SystemExit(0)
+    
+    measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq <= 0.15)]))
+    measures['hf'] = np.trapz(abs(psd[(frq >= 0.16) & (frq <= 0.5)]))
     measures['lf/hf'] = measures['lf'] / measures['hf']
     measures['interp_rr_function'] = interpolated_func
     measures['interp_rr_linspace'] = (rr_x[0], rr_x[-1], rr_x[-1])
@@ -532,8 +541,8 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
 
 #Wrapper function
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
-            calc_fft=False, interp_clipping=True, interp_threshold=1020,
-            hampel_correct=False, bpmmin=40, bpmmax=180):
+            calc_freq=False, freq_method='welch', interp_clipping=True, 
+            interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180):
     '''Processed the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
@@ -541,7 +550,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     sample_rate -- the sample rate of the heart rate data
     windowsize -- the window size to use, in seconds (calculated as windowsize * sample_rate)
     report_time -- whether to report total processing time of algorithm (default True)
-    calc_fft -- whether to compute time-series measurements (default False)
+    calc_freq -- whether to compute time-series measurements (default False)
     interp_clipping -- whether to detect and interpolate clipping segments of the signal 
                        (default True)
     intep_threshold -- threshold to use to detect clipping segments. Recommended to be a few
@@ -583,7 +592,7 @@ if __name__ == '__main__':
     #fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
     #                               timeformat='%Y-%m-%d %H:%M:%S.%f')
 
-    measures = process(hrdata, fs, report_time=True, calc_fft=False, interp_clipping=True, hampel_correct=False)
+    measures = process(hrdata, fs, report_time=True, calc_fft=True, interp_clipping=True, hampel_correct=False)
 
     for m in measures.keys():
         print(m + ': ' + str(measures[m]))

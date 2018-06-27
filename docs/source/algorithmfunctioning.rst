@@ -100,12 +100,25 @@ All measures are computed on the detected and accepted peaks in the segment. Whe
 
 Time-series
 ~~~~~~~~~~~
+Time series measurements are computed from detected peaks. The output measures are:
 
+- beats per minute (BPM)
+- interbeat interval (IBI)
+- standard deviation of RR intervals (SDNN)
+- standard deviation of successive differences (SDSD)
+- root mean square of successive differences (RMSSD)
+- proportion of successive differences above 20ms (pNN20)
+- proportion of successive differences above 50ms (pNN50)
+- median absolute deviation of RR intervals (MAD)
 
 
 Frequency Domain
 ~~~~~~~~~~~~~~~~
+Frequency domain measures computed are
 
+- low-frequency, frequency spectrum between 0.05-0.15Hz (LF)
+- high-frequency, frequency spectrum between 0.15-0.5Hz (HF)
+- the ration high frequency / low frequency (HF/LF)
 
 Estimating breathing rate
 ~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -12,3 +12,4 @@ V0.8.2
 - Added method to suppress noisy segments called 'Hampel Corrector', called such as it's simply a Hampel Filter with large window size. Computationally on the expensive side so disabled by default, but very good at suppressing noisy segments without influencing peak positions in the rest of the signal.
 - Added breathing rate extraction method. Stores estimated breathing rate in measures['breathingrate']
 - Made BPM threshold values settable
+- Added Periodogram- and Welch-based PSD estimation

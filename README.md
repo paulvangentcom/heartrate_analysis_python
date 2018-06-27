@@ -38,8 +38,6 @@ Frequency domain
 * high frequency component (0.16-0.5Hz), HF
 * lf/hf ratio, Lf/HF
 
-**Note on Frequency Domain measures:** the frequency measures (HF, LF, HF/LF) are optional at this time. The package uses the squared output of the FFT as an estimator for the periodogram. This is not the best available estimation. It will be updated in a future version. For now only the instantaneous heart rate and variability measures are recommended for scientific work.
-
 ## Basic analysis example
 
 Import the `heartbeat` module and load a file
@@ -63,14 +61,14 @@ measures = hb.process(data, 100.0)
 ```
 
 `process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
-         calc_fft=False, interp_clipping=True, interp_threshold=1020)` requires two arguments:
+         calc_freq=False, interp_clipping=True, interp_threshold=1020)` requires two arguments:
 * **dataset:** An 1-dimensional list, numpy array or array-like object containing the heart rate data;
 * **fs**: The samplerate of the signal in Hz;
 
 Several optional arguments are available:
 * **windowsize:** _optional_ `hrw` is the window size used for the calculation of the moving average. The windowsize is defined as `hrw * samplerate`. Default hrw=0.75.
 * **report_time:** _optional_ whether to report total processing time of process() loop.
-* **calc_fft:** _optional_ whether to calculate frequency domain measures. Default = false Note: can cause slowdowns in some cases.
+* **calc_freq:** _optional_ whether to calculate frequency domain measures. Default = false Note: can cause slowdowns in some cases.
 * **interp_clipping**: if True, clipping parts of the signal are identified and the implied peak shape is interpolated. Default=True
 * **interp_threshold**: the amplitude threshold beyond which will be checked for clipping. Recommended is to take this as the maximum value of the ADC with some margin for signal noise (default 1020, default ADC max 1024) 
 
@@ -249,3 +247,4 @@ The module is still in active development. The to-do for the coming months is:
 - [ ] Cluster rejections close together
 - [X] Implement subsegment rejection
 - [ ] Fix issue with peak at index 0
+- [X] Implement periodogram- and Welch-based PSD estimation.

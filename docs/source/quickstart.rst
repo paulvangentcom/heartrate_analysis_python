@@ -57,8 +57,8 @@ A :code:`dict{}` object is returned containing all measures. The object is also 
     #You can also use Pandas if you so desire
     import pandas as pd
     df = pd.read_csv("data.csv")
-    #note we need calc_fft if we want frequency-domain measures
-    measures = hb.process(df['hr'].values, fs, calc_fft=True)
+    #note we need calc_freq if we want frequency-domain measures
+    measures = hb.process(df['hr'].values, fs, calc_freq=True)
     print("measures['bpm'])
     print("measures['lf/hf'])
 
@@ -148,8 +148,7 @@ This returns:
 * **show** _optional_: if set to True a plot is visualised, if set to False a matplotlib.pyplot object is returned. Default show = True;
 * **title** _optional_: Sets the title of the plot. If not specified, default title is used.
 
-Examples:
-~~~~~~~~~
+**Examples:**
 
 .. code-block:: python
 
