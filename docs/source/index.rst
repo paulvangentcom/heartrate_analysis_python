@@ -23,6 +23,5 @@ Index
    quickstart
    heartrateanalysis
    algorithmfunctioning
-   apiref
    development
 

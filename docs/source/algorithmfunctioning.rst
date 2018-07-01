@@ -64,7 +64,7 @@ In the current implementation, if called, a median filter is taken over a 1-sec 
 
 .. image:: images/hampelcorrect.jpg
 
-
+Note that the absolute peak positions will shift slightly when using this type of filter. With it, the output measures will start to deviate as error is induced. Generally the error is not low, but by default hampel filtering is disabled. It should only be used when encountering segments of heavy noise that the algorithm cannot handle properly.
 
 
 Peak detection

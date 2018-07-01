@@ -287,7 +287,7 @@ def hampelfilt(data, filtsize=6):
     '''
     output = [x for x in data] #generate second list to prevent overwriting first
     onesided_filt = filtsize // 2
-    madarray = [0 for x in range(0, onesided_filt)]
+    #madarray = [0 for x in range(0, onesided_filt)]
     for i in range(onesided_filt, len(data) - onesided_filt - 1):
         dataslice = output[i - onesided_filt : i + onesided_filt]
         mad = MAD(dataslice)
