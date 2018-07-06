@@ -4,6 +4,10 @@ This is the package presented at the Humanist 2018 conference in the Hague, Neth
 
 **Thank you for your interest**
 
+#Official Documentation
+
+The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
+
 # Python Heart Rate Analysis Toolkit
 
 The **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistisch driving and cycling experiments.
