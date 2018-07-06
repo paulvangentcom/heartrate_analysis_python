@@ -137,21 +137,26 @@ def interpolate_peaks(hrdata, sample_rate, threshold=1020):
     newy = []
     
     for segment in clipping_segments:
-        antecedent = hrdata[segment[0] - num_datapoints : segment[0]]
-        consequent = hrdata[segment[1] : segment[1] + num_datapoints]
-        segment_data = np.concatenate((antecedent, consequent))
+        if segment[0] < num_datapoints: 
+            #if clipping is present at start of signal, skip.
+            #We cannot interpolate accurately when there is insufficient data prior to clipping segment.
+            pass
+        else: 
+            antecedent = hrdata[segment[0] - num_datapoints : segment[0]]
+            consequent = hrdata[segment[1] : segment[1] + num_datapoints]
+            segment_data = np.concatenate((antecedent, consequent))
         
-        interpdata_x = np.concatenate(([x for x in range(segment[0] - num_datapoints, segment[0])],
-                                       [x for x in range(segment[1], segment[1] + num_datapoints)]))
-        x_new = np.linspace(segment[0] - num_datapoints,
-                            segment[1] + num_datapoints,
-                            ((segment[1] - segment[0]) + (2 * num_datapoints)))
+            interpdata_x = np.concatenate(([x for x in range(segment[0] - num_datapoints, segment[0])],
+                                            [x for x in range(segment[1], segment[1] + num_datapoints)]))
+            x_new = np.linspace(segment[0] - num_datapoints,
+                                segment[1] + num_datapoints,
+                                ((segment[1] - segment[0]) + (2 * num_datapoints)))
         
-        interp_func = UnivariateSpline(interpdata_x, segment_data, k=3)
-        interp_data = interp_func(x_new)
+            interp_func = UnivariateSpline(interpdata_x, segment_data, k=3)
+            interp_data = interp_func(x_new)
         
-        hrdata[segment[0] - num_datapoints :
-             segment[1] + num_datapoints] = interp_data
+            hrdata[segment[0] - num_datapoints :
+                    segment[1] + num_datapoints] = interp_data
        
     return hrdata
 

@@ -13,3 +13,4 @@ V0.8.2
 - Added breathing rate extraction method. Stores estimated breathing rate in measures['breathingrate']
 - Made BPM threshold values settable
 - Added Periodogram- and Welch-based PSD estimation
+- Added support for edge case where clipping segment starts early in signal, meaning there is insufficient data to interpolate accurately.
