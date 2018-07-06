@@ -4,7 +4,7 @@ This is the package presented at the Humanist 2018 conference in the Hague, Neth
 
 **Thank you for your interest**
 
-#Official Documentation
+# Official Documentation
 
 The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
 
