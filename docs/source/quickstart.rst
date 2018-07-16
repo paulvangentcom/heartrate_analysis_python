@@ -28,12 +28,23 @@ Analysis requires the sampling rate for your data. If you know this *a priori*, 
     measures = hb.process(data, 100.0)
 
 
-:code:`process(dataset, fs, hrw=0.75, report_time=False)` requires two arguments:
+**process(dataset, fs, windowsize=0.75, report_time=False,
+calc_freq=False, freq_method='welch', interp_clipping=True,
+interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180)**
+               
+requires two arguments:
 
 * **dataset:** An 1-dimensional list, numpy array or array-like object containing the heart rate data;
 * **fs**: The samplerate of the signal in Hz;
-* **hrw:** _optional_ `hrw` is the window size used for the calculation of the moving average. The windowsize is defined as `hrw * samplerate`. Default hrw=0.75.
+
+Several optional arguments are available:
+
+* **windowsize:** _optional_ `windowsize` is the window size used for the calculation of the moving average. The windowsize is defined as `windowsize * samplerate`. Default windowsize=0.75.
 * **report_time:** _optional_ whether to report total processing time of process() loop.
+* **calc_fft:** _optional_ whether to calculate frequency domain measures. Default = false Note: can cause slowdowns in some cases.
+* **calc_freq:** _optional_ whether to calculate frequency domain measures. Default = false Note: can cause slowdowns in some cases.
+* **interp_clipping**: if True, clipping parts of the signal are identified and the implied peak shape is interpolated. Default=True
+* **interp_threshold**: the amplitude threshold beyond which will be checked for clipping. Recommended is to take this as the maximum value of the ADC with some margin for signal noise (default 1020, default ADC max 1024) 
 
 
 A :code:`dict{}` object is returned containing all measures. The object is also stored in the module. Access as such:
