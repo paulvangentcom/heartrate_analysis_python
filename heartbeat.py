@@ -546,7 +546,7 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
 
 #Wrapper function
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
-            calc_freq=False, freq_method='welch', interp_clipping=True, 
+            calc_freq=False, freq_method='welch', interp_clipping=True, clipping_scale=True,
             interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180):
     '''Processed the passed heart rate data. Returns measures{} dict containing results.
 
@@ -569,7 +569,8 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     t1 = time.clock()
 
     if interp_clipping:
-        hrdata = scale_data(hrdata)
+        if clipping_scale:
+            hrdata = scale_data(hrdata)
         hrdata = interpolate_peaks(hrdata, sample_rate, threshold=interp_threshold)
 
     if hampel_correct:
