@@ -92,6 +92,7 @@ After the fitting phase, several incorrectly detected peaks may still remain due
 
 .. image:: images/peakthresholding.jpeg
 
+Thresholds are computed based on the mean of the RR-intervals in the segments. Thresholds are determined as **RR_mean +/- (30% of RR_mean, with minimum value of 300)** (+ or - for upper and lower threshold, respectively). If the RR-interval exceeds one of the thresholds, it is ignored.
 
 
 Calculation of measures
