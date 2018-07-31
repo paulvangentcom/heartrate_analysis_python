@@ -13,7 +13,7 @@ Import the `heartbeat` module and load a file
 
     import heartbeat as hb
 
-    hrdata = hb.get_data('yourdata.csv', column_name='hr')
+    hrdata = hb.get_data('data.csv')
 
 
 This returns a :code:`numpy.ndarray`.
@@ -24,7 +24,7 @@ Analysis requires the sampling rate for your data. If you know this *a priori*, 
 
     import heartbeat as hb
 
-    data = hb.get_data('yourdata.csv')
+    data = hb.get_data('data.csv') #data.csv is sampled at 100Hz
     measures = hb.process(data, 100.0)
 
 
@@ -89,6 +89,9 @@ This returns a 1-dimensional :code:`numpy.ndarray` containing the heart rate dat
 :code:`get_data(filename, delim = ',', column_name = 'None')` requires one argument:
 
 * **filename:** absolute or relative path to a valid (delimited .csv/.txt or matlab .mat) file;
+
+Several optional arguments are available:
+
 * **delim** _optional_: when loading a delimited .csv or .txt file, this specifies the delimiter used. Default delim = ',';
 * **column_name** _optional_: In delimited files with header: specifying column_name will return data from that column. Not specifying column_name for delimited files will assume the file contains only numerical data, returning np.nan values where data is not numerical. For matlab files: column_name specifies the table name in the matlab file.
 
@@ -133,6 +136,9 @@ The toolkit has a simple built-in sample-rate detection. It can handle ms-based 
 :code:`get_samplerate_datetime(datetimedata, timeformat = '%H:%M:%S.f')` requires one argument:
 
 * **datetimedata:** a list, numpy array or array-like object containing datetime-based timestamps (string);
+
+One optional argument is available:
+
 * **timeformat** _optional_: the format of the datetime-strings in your dataset. Default timeformat='%H:%M:%S.f', 24-hour based time including ms: 21:43:12.569.
 
 
@@ -165,7 +171,7 @@ This returns:
 
     import heartbeat as hb
     hrdata = hb.get_data('data2.csv', column_name='hr')
-    timerdata = hb.get_data('data2.csv., column_name='timer')
+    timerdata = hb.get_data('data2.csv', column_name='timer')
 
     hb.process(dataset, hb.get_samplerate_mstimer(timerdata))
 
@@ -190,7 +196,7 @@ This returns:
 
     <module 'matplotlib.pyplot' [...]>
 
-Object can then be saved or visualised:
+Object can then be saved, appended to, or visualised:
 
 .. code-block:: python
 
@@ -199,5 +205,5 @@ Object can then be saved or visualised:
 
     plot_object.savefig('plot_1.jpg') #saves the plot as JPEG image.
 
-    plt.object.show() #displays plot 
+    plt_object.show() #displays plot 
       
