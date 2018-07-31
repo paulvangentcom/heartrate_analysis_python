@@ -4,15 +4,15 @@ This is a doctest file for the heartbeat.py module
 
 #test data reader
 >>> hb.get_data('data.csv')
-array([ 530.,  518.,  506., ...,  492.,  493.,  494.])
+array([530., 518., 506., ..., 492., 493., 494.])
 >>> hb.get_data('data.mat', column_name='hr')
 getting matlab file
-array([ 530.,  518.,  506., ...,  492.,  493.,  494.])
+array([530., 518., 506., ..., 492., 493., 494.])
 
 #test samplerate calculation
 >>> data = hb.get_data('data2.csv', column_name='timer')
->>> hb.get_samplerate_mstimer(data)
-116.99555416894158
+>>> '%.10f' %hb.get_samplerate_mstimer(data)
+'116.9955541689'
 
 >>> datetimedata = ['2016-11-24 13:58:58.081000', '2016-11-24 13:58:58.097000', '2016-11-24 13:58:58.097000',
 ...                     '2016-11-24 13:58:58.112000', '2016-11-24 13:58:58.128000', '2016-11-24 13:58:58.128000',
@@ -34,7 +34,7 @@ array([ 530.,  518.,  506., ...,  492.,  493.,  494.])
 (2474, 10)
   
 >>> hb.rolmean(data, 10, 100.0).shape
-(2482,)
+(2483,)
 
 
 #test filtering
@@ -51,7 +51,7 @@ array([ 530.,  518.,  506., ...,  492.,  493.,  494.])
 >>> hb.working_data['hr'] = data
 >>> hb.fit_peaks(data, rolmean, 100.0)
 >>> hb.working_data['best']
-10
+20
 
 #validate RR calculations
 >>> hb.working_data['RR_list'][0]
@@ -76,30 +76,30 @@ array([ 530.,  518.,  506., ...,  492.,  493.,  494.])
 
 #validate pipeline
 >>> data = hb.get_data('data.csv')
->>> measures = hb.process(data, 100.0, 0.75)
+>>> measures = hb.process(data, 100.0, 0.75, calc_freq=True)
 
 #validate timeseries measures
->>> measures['bpm']
-58.898847631241999
->>> measures['ibi']
-1018.695652173913
->>> measures['sdnn']
-65.760061080189999
->>> measures['sdsd']
-34.866925292300195
->>> measures['rmssd']
-64.737231103199733
->>> measures['pnn20']
-0.8636363636363636
->>> measures['pnn50']
-0.4090909090909091
->>> measures['hr_mad']
-40.0
+>>> '%.10f' %measures['bpm']
+'58.8988476312'
+>>> '%.10f' %measures['ibi']
+'1018.6956521739'
+>>> '%.10f' %measures['sdnn']
+'65.7600610802'
+>>> '%.10f' %measures['sdsd']
+'34.8669252923'
+>>> '%.10f' %measures['rmssd']
+'64.7372311032'
+>>> '%.10f' %measures['pnn20']
+'0.8636363636'
+>>> '%.10f' %measures['pnn50']
+'0.4090909091'
+>>> '%.10f' %measures['hr_mad']
+'40.0000000000'
 
 #validate frequency measures
->>> measures['lf']
-38.889763602405651
->>> measures['hf']
-47.317782223388534
->>> measures['lf/hf']
-0.8218847497713655
+>>> '%.10f' %measures['lf']
+'81098.1018891625'
+>>> '%.10f' %measures['hf']
+'35733.4161582109'
+>>> '%.10f' %measures['lf/hf']
+'2.2695311730'

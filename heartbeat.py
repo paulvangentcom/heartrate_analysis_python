@@ -621,8 +621,8 @@ if __name__ == '__main__':
     hrdata = get_data('data.csv')
     fs = 100.0
 
-    hrdata = get_data('data2.csv', column_name = 'hr')
-    fs = get_samplerate_mstimer(get_data('data2.csv', column_name='timer'))
+    #hrdata = get_data('data2.csv', column_name = 'hr')
+    #fs = get_samplerate_mstimer(get_data('data2.csv', column_name='timer'))
 
     measures = process(hrdata, fs, report_time=True, calc_freq =True, interp_clipping=True, hampel_correct=False)
 
