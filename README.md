@@ -66,10 +66,11 @@ V0.8.2
 
 to do before V0.8.3
 - [ ] Always reject first beat if within 0.3 sec (signal could start mid-beat, which creates slight inaccuracy)
-- [ ] Add check and auto-correction for negative values
+- [X] Add check and auto-correction for negative values
 - [ ] Handle cases where strong T-peak in signal is present
-- [ ] Cluster rejections close together
+- [X] Cluster rejections close together
 - [ ] Fix issue with peak at index 0
+- [X] Segment rejection based on percentage of rejected peaks
 
 to do before V1.0
 - [ ] Validate performance on Physionet datasets

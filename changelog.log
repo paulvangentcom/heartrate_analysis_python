@@ -17,3 +17,4 @@ V0.8.2
 
 V0.8.3
 - Added flag to disable scaling when interpolating clipping segments. Useful for data with large amplitude variations.
+- Added marking of rejected segments in plotter

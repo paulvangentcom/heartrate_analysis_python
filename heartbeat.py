@@ -377,7 +377,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180):
     working_data['best'] = min(valid_ma, key=lambda t: t[0])[1]
     detect_peaks(hrdata, rol_mean, min(valid_ma, key=lambda t: t[0])[1], sample_rate)
 
-def check_peaks():
+def check_peaks(reject_segmentwise=False):
     '''Determines the best fit for peak detection variations run by fit_peaks().'''
     rr_arr = np.array(working_data['RR_list'])
     peaklist = np.array(working_data['peaklist'])
@@ -394,7 +394,30 @@ def check_peaks():
                                                      (rr_arr >= upper_threshold))[0]+1]
     working_data['binary_peaklist'] = [0 if x in working_data['removed_beats'] 
                                        else 1 for x in working_data['peaklist']]
+    if(reject_segmentwise): 
+        check_binary_quality(working_data['binary_peaklist'])
     update_rr()
+
+def check_binary_quality(binary_peaklist, maxrejects=3):
+    '''Checks signal in chunks of 10 beats. 
+    Zeros out chunk if number of rejected peaks > maxrejects.
+    Also marks rejected segment coordinates in tuples (x[0], x[1] in working_data['rejected_segments']
+    
+    Keyword arugments:
+    binary_peaklist: list with 0 and 1 corresponding to r-peak accept/reject decisions
+    maxrejects: int, maximum number of rejected peaks per 10-beat window (default 3)
+    '''
+    idx = 0
+    peaklist = working_data['peaklist']
+    working_data['rejected_segments'] = []
+    for i in range(int(len(binary_peaklist) / 10)):
+        if np.bincount(binary_peaklist[idx:idx + 10])[0] > maxrejects:
+            binary_peaklist[idx:idx + 10] = [0 for i in range(len(binary_peaklist[idx:idx+10]))]
+            if idx + 10 < len(peaklist): 
+                working_data['rejected_segments'].append((peaklist[idx], peaklist[idx + 10]))
+            else:
+                working_data['rejected_segments'].append((peaklist[idx], peaklist[-1]))
+        idx += 10
 
 #Calculating all measures
 def calc_rr(sample_rate):
@@ -519,7 +542,7 @@ def calc_breathing(sample_rate):
         measures['breathingrate'] = np.nan
 
 #Plotting it
-def plotter(show=True, title='Heart Rate Signal Peak Detection'):
+def plotter(show=True, title='Heart Rate Signal Peak Detection', reject_segmentwise=False):
     '''Plots the analysis results.
 
     Uses calculated measures and data stored in the working_data{} and measures{}
@@ -538,6 +561,9 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
     plt.plot(working_data['hr'], alpha=0.5, color='blue', label='heart rate signal')
     plt.scatter(peaklist, ybeat, color='green', label='BPM:%.2f' %(measures['bpm']))
     plt.scatter(rejectedpeaks, rejectedpeaks_y, color='red', label='rejected peaks')
+    if(reject_segmentwise):
+        for segment in working_data['rejected_segments']:
+            plt.axvspan(segment[0], segment[1], facecolor='red', alpha=0.5)
     plt.legend(loc=4, framealpha=0.6)
     if show:
         plt.show()
@@ -547,7 +573,8 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection'):
 #Wrapper function
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
             calc_freq=False, freq_method='welch', interp_clipping=True, clipping_scale=True,
-            interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180):
+            interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180,
+            reject_segmentwise=False):
     '''Processed the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
@@ -581,7 +608,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     rol_mean = rolmean(hrdata, windowsize, sample_rate)
     fit_peaks(hrdata, rol_mean, sample_rate)
     calc_rr(sample_rate)
-    check_peaks()
+    check_peaks(reject_segmentwise)
     calc_ts_measures()
     calc_breathing(sample_rate)
     if calc_freq:
@@ -594,9 +621,8 @@ if __name__ == '__main__':
     hrdata = get_data('data.csv')
     fs = 100.0
 
-    #hrdata = get_data('data3.csv', column_name = 'hr')
-    #fs = get_samplerate_datetime(get_data('data3.csv', column_name='datetime'),
-    #                               timeformat='%Y-%m-%d %H:%M:%S.%f')
+    hrdata = get_data('data2.csv', column_name = 'hr')
+    fs = get_samplerate_mstimer(get_data('data2.csv', column_name='timer'))
 
     measures = process(hrdata, fs, report_time=True, calc_freq =True, interp_clipping=True, hampel_correct=False)
 
