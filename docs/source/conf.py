@@ -26,7 +26,7 @@ author = 'Paul van Gent'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.8'
+release = '1.0'
 
 
 # -- General configuration ---------------------------------------------------

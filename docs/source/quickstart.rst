@@ -205,5 +205,5 @@ Object can then be saved, appended to, or visualised:
 
     plot_object.savefig('plot_1.jpg') #saves the plot as JPEG image.
 
-    plt_object.show() #displays plot 
+    plot_object.show() #displays plot 
       
