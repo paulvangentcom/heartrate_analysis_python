@@ -1,7 +1,7 @@
 '''Noise-resistant heart rate analysis module for Python
 
 #Reference:
-<Article submitted, awaiting publication>
+van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data. In Proceedings of the 6th HUMANIST Conference (pp. 173–178)
 
 See also:
 http://www.paulvangent.com/2016/03/15/analyzing-a-discrete-heart-rate-signal-using-python-part-1/
@@ -19,6 +19,7 @@ from scipy.signal import butter, filtfilt, welch, periodogram
 
 __author__ = "Paul van Gent"
 __version__ = "Version 0.8.2"
+__license__ = "GNU General Public License V3.0"
 
 measures = {}
 working_data = {}
@@ -385,6 +386,7 @@ def check_peaks(reject_segmentwise=False):
     mean_rr = np.mean(rr_arr)
     upper_threshold = mean_rr + 300 if (0.3 * mean_rr) <= 300 else mean_rr + (0.3 * mean_rr)
     lower_threshold = mean_rr - 300 if (0.3 * mean_rr) <= 300 else mean_rr - (0.3 * mean_rr)
+
     peaklist_cor = peaklist[np.where((rr_arr > lower_threshold) &
                                      (rr_arr < upper_threshold))[0]+1]
     working_data['peaklist_cor'] = np.insert(peaklist_cor, 0, peaklist[0])
@@ -430,6 +432,14 @@ def calc_rr(sample_rate):
     sample_rate -- the sample rate of the data set
     '''
     peaklist = np.array(working_data['peaklist'])
+
+    #delete first peak if within first 150ms (signal might start mid-beat after peak)
+    if len(peaklist) > 0:
+        if peaklist[0] <= ((sample_rate / 1000.0) * 150):
+            peaklist = np.delete(peaklist, 0)
+            working_data['peaklist'] = peaklist
+            working_data['ybeat'] = np.delete(working_data['ybeat'], 0)
+
     rr_list = (np.diff(peaklist) / sample_rate) * 1000.0
     rr_diff = np.abs(np.diff(rr_list))
     rr_sqdiff = np.power(rr_diff, 2)

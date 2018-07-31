@@ -64,14 +64,14 @@ V0.8.2
 - [X] Implement subsegment rejection
 - [X] Implement periodogram- and Welch-based PSD estimation
 
-to do before V0.8.3
-- [ ] Always reject first beat if within 0.3 sec (signal could start mid-beat, which creates slight inaccuracy)
+V0.8.3
+- [X] Always reject first beat if within 150 ms (signal could start just after peak, which creates slight inaccuracy)
 - [X] Add check and auto-correction for negative values
-- [ ] Handle cases where strong T-peak in signal is present
 - [X] Cluster rejections close together
-- [ ] Fix issue with peak at index 0
+- [X] Fix issue with peak at index 0
 - [X] Segment rejection based on percentage of rejected peaks
 
 to do before V1.0
 - [ ] Validate performance on Physionet datasets
 - [ ] Add R-position interpolation ('high accuracy' mode)
+- [ ] Handle cases where strong T-peak in signal is present
