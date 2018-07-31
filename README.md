@@ -10,6 +10,8 @@ The official documentation is online! [You can find the official documentation h
 
 # Python Heart Rate Analysis Toolkit
 
+![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1324311.svg)
+
 The **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistisch driving and cycling experiments.
 
 
