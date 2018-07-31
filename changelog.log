@@ -15,7 +15,8 @@ V0.8.2
 - Added Periodogram- and Welch-based PSD estimation
 - Added support for edge case where clipping segment starts early in signal, meaning there is insufficient data to interpolate accurately.
 
-V0.8.3
+V1.0
+- Released Version 1.0
 - Added flag to disable scaling when interpolating clipping segments. Useful for data with large amplitude variations.
 - Added marking of rejected segments in plotter
 - Added automatic peak rejection when first peak occurs within 150ms, since the signal might start just after a peak, which creates slight inaccuracy.

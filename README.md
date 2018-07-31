@@ -49,27 +49,7 @@ The module is licensed under the [GNU General Public License Version3, GPL-v3](h
 
 ## To-do
 
-The module is still in active development. The to-do for the coming months is:
-
-V0.8.2
-- [X] Replace numerical work with numpy functions, to increase speed of processing
-- [X] Drop dependency on pandas
-- [X] Implement data handler function, recognising most used formats and parsing correctly
-- [X] Make values for inaccurate bpm rejection settable
-- [X] Increase versatility of sampling rate detection
-- [X] Add MAD time-domain measure
-- [X] Add scaling function to handle raw ADC data
-- [X] Fix issue where in some cases, RR-intervals including a rejected peak are used in calculation of measures
-- [X] Implement clipping detection -> curve fitting peak reconstrucion
-- [X] Implement subsegment rejection
-- [X] Implement periodogram- and Welch-based PSD estimation
-
-V1.0
-- [X] Always reject first beat if within 150 ms (signal could start just after peak, which creates slight inaccuracy)
-- [X] Add check and auto-correction for negative values
-- [X] Cluster rejections close together
-- [X] Fix issue with peak at index 0
-- [X] Segment rejection based on percentage of rejected peaks
+The module is still in active development. See the changelog for past changes. The to-do for the coming months is:
 
 to do before V1.1
 - [ ] Validate performance on Physionet datasets
