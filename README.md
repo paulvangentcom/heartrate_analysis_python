@@ -49,11 +49,21 @@ Frequency domain
 ## License
 The module is licensed under the [GNU General Public License Version3, GPL-v3](https://opensource.org/licenses/GPL-3.0)
 
+## Validation
+Initial results of the validation have been reported in [1, 2]. Updates here are soon to follow once the papers are published.
+
+
+[1]van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data. In Proceedings of the 6th HUMANIST Conference (pp. 173–178).
+
+[2] van Gent, P. Van, Farah, H., Nes, N. Van, & Arem, B. Van. (manuscript submitted for publication). A Novel Heart Rate Algorithm for the Analysis of Noisy Signals.
+
+
+
 ## To-do
 
 The module is still in active development. See the changelog for past changes. The to-do for the coming months is:
 
 to do before V1.1
-- [ ] Validate performance on Physionet datasets
+- [X] Validate performance on Physionet datasets
 - [ ] Add R-position interpolation ('high accuracy' mode)
 - [ ] Handle cases where strong T-peak in signal is present
