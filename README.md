@@ -8,21 +8,11 @@ This is the package presented at the Humanist 2018 conference in the Hague, Neth
 
 The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
 
-# Python Heart Rate Analysis Toolkit
+# PyHeart - Python Heart Rate Analysis Toolkit
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1324311.svg)](https://doi.org/10.5281/zenodo.1324311)
 
-The **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistisch driving and cycling experiments.
-
-
-
-The module is described in my tutorial series:
-
-* [Analyzing a Discrete Heart Rate Signal Using Python - Part 1](http://www.paulvangent.com/2016/03/15/analyzing-a-discrete-heart-rate-signal-using-python-part-1/)
-* [Analyzing a Discrete Heart Rate Signal Using Python - Part 2](http://www.paulvangent.com/2016/03/21/analyzing-a-discrete-heart-rate-signal-using-python-part-2/)
-* [Analyzing a Discrete Heart Rate Signal Using Python - Part 3](http://www.paulvangent.com/2016/03/30/analyzing-a-discrete-heart-rate-signal-using-python-part-3/)
-* Analyzing a Discrete Heart Rate Signal Using Python - Part 4: in development
-
+**PyHeart**, the **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistisch driving and cycling experiments.
 
 The module takes a discrete heart rate signal and outputs time-domain and frequency-domain measures often found in scientific literature:
 
@@ -36,15 +26,29 @@ Time domain:
 * proportion of differences between R-R intervals greater than 20ms, 50ms, pNN20, pNN50
 * median absolute deviation, MAD
 
-
 Frequency domain
 * low frequency component (0.04-0.15Hz), LF
 * high frequency component (0.16-0.5Hz), HF
 * lf/hf ratio, Lf/HF
 
+**When using the package in your research, please cite**:
+
+van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data. In Proceedings of the 6th HUMANIST Conference (pp. 173–178).
+
+van Gent, P. Van, Farah, H., Nes, N. Van, & Arem, B. Van. (manuscript submitted). A Novel Heart Rate Algorithm for the Analysis of Noisy Signals. Doi: doi.org/10.13140/RG.2.2.24895.56485
+
+
 ## Documentation
 
 [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
+
+The module is also to some extent described in my tutorial series:
+
+* [Analyzing a Discrete Heart Rate Signal Using Python - Part 1](http://www.paulvangent.com/2016/03/15/analyzing-a-discrete-heart-rate-signal-using-python-part-1/)
+* [Analyzing a Discrete Heart Rate Signal Using Python - Part 2](http://www.paulvangent.com/2016/03/21/analyzing-a-discrete-heart-rate-signal-using-python-part-2/)
+* [Analyzing a Discrete Heart Rate Signal Using Python - Part 3](http://www.paulvangent.com/2016/03/30/analyzing-a-discrete-heart-rate-signal-using-python-part-3/)
+* Analyzing a Discrete Heart Rate Signal Using Python - Part 4: in development
+
 
 ## License
 The module is licensed under the [GNU General Public License Version3, GPL-v3](https://opensource.org/licenses/GPL-3.0)
