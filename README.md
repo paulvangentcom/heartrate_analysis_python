@@ -8,11 +8,11 @@ This is the package presented at the Humanist 2018 conference in the Hague, Neth
 
 The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
 
-# PyHeart - Python Heart Rate Analysis Toolkit
+# HeartPy - Python Heart Rate Analysis Toolkit
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1324311.svg)](https://doi.org/10.5281/zenodo.1324311)
 
-**PyHeart**, the **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistisch driving and cycling experiments.
+**HeartPy**, the **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistisch driving and cycling experiments.
 
 The module takes a discrete heart rate signal and outputs time-domain and frequency-domain measures often found in scientific literature:
 
