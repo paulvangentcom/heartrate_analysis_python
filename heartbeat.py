@@ -396,7 +396,7 @@ def check_peaks(reject_segmentwise=False):
                                                      (rr_arr >= upper_threshold))[0]+1]
     working_data['binary_peaklist'] = [0 if x in working_data['removed_beats'] 
                                        else 1 for x in working_data['peaklist']]
-    if(reject_segmentwise): 
+    if reject_segmentwise: 
         check_binary_quality(working_data['binary_peaklist'])
     update_rr()
 
@@ -416,9 +416,11 @@ def check_binary_quality(binary_peaklist, maxrejects=3):
         if np.bincount(binary_peaklist[idx:idx + 10])[0] > maxrejects:
             binary_peaklist[idx:idx + 10] = [0 for i in range(len(binary_peaklist[idx:idx+10]))]
             if idx + 10 < len(peaklist): 
+                print('%s, %s' %(peaklist[idx], peaklist[idx + 10]))
                 working_data['rejected_segments'].append((peaklist[idx], peaklist[idx + 10]))
             else:
                 working_data['rejected_segments'].append((peaklist[idx], peaklist[-1]))
+                print('%s, %s' %(peaklist[idx], peaklist[-1]))
         idx += 10
 
 #Calculating all measures
@@ -552,7 +554,7 @@ def calc_breathing(sample_rate):
         measures['breathingrate'] = np.nan
 
 #Plotting it
-def plotter(show=True, title='Heart Rate Signal Peak Detection', reject_segmentwise=False):
+def plotter(show=True, title='Heart Rate Signal Peak Detection'):
     '''Plots the analysis results.
 
     Uses calculated measures and data stored in the working_data{} and measures{}
@@ -571,9 +573,15 @@ def plotter(show=True, title='Heart Rate Signal Peak Detection', reject_segmentw
     plt.plot(working_data['hr'], alpha=0.5, color='blue', label='heart rate signal')
     plt.scatter(peaklist, ybeat, color='green', label='BPM:%.2f' %(measures['bpm']))
     plt.scatter(rejectedpeaks, rejectedpeaks_y, color='red', label='rejected peaks')
-    if(reject_segmentwise):
-        for segment in working_data['rejected_segments']:
-            plt.axvspan(segment[0], segment[1], facecolor='red', alpha=0.5)
+    
+    #check if rejected segment detection is on and has rejected segments
+    try:
+        if len(working_data['rejected_segments']) >= 1:
+            for segment in working_data['rejected_segments']:
+                plt.axvspan(segment[0], segment[1], facecolor='red', alpha=0.5)
+    except:
+        pass
+
     plt.legend(loc=4, framealpha=0.6)
     if show:
         plt.show()
