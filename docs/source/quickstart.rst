@@ -13,14 +13,14 @@ pip
 
 github
 ~~~~~~
-[Download the latest release here](https://github.com/paulvangentcom/heartrate_analysis_python/releases)
+`Download the latest release here <https://github.com/paulvangentcom/heartrate_analysis_python/releases>`_
 
 :code:`python -m pip install <.whl file>`
 Don't forget to replace the <.whl file> with the filename of the .whl file in the release
 
 from source
 ~~~~~~~~~~~
-Clone the repository [from this link](https://github.com/paulvangentcom/heartrate_analysis_python)
+Clone the repository `from this link <https://github.com/paulvangentcom/heartrate_analysis_python>`_
 
 :code:`python setup.py install`
 
