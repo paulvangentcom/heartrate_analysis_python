@@ -7,19 +7,19 @@ Quickstart Guide
 Installation
 ============
 
-pip:
-~~~~
+pip
+~~~
 :code:`python -m pip install heartpy`
 
-github:
-~~~~~~~
+github
+~~~~~~
 [Download the latest release here](https://github.com/paulvangentcom/heartrate_analysis_python/releases)
 
 :code:`python -m pip install <.whl file>`
 Don't forget to replace the <.whl file> with the filename of the .whl file in the release
 
-from source:
-~~~~~~~~~~~~
+from source
+~~~~~~~~~~~
 Clone the repository [from this link](https://github.com/paulvangentcom/heartrate_analysis_python)
 
 :code:`python setup.py install`
