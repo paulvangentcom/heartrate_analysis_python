@@ -67,7 +67,8 @@ Initial results of the validation have been reported in [1, 2]. Updates here are
 
 The module is still in active development. See the changelog for past changes. The to-do for the coming months is:
 
-to do before V1.1
+to do before V1.1.1
 - [X] Validate performance on Physionet datasets
+- [ ] Report validation performance on repo (published paper + key-points document)
 - [ ] Add R-position interpolation ('high accuracy' mode)
 - [ ] Handle cases where strong T-peak in signal is present
