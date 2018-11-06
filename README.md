@@ -6,7 +6,7 @@ This is the package presented at the Humanist 2018 conference in the Hague, Neth
 
 # Installation
 ```
-python setup.py install
+python -m setup.py install
 ```
 
 Alternatively, we're also on PIP:
