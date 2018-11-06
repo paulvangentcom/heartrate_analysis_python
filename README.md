@@ -4,6 +4,13 @@ This is the package presented at the Humanist 2018 conference in the Hague, Neth
 
 **Thank you for your interest**
 
+# Installation
+```
+python setup.py install
+```
+
+That's it!
+
 # Official Documentation
 
 The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
