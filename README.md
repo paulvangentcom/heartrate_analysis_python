@@ -84,3 +84,4 @@ to do before V1.1.1
 - [ ] Report validation performance on repo (published paper + key-points document)
 - [ ] Add R-position interpolation ('high accuracy' mode)
 - [ ] Handle cases where strong T-peak in signal is present
+- [ ] Include example data on PIP release
