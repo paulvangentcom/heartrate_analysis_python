@@ -612,8 +612,13 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     windowsize -- the window size to use, in seconds (calculated as windowsize * sample_rate)
     report_time -- whether to report total processing time of algorithm (default True)
     calc_freq -- whether to compute time-series measurements (default False)
+    freq_method -- method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 
+                   'periodogram', and 'welch' (Welch's method). (Default = 'welch')
     interp_clipping -- whether to detect and interpolate clipping segments of the signal 
                        (default True)
+    clipping_scale -- whether to scale the data priod to clipping detection. Can correct errors 
+                      if signal amplitude has been affected after digitization (for example through 
+                      filtering). (Default False)
     intep_threshold -- threshold to use to detect clipping segments. Recommended to be a few
                        datapoints below the sensor or ADC's maximum value (to account for
                        slight data line noise). Default 1020, 4 below max of 1024 for 10-bit ADC
@@ -621,6 +626,12 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
                       default due to computational complexity, and generally it is not necessary
     bpmmin -- minimum value to see as likely for BPM when fitting peaks
     bpmmax -- maximum value to see as likely for BPM when fitting peaks
+    reject_segmentwise -- whether to reject segments with more than 30% rejected beats. 
+                          By default looks at segments of 10 beats at a time. (default False)
+    measures -- measures dict in which results are stored. Custom dictionary can be passed, 
+                otherwise one is created and returned.
+    working_data -- working_data dict in which results are stored. Custom dictionary can be passed, 
+                    otherwise one is created and returned.
     '''
     t1 = time.clock()
 
