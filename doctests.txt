@@ -1,17 +1,17 @@
 This is a doctest file for the heartbeat.py module
 
->>> import heartbeat as hb
+>>> import heartpy as hp
 
 #test data reader
->>> hb.get_data('data.csv')
+>>> hp.get_data('data.csv')
 array([530., 518., 506., ..., 492., 493., 494.])
->>> hb.get_data('data.mat', column_name='hr')
+>>> hp.get_data('data.mat', column_name='hr')
 getting matlab file
 array([530., 518., 506., ..., 492., 493., 494.])
 
 #test samplerate calculation
->>> data = hb.get_data('data2.csv', column_name='timer')
->>> '%.10f' %hb.get_samplerate_mstimer(data)
+>>> data = hp.get_data('data2.csv', column_name='timer')
+>>> '%.10f' %hp.get_samplerate_mstimer(data)
 '116.9955541689'
 
 >>> datetimedata = ['2016-11-24 13:58:58.081000', '2016-11-24 13:58:58.097000', '2016-11-24 13:58:58.097000',
@@ -19,64 +19,63 @@ array([530., 518., 506., ..., 492., 493., 494.])
 ...                     '2016-11-24 13:58:58.144000', '2016-11-24 13:58:58.144000', '2016-11-24 13:58:58.159000',
 ...                     '2016-11-24 13:58:58.175000', '2016-11-24 13:58:58.175000', '2016-11-24 13:58:58.190000',
 ...                     '2016-11-24 13:58:58.206000']
->>> hb.get_samplerate_datetime(datetimedata, timeformat='%Y-%m-%d %H:%M:%S.%f')
+>>> hp.get_samplerate_datetime(datetimedata, timeformat='%Y-%m-%d %H:%M:%S.%f')
 104.0
 
->>> datetimedata = hb.get_data('data3.csv', column_name='datetime')
->>> hb.get_samplerate_datetime(datetimedata, timeformat='%Y-%m-%d %H:%M:%S.%f')
+>>> datetimedata = hp.get_data('data3.csv', column_name='datetime')
+>>> hp.get_samplerate_datetime(datetimedata, timeformat='%Y-%m-%d %H:%M:%S.%f')
 100.41971086584796
 >>>
 
 
 #test rolling mean functions
->>> data = hb.get_data('data.csv')
->>> hb.rollwindow(data, 10).shape
+>>> data = hp.get_data('data.csv')
+>>> hp.rollwindow(data, 10).shape
 (2474, 10)
   
->>> hb.rolmean(data, 10, 100.0).shape
+>>> hp.rolmean(data, 10, 100.0).shape
 (2483,)
 
 
 #test filtering
->>> hb.butter_lowpass_filter(data, 2, 100.0, 2).shape
+>>> hp.butter_lowpass_filter(data, 2, 100.0, 2).shape
 (2483,)
 
->>> hb.filtersignal(data, 2, 100.0, 2).shape
+>>> hp.filtersignal(data, 2, 100.0, 2).shape
 (2483,)
 		 
 
 #test peak fitting
->>> data = hb.get_data('data.csv')
->>> rolmean = hb.rolmean(data, 0.75, 100.0)
->>> hb.working_data['hr'] = data
->>> hb.fit_peaks(data, rolmean, 100.0)
->>> hb.working_data['best']
+>>> data = hp.get_data('data.csv')
+>>> rolmean = hp.rolmean(data, 0.75, 100.0)
+>>> working_data = hp.fit_peaks(data, rolmean, 100.0)
+>>> working_data['best']
 20
 
 #validate RR calculations
->>> hb.working_data['RR_list'][0]
+>>> working_data['RR_list'][0]
 1020.0
->>> hb.working_data['RR_list'][5]
+>>> working_data['RR_list'][5]
 1090.0
->>> hb.working_data['RR_list'][10]
+>>> working_data['RR_list'][10]
 1080.0
->>> hb.working_data['RR_diff'][0]
+>>> working_data['RR_diff'][0]
 30.0
->>> hb.working_data['RR_diff'][5]
+>>> working_data['RR_diff'][5]
 100.0
->>> hb.working_data['RR_diff'][10]
+>>> working_data['RR_diff'][10]
 80.0
->>> hb.working_data['RR_sqdiff'][0]
+>>> working_data['RR_sqdiff'][0]
 900.0
->>> hb.working_data['RR_sqdiff'][5]
+>>> working_data['RR_sqdiff'][5]
 10000.0
->>> hb.working_data['RR_sqdiff'][10]
+>>> working_data['RR_sqdiff'][10]
 6400.0
 
 
 #validate pipeline
->>> data = hb.get_data('data.csv')
->>> measures = hb.process(data, 100.0, 0.75, calc_freq=True)
+>>> data = hp.get_data('data.csv')
+>>> working_data, measures = hp.process(data, 100.0, 0.75, calc_freq=True)
 
 #validate timeseries measures
 >>> '%.10f' %measures['bpm']

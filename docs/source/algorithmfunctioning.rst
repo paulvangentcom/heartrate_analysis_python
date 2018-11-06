@@ -32,9 +32,9 @@ A peak enhancement function is available that attempts to normalise the amplitud
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
     
-    enhanced = hb.enhance_peaks(data, iterations=2)
+    enhanced = hp.enhance_peaks(data, iterations=2)
 
 .. image:: images/peaknorm.jpeg
         
@@ -45,9 +45,9 @@ A Butterworth filter implementation is available to remove high frequency noise.
 
 .. code-block:: python
     
-    import heartbeat as hb
+    import heartpy as hp
     
-    filtered = hb.butter_lowpass_filter(data, cutoff=5, sample_rate=100.0, order=3)
+    filtered = hp.butter_lowpass_filter(data, cutoff=5, sample_rate=100.0, order=3)
     
 .. image:: images/butterworth.jpeg
 
@@ -134,11 +134,11 @@ The problem is now reduced to one of peak finding. Breathing rate can be extract
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
     
-    data = hb.get_data('data.csv')
+    data = hp.get_data('data.csv')
     fs = 100.0
-    measures = hb.process(data, fs, report_time=True)
+    working_data, measures = hp.process(data, fs, report_time=True)
     print('breathing rate is: %s Hz' %measures['breathingrate'])
     
 This will result in:

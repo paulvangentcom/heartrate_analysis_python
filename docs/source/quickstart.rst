@@ -6,14 +6,14 @@ Quickstart Guide
 
 Basic Example
 =============
-Import the `heartbeat` module and load a file
+Import the `HeartPy` module and load a file
 
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
 
-    hrdata = hb.get_data('data.csv')
+    hrdata = hp.get_data('data.csv')
 
 
 This returns a :code:`numpy.ndarray`.
@@ -22,10 +22,10 @@ Analysis requires the sampling rate for your data. If you know this *a priori*, 
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
 
-    data = hb.get_data('data.csv') #data.csv is sampled at 100Hz
-    measures = hb.process(data, 100.0)
+    data = hp.get_data('data.csv') #data.csv is sampled at 100Hz
+    working_data, measures = hp.process(data, 100.0)
 
 
 **process(dataset, fs, windowsize=0.75, report_time=False,
@@ -47,31 +47,27 @@ Several optional arguments are available:
 * **interp_threshold**: the amplitude threshold beyond which will be checked for clipping. Recommended is to take this as the maximum value of the ADC with some margin for signal noise (default 1020, default ADC max 1024) 
 
 
-A :code:`dict{}` object is returned containing all measures. The object is also stored in the module. Access as such:
+Two :code:`dict{}` objects are returned: one working data dict, and one containing all measures. Access as such:
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
 
-    data = hb.get_data('data.csv') 
+    data = hp.get_data('data.csv') 
     fs = 100.0 #example file 'data.csv' is sampled at 100.0 Hz
 
-    measures = hb.process(data, fs, report_time=True)
+    working_data, measures = hp.process(data, fs, report_time=True)
 
     print(measures['bpm']) #returns BPM value
-    print(measures['rmssd'] # returns RMSSD HRV measure
-        
-    #Alternatively, use dictionary stored in module:
-    print(hb.measures['bpm']) #returns BPM value
-    print(hb.measures['sdsd'] # returns SDSD HRV measure
+    print(measures['rmssd']) # returns RMSSD HRV measure
 
     #You can also use Pandas if you so desire
     import pandas as pd
-    df = pd.read_csv("data.csv")
+    df = pd.read_csv("data.csv", names=['hr'])
     #note we need calc_freq if we want frequency-domain measures
-    measures = hb.process(df['hr'].values, fs, calc_freq=True)
-    print("measures['bpm'])
-    print("measures['lf/hf'])
+    working_data, measures = hp.process(df['hr'].values, fs, calc_freq=True)
+    print(measures['bpm'])
+    print(measures['lf/hf'])
 
     
 Getting Data From Files
@@ -80,9 +76,9 @@ The toolkit has functionality to open and parse delimited .csv and .txt files, a
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
 
-    data = hb.get_data('data.csv')
+    data = hp.get_data('data.csv')
 
 This returns a 1-dimensional :code:`numpy.ndarray` containing the heart rate data.
 
@@ -100,16 +96,16 @@ Examples:
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
 
     #load data from a delimited file without header info
-    headerless_data = hb.get_data('data.csv')
+    headerless_data = hp.get_data('data.csv')
 
     #load data from column labeles 'hr' in a delimited file with header info
-    headered_data = hb.get_data('data.csv', column_name = 'hr')
+    headered_data = hp.get_data('data2.csv', column_name = 'hr')
 
     #load matlab file
-    matlabdata = hb.get_data('data2.mat', column_name = 'hr')
+    matlabdata = hp.get_data('data2.mat', column_name = 'hr')
     #note that the column_name here represents the table name in the matlab file
         
 
@@ -119,13 +115,17 @@ The toolkit has a simple built-in sample-rate detection. It can handle ms-based 
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
 
     #if you have a ms-based timer:
-    fs = hb.get_samplerate_mstimer(mstimer_data)
+	mstimer_data = hp.get_data('data2.csv', column_name='timer')
+    fs = hp.get_samplerate_mstimer(mstimer_data)
+	print(fs)
 
     #if you have a datetime-based timer:
-    fs = hb.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:%S.%f')
+	datetime_data = hp.get_data('data3.csv', column_name='datetime')
+    fs = hp.get_samplerate_datetime(datetime_data, timeformat='%Y-%m-%d %H:%M:%S.%f')
+	print(fs)
 
 
 :code:`get_samplerate_mstimer(timerdata)` requires one argument:
@@ -150,17 +150,22 @@ Example with the included `data.csv` example file (recorded at 100.0Hz):
 
 .. code-block:: python
 
-    import heartbeat as hb
+    import heartpy as hp
 
-    data = hb.get_data('data.csv')
-    measures = hb.process(data, 100.0)
-    hb.plotter()
+    data = hp.get_data('data.csv')
+    working_data, measures = hp.process(data, 100.0)
+    hp.plotter(working_data, measures)
 
 This returns:
 
 .. image:: images/output1.jpeg
 
-:code:`plotter(show = True, title = 'Heart Rate Signal Peak Detection')` has two optional arguments:
+:code:`plotter(working_data, measures, show = True, title = 'Heart Rate Signal Peak Detection')` has two required arguments:
+
+* **working_data** The working data :code:`dict{}` container returned by the :code:`process()` function.
+* **measures** The measures :code:`dict{}` container returned by the :code:`process()` function.
+
+Several optional arguments are available:
 
 * **show** _optional_: if set to True a plot is visualised, if set to False a matplotlib.pyplot object is returned. Default show = True;
 * **title** _optional_: Sets the title of the plot. If not specified, default title is used.
@@ -169,14 +174,14 @@ This returns:
 
 .. code-block:: python
 
-    import heartbeat as hb
-    hrdata = hb.get_data('data2.csv', column_name='hr')
-    timerdata = hb.get_data('data2.csv', column_name='timer')
+    import heartpy as hp
+    hrdata = hp.get_data('data2.csv', column_name='hr')
+    timerdata = hp.get_data('data2.csv', column_name='timer')
 
-    hb.process(dataset, hb.get_samplerate_mstimer(timerdata))
+    working_data, measures = hp.process(hrdata, hp.get_samplerate_mstimer(timerdata))
 
     #plot with different title
-    hb.plotter(title='Heart Beat Detection on Noisy Signal')
+    hp.plotter(working_data, measures, title='Heart Beat Detection on Noisy Signal')
 
 
 .. image:: images/output2.jpeg
@@ -187,8 +192,8 @@ By default a plot is visualised when plotter() is called. The function returns a
 
 .. code-block:: python
 
-    hb.process(dataset, 0.75, get_samplerate_mstimer(dataset))
-    hb.plotter(show=False)
+    working_data, measures = hp.process(hrdata, hp.get_samplerate_mstimer(timerdata))
+    plot_object = hp.plotter(working_data, measures, show=False)
 
 This returns:
 
@@ -200,8 +205,8 @@ Object can then be saved, appended to, or visualised:
 
 .. code-block:: python
 
-    hb.process(dataset, 0.75, get_samplerate_mstimer(dataset))
-    plot_object = hb.plotter(show=False)
+    working_data, measures = hp.process(hrdata, hp.get_samplerate_mstimer(timerdata))
+    plot_object = hp.plotter(working_data, measures, show=False)
 
     plot_object.savefig('plot_1.jpg') #saves the plot as JPEG image.
 

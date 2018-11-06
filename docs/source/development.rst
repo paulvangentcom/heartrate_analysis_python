@@ -34,6 +34,16 @@ V1.0
 - Added automatic peak rejection when first peak occurs within 150ms, since the signal might start just after a peak, which creates slight inaccuracy.
 - Added segment rejection based on percentage of incorrect peaks.
 
+V1.0.1
+~~~~
+- Changed segmentwise rejection API to simplify plotting
+
+V1.1
+~~~~
+- We are now officially called HeartPy
+- Changed overall structure to get rid of global dicts, allows for modular or multithreaded use easier.
+- Changed docs to reflect changes
+
 
 Questions
 =========

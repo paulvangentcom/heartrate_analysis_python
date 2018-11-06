@@ -18,7 +18,7 @@ from scipy.interpolate import UnivariateSpline
 from scipy.signal import butter, filtfilt, welch, periodogram
 
 __author__ = "Paul van Gent"
-__version__ = "Version 0.8.2"
+__version__ = "Version 1.0.1"
 __license__ = "GNU General Public License V3.0"
 
 measures = {}
