@@ -9,6 +9,11 @@ This is the package presented at the Humanist 2018 conference in the Hague, Neth
 python setup.py install
 ```
 
+Alternatively, we're also on PIP:
+```
+python -m pip install heartpy
+```
+
 That's it!
 
 # Official Documentation
