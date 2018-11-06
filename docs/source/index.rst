@@ -7,7 +7,7 @@ Welcome to the documentation of the HeartPy, Python Heart Rate Analysis Toolkit.
 
 The toolkit was presented at the Humanist 2018 conference in The Hague (`see paper here <https://www.researchgate.net/publication/325967542_Heart_Rate_Analysis_for_Human_Factors_Development_and_Validation_of_an_Open_Source_Toolkit_for_Noisy_Naturalistic_Heart_Rate_Data>`_ ). 
 
-A technical paper about the functionality [is available here](http://doi.org/10.13140/RG.2.2.24895.56485)
+A technical paper about the functionality (`is available here <http://doi.org/10.13140/RG.2.2.24895.56485>`_)
 
 **Please cite one or both of these papers when using the toolkit in your research!**
 
