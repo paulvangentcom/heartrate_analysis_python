@@ -22,6 +22,7 @@ import time
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import butter, filtfilt, welch, periodogram
+from heartpy import exceptions
 
 __author__ = "Paul van Gent"
 __version__ = "Version 1.1"
@@ -379,11 +380,17 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
         if (_rrsd > 0.1) and ((bpmmin <= _bpm <= bpmmax)):
             valid_ma.append([_rrsd, _ma_perc])
 
-
-    working_data['best'] = min(valid_ma, key=lambda t: t[0])[1]
-    working_data = detect_peaks(hrdata, rol_mean, min(valid_ma, key=lambda t: t[0])[1], 
-                                sample_rate, update_dict=True, working_data=working_data)
-    return working_data
+    if len(valid_ma) > 0:
+        working_data['best'] = min(valid_ma, key=lambda t: t[0])[1]
+        working_data = detect_peaks(hrdata, rol_mean, min(valid_ma, key=lambda t: t[0])[1], 
+                                    sample_rate, update_dict=True, working_data=working_data)
+        return working_data
+    else:
+        raise exceptions.BadSignalWarning('\n----------------\nCould not determine best fit for \
+given signal. Please check the source signal.\n Probable causes:\n- detected heart rate falls \
+outside of bpmmin<->bpmmax constraints\n- no detectable heart rate present in signal\n\
+- very noisy signal (consider filtering and scaling)\nIf you\'re sure the signal contains heart\
+rate data, consider filtering and/or scaling first.\n----------------\n')
 
 def check_peaks(rr_arr, peaklist, ybeat, reject_segmentwise=False, working_data={}):
     '''Determines the best fit for peak detection variations run by fit_peaks().'''
@@ -650,12 +657,13 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     working_data['hr'] = hrdata
     rol_mean = rolmean(hrdata, windowsize, sample_rate)
-    working_data = fit_peaks(hrdata, rol_mean, sample_rate, working_data=working_data)
+    working_data = fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=bpmmin,
+                             bpmmax=bpmmax, working_data=working_data)
     working_data = calc_rr(working_data['peaklist'], sample_rate, working_data=working_data)
     working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
                                reject_segmentwise, working_data=working_data)
     measures = calc_ts_measures(working_data['RR_list_cor'], working_data['RR_diff'],
-                                              working_data['RR_sqdiff'], measures=measures)
+                                working_data['RR_sqdiff'], measures=measures)
     measures = calc_breathing(working_data['RR_list_cor'], hrdata, sample_rate, measures=measures)
     if calc_freq:
         measures = calc_fd_measures(working_data['RR_list_cor'], measures=measures)

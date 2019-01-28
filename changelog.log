@@ -29,3 +29,9 @@ V1.1
 - We are now officially called HeartPy
 - Changed overall structure to get rid of global dicts, allows for modular or multithreaded use easier.
 - Changed docs to reflect changes
+
+V1.1.1
+- Updated doctests that failed due to rounding errors introduced by switching from FFT to Welch's PSD computation method as default option.
+- Added exceptions.py to implement custom exception handling, also for future versions.
+- Added custom exception BadSignalWarning to handle situations where no discernible heart rate is present in signal, replacing the default nondescript "empty list valid_ma[]" error with a verbose message.
+- Fixed function "fit_peaks()" not inheriting bpmmin and bpmmax variables from "process()", as outlined by Yurasmol in issue #5.
