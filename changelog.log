@@ -35,3 +35,11 @@ V1.1.1
 - Added exceptions.py to implement custom exception handling, also for future versions.
 - Added custom exception BadSignalWarning to handle situations where no discernible heart rate is present in signal, replacing the default nondescript "empty list valid_ma[]" error with a verbose message.
 - Fixed function "fit_peaks()" not inheriting bpmmin and bpmmax variables from "process()", as outlined by Yurasmol in issue #5.
+
+V1.1.2
+- Added high-pass and band-pass Butterworth filters
+- Fixed case where no peak-peak differences over 20ms in a signal caused an exception
+- Fixed case where intermittent noisy signals resulted in exception when calculating breathing rate
+- Added scale_sections() function that uses local scaling rather than global
+- Added preprocess_ecg(data, sample_rate) function that attempts to preprocess ecg data. Note: doubles sampling rate of returned data.
+- Added highpass and bandpass filtering options. Called through filtersignal function with argument filtertype= lowpass/highpass/bandpass.

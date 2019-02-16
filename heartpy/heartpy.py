@@ -21,11 +21,11 @@ import time
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline
-from scipy.signal import butter, filtfilt, welch, periodogram
+from scipy.signal import butter, filtfilt, welch, periodogram, resample_poly
 from heartpy import exceptions
 
 __author__ = "Paul van Gent"
-__version__ = "Version 1.1"
+__version__ = "Version 1.1.2"
 __license__ = "GNU General Public License V3.0"
 
 #Data handling
@@ -68,6 +68,27 @@ def get_data(filename, delim=',', column_name='None', encoding=None):
     return hrdata
 
 #Preprocessing
+def preprocess_ecg(data, sample_rate):
+    '''preprocesses ECG data.
+
+    function to be customisable asap. For now uses default settings 
+    '''
+    preprocessed = scale_sections(data, sample_rate, windowsize=5)
+    preprocessed = filtersignal(preprocessed, cutoff=4, sample_rate=256.0,
+                                   order=4, filtertype='lowpass')
+    #set signal mean to zero, clip out negative values
+    mn = np.mean(preprocessed)
+    preprocessed = np.clip(preprocessed - mn, a_min=0, a_max=None)
+    #second linear scaling
+    preprocessed = scale_sections(preprocessed, 256.0, 5) 
+
+    #polyphase filtering. Note this doubles the samplerate!
+    preprocessed = resample_poly(preprocessed, len(preprocessed)*4,
+                                 len(preprocessed)*2)
+    preprocessed = enhance_peaks(preprocessed, iterations=2)
+
+    return preprocessed
+
 def scale_data(data):
     '''Scales data between 0 and 1024 for analysis
     
@@ -78,6 +99,36 @@ def scale_data(data):
     minimum = np.min(data)
     data = 1024 * ((data - minimum) / range)
     return data
+
+def scale_sections(data, sample_rate, windowsize):
+    '''scales the data locally within the given window size.
+
+    Use prior to lowpass filtering for best results on 
+    signal where noise creates a variable ampliture.
+
+    keyword arguments:
+    data -- numpy array or list to be scales
+    sample_rate -- sample rate of the signal
+    windowsize -- size of the window within which signal is scaled, in seconds    
+    '''
+    total_length = len(data) / sample_rate
+    window_dimension = int(windowsize * sample_rate)
+    
+    data_start = 0
+    data_end = window_dimension
+    
+    output = np.empty(len(data))
+    
+    while data_end <= len(data):
+        sliced = data[data_start:data_end]
+        sliced = np.power(sliced, 2)
+        scaled = scale_data(sliced)
+        
+        output[data_start:data_end] = scaled
+        data_start += window_dimension
+        data_end += window_dimension
+        
+    return np.array(output)
 
 def enhance_peaks(hrdata, iterations=2):
     '''Attempts to enhance the signal-noise ratio by accentuating the highest peaks
@@ -237,38 +288,46 @@ def rolmean(data, windowsize, sample_rate):
 
 def butter_lowpass(cutoff, sample_rate, order=2):
     '''Defines standard Butterworth lowpass filter.
+    '''
+    nyq = 0.5 * sample_rate
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='high', analog=False)
+    return b, a
 
-    use 'butter_lowpass_filter' to call the filter.
+def butter_highpass(cutoff, sample_rate, order=2):
+    '''Defines standard Butterworth lowpass filter.
     '''
     nyq = 0.5 * sample_rate
     normal_cutoff = cutoff / nyq
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     return b, a
 
-def butter_lowpass_filter(data, cutoff, sample_rate, order):
+def butter_bandpass(lowcut, highcut, fs, order=5):
+    '''Defines standard Butterworth bandpass filter.
+    '''
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = butter(order, [low, high], btype='band')
+    return b, a
+
+def filtersignal(data, cutoff, sample_rate, order, filtertype='lowpass'):
     '''Applies the Butterworth lowpass filter
 
     Keyword arguments:
     data -- 1-dimensional numpy array or list containing the to be filtered data
-    cutoff -- the cutoff frequency of the filter
+    cutoff -- the cutoff frequency of the filter. Expects float for low and high types
+              for bandpass filter expects list or array [low, high]
     sample_rate -- the sample rate of the data set
     order -- the filter order (default 2)
     '''
-    b, a = butter_lowpass(cutoff, sample_rate, order=order)
+    if filtertype == 'lowpass':
+        b, a = butter_lowpass(cutoff, sample_rate, order=order)
+    elif filtertype == 'highpass':
+        b, a = butter_highpass(cutoff, sample_rate, order=order)
+    elif filtertype == 'bandpass':
+        b, a = butter_bandpass(cutoff[0], cutoff[1], sample_rate, order=order)
     filtered_data = filtfilt(b, a, data)
-    return filtered_data
-
-def filtersignal(data, cutoff, sample_rate, order):
-    '''Filters the given signal using a Butterworth lowpass filter.
-
-    Keyword arguments:
-    data -- 1-dimensional numpy array or list containing the to be filtered data
-    cutoff -- the cutoff frequency of the filter
-    sample_rate -- the sample rate of the data set
-    order -- the filter order (default 2)
-    '''
-    data = np.power(np.array(data), 3)
-    filtered_data = butter_lowpass_filter(data, cutoff, sample_rate, order)
     return filtered_data
 
 def MAD(data):
@@ -346,7 +405,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
         working_data['rolmean'] = rol_mean
         working_data = calc_rr(working_data['peaklist'], sample_rate,
                                working_data=working_data)
-        if len(working_data['RR_list']):
+        if len(working_data['RR_list']) > 0:
             working_data['rrsd'] = np.std(working_data['RR_list'])
         else:
             working_data['rrsd'] = np.inf
@@ -433,11 +492,9 @@ def check_binary_quality(peaklist, binary_peaklist, maxrejects=3, working_data={
         if np.bincount(binary_peaklist[idx:idx + 10])[0] > maxrejects:
             binary_peaklist[idx:idx + 10] = [0 for i in range(len(binary_peaklist[idx:idx+10]))]
             if idx + 10 < len(peaklist): 
-                print('%s, %s' %(peaklist[idx], peaklist[idx + 10]))
                 working_data['rejected_segments'].append((peaklist[idx], peaklist[idx + 10]))
             else:
                 working_data['rejected_segments'].append((peaklist[idx], peaklist[-1]))
-                print('%s, %s' %(peaklist[idx], peaklist[-1]))
         idx += 10
     return working_data
 
@@ -507,10 +564,15 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}):
     nn50 = [x for x in rr_diff if x > 50]
     measures['nn20'] = nn20
     measures['nn50'] = nn50
-    measures['pnn20'] = float(len(nn20)) / float(len(rr_diff))
-    measures['pnn50'] = float(len(nn50)) / float(len(rr_diff))
+    try:
+        measures['pnn20'] = float(len(nn20)) / float(len(rr_diff))
+    except:
+        measures['pnn20'] = np.nan
+    try:
+        measures['pnn50'] = float(len(nn50)) / float(len(rr_diff))
+    except:
+        measures['pnn50'] = np.nan
     measures['hr_mad'] = MAD(rr_list)
-    
     return measures
 
 def calc_fd_measures(rr_list, method='welch', measures={}):
@@ -610,7 +672,7 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     else:
         return plt
 
-#Wrapper function
+#Wrapper functions
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
             calc_freq=False, freq_method='welch', interp_clipping=True, clipping_scale=False,
             interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180,
@@ -664,7 +726,10 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
                                reject_segmentwise, working_data=working_data)
     measures = calc_ts_measures(working_data['RR_list_cor'], working_data['RR_diff'],
                                 working_data['RR_sqdiff'], measures=measures)
-    measures = calc_breathing(working_data['RR_list_cor'], hrdata, sample_rate, measures=measures)
+    try:
+        measures = calc_breathing(working_data['RR_list_cor'], hrdata, sample_rate, measures=measures)
+    except:
+        measures['breathingrate'] = np.nan
     if calc_freq:
         measures = calc_fd_measures(working_data['RR_list_cor'], measures=measures)
     if report_time:
