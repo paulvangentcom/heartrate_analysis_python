@@ -43,3 +43,4 @@ V1.1.2
 - Added scale_sections() function that uses local scaling rather than global
 - Added preprocess_ecg(data, sample_rate) function that attempts to preprocess ecg data. Note: doubles sampling rate of returned data.
 - Added highpass and bandpass filtering options. Called through filtersignal function with argument filtertype= lowpass/highpass/bandpass.
+- Changed way peak fitting works by adding extra peak validation step between fitting phases

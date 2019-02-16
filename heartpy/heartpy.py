@@ -406,7 +406,15 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
         working_data = calc_rr(working_data['peaklist'], sample_rate,
                                working_data=working_data)
         if len(working_data['RR_list']) > 0:
-            working_data['rrsd'] = np.std(working_data['RR_list'])
+            try:
+                working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
+                                           reject_segmentwise=True, working_data=working_data)
+                working_data = update_rr(working_data['RR_list'], working_data['binary_peaklist'],
+                                         working_data=working_data)
+                peaklist = working_data['peaklist_cor']
+            except:
+                pass
+            working_data['rrsd'] = np.std(working_data['RR_list_cor'])
         else:
             working_data['rrsd'] = np.inf
         return working_data
