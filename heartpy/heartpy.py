@@ -438,6 +438,20 @@ def make_windows(data, sample_rate, windowsize, overlap):
         
     return np.array(slices, dtype=np.int32)
 
+def append_dict(continuous_dict, measure_key, measure_value):
+    '''function to append key to continuous dict, if doesn't exist. EAFP
+
+    keyword arguments:
+    - continous_dict: dictionary object that contains continuous output measures
+    - measure_key: key for the measure to be stored in continuous_dict
+    - measure_value: value to be appended to dictionary
+    ''' 
+    try:
+        continuous_dict[measure_key].append(measure_value)
+    except KeyError:
+        continuous_dict[measure_key] = [measure_value]
+    return continuous_dict
+
 #Peak detection
 def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, working_data={}):
     '''Detects heartrate peaks in the given dataset.
