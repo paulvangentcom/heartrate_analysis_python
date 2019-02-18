@@ -369,6 +369,75 @@ def hampel_correcter(data, sample_rate, filtsize=6):
     '''
     return data - hampelfilt(data, filtsize=int(sample_rate))
 
+def outliers_iqr_method(hrvalues):
+    '''function that removes outliers based on the interquartile range method
+    see: https://en.wikipedia.org/wiki/Interquartile_range
+
+    keyword arguments:
+    hrvalues -- list of computed hr or hrv values, from which outliers need to be identified
+
+    returns cleaned list, with outliers substituted for the median
+    '''
+    med = np.median(hrvalues)
+    q1, q3 = np.percentile(hrvalues, [25, 75])
+    iqr = q3 - q1
+    lower = q1 - (1.5 * iqr)
+    upper = q3 + (1.5 * iqr)
+    output = np.empty(len(hrvalues))
+    for i in range(0,len(hrvalues)):
+        if hrvalues[i] < lower or hrvalues[i] > upper:
+            output[i] = med
+        else:
+            output[i] = hrvalues[i]
+    return output
+
+def outliers_modified_z(hrvalues):
+    '''function that removes outliers based on the modified Z-score metric
+
+    keyword arguments:
+    - hrvalues: list of computed hr or hrv values, from which outliers 
+                need to be identified
+
+    returns cleaned list, with outliers substituted for the median
+    '''
+    hrvalues = np.array(hrvalues)
+    threshold = 3.5
+    med = np.median(hrvalues)
+    mean_abs_dev = MAD(hrvalues)
+    modified_z_result = 0.6745 * (hrvalues - med) / mean_abs_dev
+    output = np.empty(len(hrvalues))
+    for i in range(0, len(hrvalues)):
+        if np.abs(modified_z_result[i]) <= threshold:
+            output[i] = hrvalues[i]
+        else:
+            output[i] = med
+    return output
+
+def make_windows(data, sample_rate, windowsize, overlap):
+    '''function that slices data into windows for concurrent analysis.
+    
+    keyword arguments:
+    - data: 1-dimensional numpy array containing heart rate sensor data
+    - sample_rate: sample rate of the data stream in 'data'
+    - windowsize: size of the window that is sliced
+    - overlap: overlap between two adjacent windows: 0 <= float < 1.0
+    
+    returns index tuples of windows
+    '''
+    ln = len(data)
+    window = windowsize * sample_rate
+    stepsize = (1 - overlap) * window
+    start = 0
+    end = window
+    
+    slices = []
+    while end < len(data):
+        slices.append((start, end))
+        start += stepsize
+        end += stepsize
+        
+    return np.array(slices, dtype=np.int32)
+
 #Peak detection
 def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, working_data={}):
     '''Detects heartrate peaks in the given dataset.
