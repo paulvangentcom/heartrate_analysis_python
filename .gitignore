@@ -2,7 +2,7 @@
 *.pyc
 
 physionet/
-experimental/
+experimental/*/
 docs/build
 docs/make.bat
 docs/Makefile
