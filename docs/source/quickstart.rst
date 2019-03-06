@@ -17,12 +17,6 @@ github
 
 :code:`python setup.py install`
 
-from source
-~~~~~~~~~~~
-Clone the repository `from this link <https://github.com/paulvangentcom/heartrate_analysis_python>`_
-
-:code:`python setup.py install`
-
 
 Basic Example
 =============
