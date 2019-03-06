@@ -17,8 +17,6 @@ github
 
 :code:`python setup.py install`
 
-Don't forget to replace the <.whl file> with the filename of the .whl file in the release
-
 from source
 ~~~~~~~~~~~
 Clone the repository `from this link <https://github.com/paulvangentcom/heartrate_analysis_python>`_
