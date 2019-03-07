@@ -245,7 +245,7 @@ Usage works like this:
 .. code-block:: python
 
 	working_data, measures = hp.process_segmentwise(data, sample_rate=100.0, 
-													segment_width = 40, segment_overlap = 0.25)
+	segment_width = 40, segment_overlap = 0.25)
 												
 												
 What this will do is segment the data into sections of 40 seconds each. In this example each window will have an overlap with the previous window of 25%, meaning each iteration the 40 second window moves by 30 seconds.
