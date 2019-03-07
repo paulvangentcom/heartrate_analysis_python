@@ -54,3 +54,4 @@ V1.1.4
 - Added wrapper function 'process_segmentwise()' that splits hrdata in sections (overlap between sections is settable), and analyses each section separately. Returns two dict objects with all outputs.
 - Changed rolling mean function to no longer flatten off the more it is raised, turned out to be more robust.
 - Removed peak validation step implemented in V1.1.2 -> after further testing it turned out to be detrimental to many cases.
+- Updated docs to reflect the changes to the codebase.

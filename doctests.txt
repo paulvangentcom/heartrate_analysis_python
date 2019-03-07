@@ -38,9 +38,6 @@ array([530., 518., 506., ..., 492., 493., 494.])
 
 
 #test filtering
->>> hp.butter_lowpass_filter(data, 2, 100.0, 2).shape
-(2483,)
-
 >>> hp.filtersignal(data, 2, 100.0, 2).shape
 (2483,)
 		 
@@ -96,9 +93,9 @@ array([530., 518., 506., ..., 492., 493., 494.])
 '40.0000000000'
 
 #validate frequency measures
->>> '%.10f' %measures['lf']
-'81098.1018891626'
->>> '%.10f' %measures['hf']
-'35733.4161582114'
->>> '%.10f' %measures['lf/hf']
-'2.2695311730'
+>>> '%.5f' %measures['lf']
+'81098.10189'
+>>> '%.5f' %measures['hf']
+'35733.41616'
+>>> '%.5f' %measures['lf/hf']
+'2.26953'

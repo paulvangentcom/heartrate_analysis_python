@@ -68,7 +68,7 @@ Results show that the effect of incorrect beat placements **far outweigh** those
 
 Take into consideration that the scale for RMSSD doesn't typically exceed +/- 130, SDSD doesn't differ by much. This means that even a few incorrectly detected peaks are already introducing large measurement errors into the output variables. The algorithm described here is specifically designed to handle noisy PPG data from cheap sensors. The main design criteria was to minimise the number of incorrectly placed peaks as to minimise the error introduced into the output measures.
 
-More information on the functioning can be found in the rest of the documentation, as well as the paper here: http://doi.org/10.13140/RG.2.2.24895.56485. Information on the valiation can be found in [5]_.
+More information on the functioning can be found in the rest of the documentation, as well as in the technical paper here [6]_. Information on the valiation can be found in [5]_.
 
 
 References
@@ -83,3 +83,6 @@ References
 .. [4] F. Bousefsaf, C. Maaoui, and  a. Pruski, “Remote detection of mental workload changes using cardiac parameters assessed with a low-cost webcam,” Comput. Biol. Med., vol. 53, pp. 1–10, 2014.
 
 .. [5] van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). “Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data.“ In proceedings of the Humanist 2018 conference, 2018, pp.173-17
+
+.. [6] van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). Analysing Noisy Driver Physiology Real-Time Using Off-the-Shelf Sensors: Heart rate analysis software from the Taking the Fast Lane Project. http://doi.org/10.13140/RG.2.2.24895.56485
+

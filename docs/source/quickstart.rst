@@ -235,3 +235,30 @@ Object can then be saved, appended to, or visualised:
 
     plot_object.show() #displays plot 
       
+	  
+Getting heart rate over time
+============================
+There may be situations where you have a long heart rate signal, and want to compute how the heart rate measures change over time in the signal. HeartPy includes the :process_segmentwise: function that does just that!
+
+Usage works like this:
+
+.. code-block:: python
+
+working_data, measures = hp.process_segmentwise(data, sample_rate=100.0, 
+												segment_width = 40, segment_overlap = 0.25)
+												
+												
+What this will do is segment the data into sections of 40 seconds each. In this example each window will have an overlap with the previous window of 25%, meaning each iteration the 40 second window moves by 30 seconds.
+
+`process_segmentwist()` expects two arguments:
+- data: 1-d numpy array or list containing heart rate data
+- sample_rate: the sample rate with which the data is collected, in Hz
+
+Several optional arguments are possible:
+
+- segment_width: the width of the window used, in seconds.
+- segment_overlap: the fraction of overlap between adjacent windows: 0 <= segment_overlap < 1.0
+- replace_outliers: bool, whether to replace outliers in the computed measures with the median
+- outlier_method: which outlier detection method to use. The interquartile-range ('iqr') or modified z-score ('z-score') methods are available as of now. Default: 'iqr'
+- mode: 'fast' or 'full'. The 'fast' method detects peaks over the entire signal, then segments and computes heart rate and heart rate variability measures. The 'full' method segments the data first, then runs the full analysis pipelin on each segment. For small numbers of segments (<10), there is not much difference and the fast method can actually be slower. The more segments there are, the larger the difference becomes. 
+By default you should choose the 'fast' method. If there are problems with peak fitting, consider trying the 'full' method.

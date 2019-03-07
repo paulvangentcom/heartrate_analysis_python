@@ -25,7 +25,7 @@ from scipy.signal import butter, filtfilt, welch, periodogram, resample_poly
 from heartpy import exceptions
 
 __author__ = "Paul van Gent"
-__version__ = "Version 1.1.3"
+__version__ = "Version 1.1.4"
 __license__ = "GNU General Public License V3.0"
 
 #Data handling
@@ -643,6 +643,18 @@ def update_rr(rr_source, b_peaklist, working_data={}):
 
     return working_data
 
+def calc_rr_segment(rr_source, b_peaklist):
+    '''Calculates rr-measures when analysing segmentwist in the 'fast' mode
+    '''
+    rr_list = [rr_source[i] for i in range(len(rr_source)) if b_peaklist[i] + b_peaklist[i+1] == 2]
+    rr_mask = [0 if (b_peaklist[i] + b_peaklist[i+1] == 2) else 1 for i in range(len(rr_source))]
+    rr_masked = np.ma.array(rr_source, mask=rr_mask)
+    rr_diff = np.abs(np.diff(rr_masked))
+    rr_diff = rr_diff[~rr_diff.mask]
+    rr_sqdiff = np.power(rr_diff, 2)
+    
+    return rr_list, rr_diff, rr_sqdiff
+
 def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}):
     '''Calculates the time-series measurements.
 
@@ -771,7 +783,7 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
 
 #Wrapper functions
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
-            calc_freq=False, freq_method='welch', interp_clipping=False, clipping_scale=False,
+            calc_freq=False, Fmethod='welch', interp_clipping=False, clipping_scale=False,
             interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180,
             reject_segmentwise=False, measures={}, working_data={}):
     '''Processes the passed heart rate data. Returns measures{} dict containing results.
@@ -837,7 +849,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     return working_data, measures
 
 def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=0,
-                        replace_outliers=True, outlier_method='iqr', **kwargs):
+                        replace_outliers=True, outlier_method='iqr', mode='fast', **kwargs):
     '''method that analyses a long heart rate data array by running a moving window 
        over the data, computing measures in each iteration. Both the window width
        and the overlap with the previous window location are settable.
@@ -869,24 +881,40 @@ use either \'iqr\' or \'z-score\''
 
     slice_indices = make_windows(hrdata, sample_rate, segment_width, segment_overlap)
 
-    for i, ii in slice_indices:
-        try:
-            working_data, measures = process(hrdata[i:ii], sample_rate)
-            for k in measures.keys():
-                s_measures = append_dict(s_measures, k, measures[k])
-            for k in working_data.keys():
-                s_working_data = append_dict(s_working_data, k, working_data[k])
-        except exceptions.BadSignalWarning:
-            pass
+    if mode == 'full':
+        for i, ii in slice_indices:
+            try:
+                working_data, measures = process(hrdata[i:ii], sample_rate, **kwargs)
+                for k in measures.keys():
+                    s_measures = append_dict(s_measures, k, measures[k])
+                for k in working_data.keys():
+                    s_working_data = append_dict(s_working_data, k, working_data[k])
+            except exceptions.BadSignalWarning:
+                pass
+    elif mode == 'fast':
+        working_data, measures = process(hrdata, sample_rate, *kwargs)
+        peaklist = np.asarray(working_data['peaklist'])
+        for i, ii in slice_indices:
+            #pks = [x for x in peaklist if i <= x < ii]
+            pks = peaklist[np.where((peaklist >= i) & (peaklist < ii))]
+            pks_b = working_data['binary_peaklist'][np.int(np.where(peaklist == pks[0])[0]):
+                                                    np.int(np.where(peaklist == pks[-1])[-1]) + 1]
+            rr_list = (np.diff(pks) / sample_rate) * 1000.0
+            rr_list, rr_diff, rr_sqdiff = calc_rr_segment(rr_list, pks_b)
+            tmp = calc_ts_measures(rr_list, rr_diff, rr_sqdiff, {})
+        for k in tmp.keys():
+            s_measures = append_dict(s_measures, k, tmp[k])
+    else:
+        raise ValueError('mode not understood! Needs to be either \'fast\' or \'full\', passed: %s' %mode)
 
     if replace_outliers:
         if outlier_method.lower() == 'iqr':
             for k in s_measures.keys():
-                if k not in ['nn20', 'nn50']: #skip these measures
+                if k not in ['nn20', 'nn50', 'interp_rr_function', 'interp_rr_linspace']: #skip these measures
                     s_measures[k] = outliers_iqr_method(s_measures[k])
         elif outlier_method.lower() == 'z-score':
             for k in s_measures.keys():
-                if k not in ['nn20', 'nn50']: #skip these measures
+                if k not in ['nn20', 'nn50', 'interp_rr_function', 'interp_rr_linspace']: #skip these measures
                     s_measures[k] = outliers_iqr_method(s_measures[k])
                 s_measures[k] = outliers_iqr_method(s_measures[k])
 
