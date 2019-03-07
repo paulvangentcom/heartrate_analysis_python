@@ -261,3 +261,11 @@ Several optional arguments are possible:
 - outlier_method: which outlier detection method to use. The interquartile-range ('iqr') or modified z-score ('z-score') methods are available as of now. Default: 'iqr'
 - mode: 'fast' or 'full'. The 'fast' method detects peaks over the entire signal, then segments and computes heart rate and heart rate variability measures. The 'full' method segments the data first, then runs the full analysis pipelin on each segment. For small numbers of segments (<10), there is not much difference and the fast method can actually be slower. The more segments there are, the larger the difference becomes. 
 By default you should choose the 'fast' method. If there are problems with peak fitting, consider trying the 'full' method.
+- **kwargs: you can pass all the arguments normally passed to the `process()` function at the end of the arguments here as well. These will be passed on and used in the analysis. Example:
+
+.. code-block:: python
+
+	working_data, measures = hp.process_segmentwise(data, sample_rate=100.0, segment_width = 40, segment_overlap = 0.25, calc_freq=True, reject_segmentwise=True, report_time=True)	
+	
+	
+In this example the last three arguments will be passed on the the `process()` function and used in the analysis. For a full list of arguments that `process()` supports, see the `Basic Example`_
