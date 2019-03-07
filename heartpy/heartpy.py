@@ -74,8 +74,8 @@ def preprocess_ecg(data, sample_rate):
     function to be customisable asap. For now uses default settings 
     '''
     preprocessed = scale_sections(data, sample_rate, windowsize=2.5)
-    preprocessed = filtersignal(preprocessed, cutoff=4, sample_rate=sample_rate,
-                                   order=4, filtertype='lowpass')
+    preprocessed = filtersignal(preprocessed, cutoff=0.5, sample_rate=sample_rate,
+                                   order=4, filtertype='highpass')
     #set signal mean to zero, clip out negative values
     mn = np.mean(preprocessed)
     preprocessed = np.clip(preprocessed - mn, a_min=0, a_max=None)
@@ -291,7 +291,7 @@ def butter_lowpass(cutoff, sample_rate, order=2):
     '''
     nyq = 0.5 * sample_rate
     normal_cutoff = cutoff / nyq
-    b, a = butter(order, normal_cutoff, btype='high', analog=False)
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
     return b, a
 
 def butter_highpass(cutoff, sample_rate, order=2):
@@ -299,7 +299,7 @@ def butter_highpass(cutoff, sample_rate, order=2):
     '''
     nyq = 0.5 * sample_rate
     normal_cutoff = cutoff / nyq
-    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    b, a = butter(order, normal_cutoff, btype='high', analog=False)
     return b, a
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
@@ -467,7 +467,11 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
                    example by the breath analysis module.
     '''
     rmean = np.array(rol_mean)
-    rol_mean = rmean + ((rmean / 100) * ma_perc)
+
+    #rol_mean = rmean + ((rmean / 100) * ma_perc)
+    mn = np.mean(rmean / 100) * ma_perc
+    rol_mean = rmean + mn
+
     peaksx = np.where((hrdata > rol_mean))[0]
     peaksy = hrdata[np.where((hrdata > rol_mean))[0]]
     peakedges = np.concatenate((np.array([0]),
@@ -489,15 +493,16 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
         working_data = calc_rr(working_data['peaklist'], sample_rate,
                                working_data=working_data)
         if len(working_data['RR_list']) > 0:
-            try:
-                working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
-                                           reject_segmentwise=True, working_data=working_data)
-                working_data = update_rr(working_data['RR_list'], working_data['binary_peaklist'],
-                                         working_data=working_data)
-                peaklist = working_data['peaklist_cor']
-            except:
-                pass
-            working_data['rrsd'] = np.std(working_data['RR_list_cor'])
+            #try:
+            #   working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
+            #                               reject_segmentwise=True, working_data=working_data)
+            #    working_data = update_rr(working_data['RR_list'], working_data['binary_peaklist'],
+            #                             working_data=working_data)
+            #    peaklist = working_data['peaklist_cor']
+            #except:
+            #    pass
+            #working_data['rrsd'] = np.std(working_data['RR_list_cor'])
+            working_data['rrsd'] = np.std(working_data['RR_list'])
         else:
             working_data['rrsd'] = np.inf
         return working_data
@@ -812,6 +817,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     working_data['hr'] = hrdata
     rol_mean = rolmean(hrdata, windowsize, sample_rate)
+
     working_data = fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=bpmmin,
                              bpmmax=bpmmax, working_data=working_data)
     working_data = calc_rr(working_data['peaklist'], sample_rate, working_data=working_data)
