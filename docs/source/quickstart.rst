@@ -258,6 +258,7 @@ Several optional arguments are possible:
 - **segment_width**: the width of the window used, in seconds.
 - **segment_overlap**: the fraction of overlap between adjacent windows: 0 <= segment_overlap < 1.0
 - **replace_outliers**: bool, whether to replace outliers in the computed measures with the median
+- **segment_min_size**: When segmenting, the tail end of the data if often shorter than the specified size in segment_width. The tail end is only included if it is longer than the `segment_min_size`. Default = 20. Setting this too low is not recommended as it may make peak fitting unstable, and it also doesn't make much sense from a biosignal analysis perspective to use very short data segments.
 - **outlier_method**: which outlier detection method to use. The interquartile-range ('iqr') or modified z-score ('z-score') methods are available as of now. Default: 'iqr'
 - **mode**: 'fast' or 'full'. The 'fast' method detects peaks over the entire signal, then segments and computes heart rate and heart rate variability measures. The 'full' method segments the data first, then runs the full analysis pipelin on each segment. For small numbers of segments (<10), there is not much difference and the fast method can actually be slower. The more segments there are, the larger the difference becomes. 
 By default you should choose the 'fast' method. If there are problems with peak fitting, consider trying the 'full' method.

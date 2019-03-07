@@ -55,3 +55,7 @@ V1.1.4
 - Changed rolling mean function to no longer flatten off the more it is raised, turned out to be more robust.
 - Removed peak validation step implemented in V1.1.2 -> after further testing it turned out to be detrimental to many cases.
 - Updated docs to reflect the changes to the codebase.
+
+V1.1.5
+- Adapted `make_windows()` to accept tail end of data. Updated `process_segmentise()` to make use of this.
+- Updated docs explaining the new functionality

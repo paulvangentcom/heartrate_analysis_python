@@ -25,7 +25,7 @@ from scipy.signal import butter, filtfilt, welch, periodogram, resample_poly
 from heartpy import exceptions
 
 __author__ = "Paul van Gent"
-__version__ = "Version 1.1.4"
+__version__ = "Version 1.1.5"
 __license__ = "GNU General Public License V3.0"
 
 #Data handling
@@ -413,7 +413,7 @@ def outliers_modified_z(hrvalues):
             output.append(med)
     return output
 
-def make_windows(data, sample_rate, windowsize=120, overlap=0):
+def make_windows(data, sample_rate, windowsize=120, overlap=0, min_size=20):
     '''function that slices data into windows for concurrent analysis.
     
     keyword arguments:
@@ -421,6 +421,10 @@ def make_windows(data, sample_rate, windowsize=120, overlap=0):
     - sample_rate: sample rate of the data stream in 'data'
     - windowsize: size of the window that is sliced
     - overlap: overlap between two adjacent windows: 0 <= float < 1.0
+    - min_size: the minimum size for the last (partial) window to be included. Very short windows
+                might not stable for peak fitting, especially when significant noise is present. 
+                Slightly longer windows are likely stable but don't make much sense from a 
+                signal analysis perspective.
     
     returns index tuples of windows
     '''
@@ -435,6 +439,8 @@ def make_windows(data, sample_rate, windowsize=120, overlap=0):
         slices.append((start, end))
         start += stepsize
         end += stepsize
+    if (ln - start) / sample_rate >= min_size:
+        slices.append((start, ln))
         
     return np.array(slices, dtype=np.int32)
 
@@ -849,7 +855,8 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     return working_data, measures
 
 def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=0,
-                        replace_outliers=True, outlier_method='iqr', mode='fast', **kwargs):
+                        segment_min_size=20, replace_outliers=True, outlier_method='iqr',
+                        mode='fast', **kwargs)  :
     '''method that analyses a long heart rate data array by running a moving window 
        over the data, computing measures in each iteration. Both the window width
        and the overlap with the previous window location are settable.
@@ -865,6 +872,9 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
                         errors on one or more segments) with the median.
     outlier_method -- which  method to use to detect outliers. Available are the
                       'interquartile-range' ('iqr') and the 'modified z-score' ('z-score') methods.
+    segment_min_size -- After segmenting the data, a tail end will likely remain that is shorter than the specified
+                        segment_size. segment_min_size sets the minimum size for the last segment of the 
+                        generated series of segments to still be included. Default = 20.
 
 
     returns two keyed dictionary objects with segmented outputs
@@ -879,7 +889,7 @@ use either \'iqr\' or \'z-score\''
     s_measures={}
     s_working_data={}
 
-    slice_indices = make_windows(hrdata, sample_rate, segment_width, segment_overlap)
+    slice_indices = make_windows(hrdata, sample_rate, segment_width, segment_overlap, segment_min_size)
 
     if mode == 'full':
         for i, ii in slice_indices:
