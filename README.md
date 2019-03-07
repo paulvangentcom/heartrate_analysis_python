@@ -80,6 +80,7 @@ Initial results of the validation have been reported in [1, 2]. Updates here are
 The module is still in active development. See the changelog for past changes. The to-do for the coming months is:
 
 to do before V1.2
+- [X] Validate performance on Physionet datasets
 - [ ] Update threshold parameter optimization to handle cases of double peaks and large portion of signal containing little to no hr
 - [ ] Report validation performance on repo (published paper + key-points document)
 - [ ] Add R-position interpolation ('high accuracy' mode)
