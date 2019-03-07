@@ -49,3 +49,6 @@ V1.1.3
 - Added functions to allow for continous measure output
 - Added make_windows() function to divide input data into evenly sized segments with settable windowsize and settable overlap
 - Added two functions to remove outliers from continous set: outliers_modified_z(), and outliers_iqr_method(). Both take a list of numpy array of one continous measure and remove outliers due to incorrectly analysed sections, if any outliers are persent.
+
+V1.1.4
+- Added wrapper function 'process_segmentwise()' that splits hrdata in sections (overlap between sections is settable), and analyses each section separately. Returns two dict objects with all outputs.

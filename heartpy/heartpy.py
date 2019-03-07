@@ -25,7 +25,7 @@ from scipy.signal import butter, filtfilt, welch, periodogram, resample_poly
 from heartpy import exceptions
 
 __author__ = "Paul van Gent"
-__version__ = "Version 1.1.2"
+__version__ = "Version 1.1.3"
 __license__ = "GNU General Public License V3.0"
 
 #Data handling
@@ -73,7 +73,7 @@ def preprocess_ecg(data, sample_rate):
 
     function to be customisable asap. For now uses default settings 
     '''
-    preprocessed = scale_sections(data, sample_rate, windowsize=5)
+    preprocessed = scale_sections(data, sample_rate, windowsize=2.5)
     preprocessed = filtersignal(preprocessed, cutoff=4, sample_rate=sample_rate,
                                    order=4, filtertype='lowpass')
     #set signal mean to zero, clip out negative values
@@ -100,7 +100,7 @@ def scale_data(data):
     data = 1024 * ((data - minimum) / range)
     return data
 
-def scale_sections(data, sample_rate, windowsize):
+def scale_sections(data, sample_rate, windowsize=2.5):
     '''scales the data locally within the given window size.
 
     Use prior to lowpass filtering for best results on 
@@ -109,7 +109,7 @@ def scale_sections(data, sample_rate, windowsize):
     keyword arguments:
     data -- numpy array or list to be scales
     sample_rate -- sample rate of the signal
-    windowsize -- size of the window within which signal is scaled, in seconds    
+    windowsize -- size of the window within which signal is scaled, in seconds (default 2.5s)
     '''
     total_length = len(data) / sample_rate
     window_dimension = int(windowsize * sample_rate)
@@ -383,12 +383,12 @@ def outliers_iqr_method(hrvalues):
     iqr = q3 - q1
     lower = q1 - (1.5 * iqr)
     upper = q3 + (1.5 * iqr)
-    output = np.empty(len(hrvalues))
+    output = []
     for i in range(0,len(hrvalues)):
         if hrvalues[i] < lower or hrvalues[i] > upper:
-            output[i] = med
+            output.append(med)
         else:
-            output[i] = hrvalues[i]
+            output.append(hrvalues[i])
     return output
 
 def outliers_modified_z(hrvalues):
@@ -405,15 +405,15 @@ def outliers_modified_z(hrvalues):
     med = np.median(hrvalues)
     mean_abs_dev = MAD(hrvalues)
     modified_z_result = 0.6745 * (hrvalues - med) / mean_abs_dev
-    output = np.empty(len(hrvalues))
+    output = []
     for i in range(0, len(hrvalues)):
         if np.abs(modified_z_result[i]) <= threshold:
-            output[i] = hrvalues[i]
+            output.append(hrvalues[i])
         else:
-            output[i] = med
+            output.append(med)
     return output
 
-def make_windows(data, sample_rate, windowsize, overlap):
+def make_windows(data, sample_rate, windowsize=120, overlap=0):
     '''function that slices data into windows for concurrent analysis.
     
     keyword arguments:
@@ -438,19 +438,19 @@ def make_windows(data, sample_rate, windowsize, overlap):
         
     return np.array(slices, dtype=np.int32)
 
-def append_dict(continuous_dict, measure_key, measure_value):
+def append_dict(dict_obj, measure_key, measure_value):
     '''function to append key to continuous dict, if doesn't exist. EAFP
 
     keyword arguments:
-    - continous_dict: dictionary object that contains continuous output measures
+    - dict_obj: dictionary object that contains continuous output measures
     - measure_key: key for the measure to be stored in continuous_dict
     - measure_value: value to be appended to dictionary
     ''' 
     try:
-        continuous_dict[measure_key].append(measure_value)
+        dict_obj[measure_key].append(measure_value)
     except KeyError:
-        continuous_dict[measure_key] = [measure_value]
-    return continuous_dict
+        dict_obj[measure_key] = [measure_value]
+    return dict_obj
 
 #Peak detection
 def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, working_data={}):
@@ -746,6 +746,7 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     rejectedpeaks_y = working_data['removed_beats_y']
     plt.title(title)
     plt.plot(working_data['hr'], alpha=0.5, color='blue', label='heart rate signal')
+    plt.plot(working_data['rolmean'])
     plt.scatter(peaklist, ybeat, color='green', label='BPM:%.2f' %(measures['bpm']))
     plt.scatter(rejectedpeaks, rejectedpeaks_y, color='red', label='rejected peaks')
     
@@ -767,13 +768,14 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
             calc_freq=False, freq_method='welch', interp_clipping=False, clipping_scale=False,
             interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180,
-            reject_segmentwise=False, measures = {}, working_data = {}):
-    '''Processed the passed heart rate data. Returns measures{} dict containing results.
+            reject_segmentwise=False, measures={}, working_data={}):
+    '''Processes the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
     hrdata -- 1-dimensional numpy array or list containing heart rate data
     sample_rate -- the sample rate of the heart rate data
-    windowsize -- the window size to use, in seconds (calculated as windowsize * sample_rate)
+    windowsize -- the window size to use in the calculation of the moving average,
+                  in seconds (will be calculated as windowsize * sample_rate)
     report_time -- whether to report total processing time of algorithm (default True)
     calc_freq -- whether to compute time-series measurements (default False)
     freq_method -- method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 
@@ -825,7 +827,64 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         measures = calc_fd_measures(working_data['RR_list_cor'], measures=measures)
     if report_time:
         print('\nFinished in %.8s sec' %(time.clock()-t1))
+
     return working_data, measures
+
+def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=0,
+                        replace_outliers=True, outlier_method='iqr', **kwargs):
+    '''method that analyses a long heart rate data array by running a moving window 
+       over the data, computing measures in each iteration. Both the window width
+       and the overlap with the previous window location are settable.
+
+       Keyword arguents:
+    hrdata -- 1-dimensional numpy array or list containing heart rate data
+    sample_rate -- the sample rate of the heart rate data
+    segment_width -- the width of the segment, in seconds, within which all measures 
+                     will be computed.
+    segment_overlap -- the fraction of overlap of adjacent segments, 
+                       needs to be 0 <= segment_overlap < 1
+    replace_outliers -- bool, whether to replace outliers (likely caused by peak fitting
+                        errors on one or more segments) with the median.
+    outlier_method -- which  method to use to detect outliers. Available are the
+                      'interquartile-range' ('iqr') and the 'modified z-score' ('z-score') methods.
+
+
+    returns two keyed dictionary objects with segmented outputs
+    '''
+
+    assert 0 <= segment_overlap < 1.0, 'value error: segment_overlap needs to be \
+0 <= segment_overlap < 1.0!'
+
+    assert outlier_method in ['iqr', 'z-score'], 'Unknown outlier detection method specified, \
+use either \'iqr\' or \'z-score\''
+
+    s_measures={}
+    s_working_data={}
+
+    slice_indices = make_windows(hrdata, sample_rate, segment_width, segment_overlap)
+
+    for i, ii in slice_indices:
+        try:
+            working_data, measures = process(hrdata[i:ii], sample_rate)
+            for k in measures.keys():
+                s_measures = append_dict(s_measures, k, measures[k])
+            for k in working_data.keys():
+                s_working_data = append_dict(s_working_data, k, working_data[k])
+        except exceptions.BadSignalWarning:
+            pass
+
+    if replace_outliers:
+        if outlier_method.lower() == 'iqr':
+            for k in s_measures.keys():
+                if k not in ['nn20', 'nn50']: #skip these measures
+                    s_measures[k] = outliers_iqr_method(s_measures[k])
+        elif outlier_method.lower() == 'z-score':
+            for k in s_measures.keys():
+                if k not in ['nn20', 'nn50']: #skip these measures
+                    s_measures[k] = outliers_iqr_method(s_measures[k])
+                s_measures[k] = outliers_iqr_method(s_measures[k])
+
+    return s_working_data, s_measures
 
 if __name__ == '__main__':
     hrdata = get_data('data.csv')
