@@ -255,13 +255,13 @@ What this will do is segment the data into sections of 40 seconds each. In this 
 
 Several optional arguments are possible:
 
-- *segment_width*: the width of the window used, in seconds.
-- *segment_overlap*: the fraction of overlap between adjacent windows: 0 <= segment_overlap < 1.0
-- *replace_outliers*: bool, whether to replace outliers in the computed measures with the median
-- *outlier_method*: which outlier detection method to use. The interquartile-range ('iqr') or modified z-score ('z-score') methods are available as of now. Default: 'iqr'
-- *mode*: 'fast' or 'full'. The 'fast' method detects peaks over the entire signal, then segments and computes heart rate and heart rate variability measures. The 'full' method segments the data first, then runs the full analysis pipelin on each segment. For small numbers of segments (<10), there is not much difference and the fast method can actually be slower. The more segments there are, the larger the difference becomes. 
+- **segment_width**: the width of the window used, in seconds.
+- **segment_overlap**: the fraction of overlap between adjacent windows: 0 <= segment_overlap < 1.0
+- **replace_outliers**: bool, whether to replace outliers in the computed measures with the median
+- **outlier_method**: which outlier detection method to use. The interquartile-range ('iqr') or modified z-score ('z-score') methods are available as of now. Default: 'iqr'
+- **mode**: 'fast' or 'full'. The 'fast' method detects peaks over the entire signal, then segments and computes heart rate and heart rate variability measures. The 'full' method segments the data first, then runs the full analysis pipelin on each segment. For small numbers of segments (<10), there is not much difference and the fast method can actually be slower. The more segments there are, the larger the difference becomes. 
 By default you should choose the 'fast' method. If there are problems with peak fitting, consider trying the 'full' method.
-- *\*\*kwargs*: you can pass all the arguments normally passed to the `process()` function at the end of the arguments here as well. These will be passed on and used in the analysis. Example:
+- **kwargs*: you can pass all the arguments normally passed to the `process()` function at the end of the arguments here as well. These will be passed on and used in the analysis. Example:
 
 .. code-block:: python
 
