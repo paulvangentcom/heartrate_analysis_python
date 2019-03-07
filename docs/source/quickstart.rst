@@ -238,7 +238,7 @@ Object can then be saved, appended to, or visualised:
 	  
 Getting heart rate over time
 ============================
-There may be situations where you have a long heart rate signal, and want to compute how the heart rate measures change over time in the signal. HeartPy includes the :process_segmentwise: function that does just that!
+There may be situations where you have a long heart rate signal, and want to compute how the heart rate measures change over time in the signal. HeartPy includes the `process_segmentwise` function that does just that!
 
 Usage works like this:
 
