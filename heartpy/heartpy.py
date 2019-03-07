@@ -74,13 +74,13 @@ def preprocess_ecg(data, sample_rate):
     function to be customisable asap. For now uses default settings 
     '''
     preprocessed = scale_sections(data, sample_rate, windowsize=5)
-    preprocessed = filtersignal(preprocessed, cutoff=4, sample_rate=256.0,
+    preprocessed = filtersignal(preprocessed, cutoff=4, sample_rate=sample_rate,
                                    order=4, filtertype='lowpass')
     #set signal mean to zero, clip out negative values
     mn = np.mean(preprocessed)
     preprocessed = np.clip(preprocessed - mn, a_min=0, a_max=None)
     #second linear scaling
-    preprocessed = scale_sections(preprocessed, 256.0, 5) 
+    preprocessed = scale_sections(preprocessed, sample_rate, 5) 
 
     #polyphase filtering. Note this doubles the samplerate!
     preprocessed = resample_poly(preprocessed, len(preprocessed)*4,
