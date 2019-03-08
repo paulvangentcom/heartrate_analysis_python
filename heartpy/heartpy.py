@@ -1,32 +1,25 @@
-'''Noise-resistant heart rate analysis module for Python
-
-#References:
-van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). 
-Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data. 
-In Proceedings of the 6th HUMANIST Conference (pp. 173 to 178)
-
-van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). 
-Analysing Noisy Driver Physiology Real-Time Using Off-the-Shelf Sensors: Heart Rate Analysis Software from the Taking the Fast Lane Project.
-Manuscript submitted for publication, doi.org/10.13140/RG.2.2.24895.56485
-
-#See also:
-http://www.paulvangent.com/2016/03/15/analyzing-a-discrete-heart-rate-signal-using-python-part-1/
-http://www.paulvangent.com/2016/03/21/analyzing-a-discrete-heart-rate-signal-using-python-part-2/
-http://www.paulvangent.com/2016/03/30/analyzing-a-discrete-heart-rate-signal-using-python-part-3/
-<part 4 to follow after publication>
-'''
-
 from datetime import datetime
 import time
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import butter, filtfilt, welch, periodogram, resample_poly
-from heartpy import exceptions
 
-__author__ = "Paul van Gent"
-__version__ = "Version 1.1.5"
-__license__ = "GNU General Public License V3.0"
+from . import exceptions
+
+__all__ = ['enhance_peaks',
+           'get_data', 
+           'get_samplerate_mstimer', 
+           'get_samplerate_datetime', 
+           'hampel_correcter',
+           'plotter',
+           'preprocess_ecg', 
+           'process',
+           'process_segmentwise', 
+           'raw_to_ecg',
+           'scale_data',
+           'scale_sections',
+           'filtersignal']
 
 #Data handling
 def get_data(filename, delim=',', column_name='None', encoding=None):
@@ -515,7 +508,6 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
     else:
         return peaklist, working_data
 
-
 def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data={}):
     '''Runs fitting with varying peak detection thresholds given a heart rate signal.
        Results in relatively noise-robust, temporally accuract peak detection, as no
@@ -855,13 +847,15 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     return working_data, measures
 
 def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=0,
-                        segment_min_size=20, replace_outliers=True, outlier_method='iqr',
+                        segment_min_size=20, replace_outliers=False, outlier_method='iqr',
                         mode='fast', **kwargs)  :
-    '''method that analyses a long heart rate data array by running a moving window 
-       over the data, computing measures in each iteration. Both the window width
-       and the overlap with the previous window location are settable.
+    '''
+    method that analyses a long heart rate data array by running a moving window 
+    over the data, computing measures in each iteration. Both the window width
+    and the overlap with the previous window location are settable.
 
-       Keyword arguents:
+    Keyword arguments:
+    ------------------
     hrdata -- 1-dimensional numpy array or list containing heart rate data
     sample_rate -- the sample rate of the heart rate data
     segment_width -- the width of the segment, in seconds, within which all measures 
@@ -877,7 +871,7 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
                         generated series of segments to still be included. Default = 20.
 
 
-    returns two keyed dictionary objects with segmented outputs
+    returns: 'working_data' and 'measures', two keyed dictionary objects with segmented outputs
     '''
 
     assert 0 <= segment_overlap < 1.0, 'value error: segment_overlap needs to be \
@@ -912,8 +906,13 @@ use either \'iqr\' or \'z-score\''
             rr_list = (np.diff(pks) / sample_rate) * 1000.0
             rr_list, rr_diff, rr_sqdiff = calc_rr_segment(rr_list, pks_b)
             tmp = calc_ts_measures(rr_list, rr_diff, rr_sqdiff, {})
-        for k in tmp.keys():
-            s_measures = append_dict(s_measures, k, tmp[k])
+            for k in tmp.keys():
+                s_measures = append_dict(s_measures, k, tmp[k])
+            s_working_data = append_dict(s_working_data, 'rr_list', rr_list)
+            s_working_data = append_dict(s_working_data, 'rr_diff', rr_diff)
+            s_working_data = append_dict(s_working_data, 'rr_sqdiff', rr_sqdiff)
+            s_working_data = append_dict(s_working_data, 'peaklist', peaklist)
+
     else:
         raise ValueError('mode not understood! Needs to be either \'fast\' or \'full\', passed: %s' %mode)
 
@@ -929,19 +928,3 @@ use either \'iqr\' or \'z-score\''
                 s_measures[k] = outliers_iqr_method(s_measures[k])
 
     return s_working_data, s_measures
-
-if __name__ == '__main__':
-    hrdata = get_data('data.csv')
-    fs = 100.0
-
-    #hrdata = get_data('data2.csv', column_name = 'hr')
-    #fs = get_samplerate_mstimer(get_data('data2.csv', column_name='timer'))
-
-    working_data, measures = process(hrdata, fs, report_time=True, calc_freq =True, 
-                                     interp_clipping=True, hampel_correct=False,
-                                     reject_segmentwise=True)
-
-    for m in measures.keys():
-        print(m + ': ' + str(measures[m]))
-    
-    plotter(working_data, measures)

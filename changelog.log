@@ -59,3 +59,6 @@ V1.1.4
 V1.1.5
 - Adapted `make_windows()` to accept tail end of data. Updated `process_segmentise()` to make use of this.
 - Updated docs explaining the new functionality
+- Fixed error where 'fast' segmentwise method returned single instance in dict rather than sequence
+- Fixed error where 'fast' segmentwise method returned empty working_data object
+- Started properly structuring module.

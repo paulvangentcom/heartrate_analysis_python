@@ -3,6 +3,8 @@ This module contains the custom exceptions and warnings
 for the HeartPy module
 '''
 
+__all__ = ['BadSignalWarning']
+
 class BadSignalWarning(UserWarning):
     '''
     warning class to raise when no heart rate is detectable
