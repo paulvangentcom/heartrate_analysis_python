@@ -653,7 +653,7 @@ def calc_rr_segment(rr_source, b_peaklist):
     
     return rr_list, rr_diff, rr_sqdiff
 
-def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}):
+def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     '''Calculates the time-series measurements.
 
     Uses calculated measures stored in the working_data{} dict to calculate
@@ -666,10 +666,10 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}):
     measures['sdnn'] = np.std(rr_list)
     measures['sdsd'] = np.std(rr_diff)
     measures['rmssd'] = np.sqrt(np.mean(rr_sqdiff))
-    nn20 = [x for x in rr_diff if x > 20]
-    nn50 = [x for x in rr_diff if x > 50]
-    measures['nn20'] = nn20
-    measures['nn50'] = nn50
+    nn20 = rr_diff[np.where(rr_diff > 20.0)]
+    nn50 = rr_diff[np.where(rr_diff > 50.0)]
+    working_data['nn20'] = nn20
+    working_data['nn50'] = nn50
     try:
         measures['pnn20'] = float(len(nn20)) / float(len(rr_diff))
     except:
@@ -834,7 +834,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
                                reject_segmentwise, working_data=working_data)
     measures = calc_ts_measures(working_data['RR_list_cor'], working_data['RR_diff'],
-                                working_data['RR_sqdiff'], measures=measures)
+                                working_data['RR_sqdiff'], measures=measures, working_data=working_data)
     try:
         measures = calc_breathing(working_data['RR_list_cor'], hrdata, sample_rate, measures=measures)
     except:
@@ -896,7 +896,7 @@ use either \'iqr\' or \'z-score\''
             except exceptions.BadSignalWarning:
                 pass
     elif mode == 'fast':
-        working_data, measures = process(hrdata, sample_rate, *kwargs)
+        working_data, measures = process(hrdata, sample_rate, **kwargs)
         peaklist = np.asarray(working_data['peaklist'])
         for i, ii in slice_indices:
             #pks = [x for x in peaklist if i <= x < ii]
@@ -905,7 +905,7 @@ use either \'iqr\' or \'z-score\''
                                                     np.int(np.where(peaklist == pks[-1])[-1]) + 1]
             rr_list = (np.diff(pks) / sample_rate) * 1000.0
             rr_list, rr_diff, rr_sqdiff = calc_rr_segment(rr_list, pks_b)
-            tmp = calc_ts_measures(rr_list, rr_diff, rr_sqdiff, {})
+            tmp = calc_ts_measures(rr_list, rr_diff, rr_sqdiff)
             for k in tmp.keys():
                 s_measures = append_dict(s_measures, k, tmp[k])
             s_working_data = append_dict(s_working_data, 'rr_list', rr_list)

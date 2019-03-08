@@ -62,3 +62,8 @@ V1.1.5
 - Fixed error where 'fast' segmentwise method returned single instance in dict rather than sequence
 - Fixed error where 'fast' segmentwise method returned empty working_data object
 - Started properly structuring module.
+
+V1.1.6
+- moved nn20/nn50 temp containers to 'working_data' dict in stead of output measures (see issue #15).
+- fixed wrongly unpacked kwargs in process_segmentwise
+- deprecated doctests.txt for now - no longer functional and need updating.
