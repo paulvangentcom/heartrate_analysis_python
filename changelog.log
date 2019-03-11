@@ -68,3 +68,4 @@ V1.1.6
 - fixed wrongly unpacked kwargs in process_segmentwise
 - deprecated doctests.txt for now - no longer functional and need updating.
 - process_segmentwise() now returns the indices of the slices made in the original data, these are appended to both the returned measures{} and working_data{}. Closes #14
+- updated process_segmentwise to allow control over last (likely incomplete) segment. Setting min_size to -1 now puts the tail end of the data into the last bin, making it larger than the others. Closes #16

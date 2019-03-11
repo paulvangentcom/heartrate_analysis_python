@@ -12,6 +12,7 @@ __all__ = ['enhance_peaks',
            'get_samplerate_mstimer', 
            'get_samplerate_datetime', 
            'hampel_correcter',
+           'make_windows',
            'plotter',
            'preprocess_ecg', 
            'process',
@@ -432,7 +433,10 @@ def make_windows(data, sample_rate, windowsize=120, overlap=0, min_size=20):
         slices.append((start, end))
         start += stepsize
         end += stepsize
-    if (ln - start) / sample_rate >= min_size:
+    
+    if min_size == -1:
+        slices[-1] = (slices[-1][0], len(data))
+    elif (ln - start) / sample_rate >= min_size:
         slices.append((start, ln))
         
     return np.array(slices, dtype=np.int32)
