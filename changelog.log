@@ -67,3 +67,4 @@ V1.1.6
 - moved nn20/nn50 temp containers to 'working_data' dict in stead of output measures (see issue #15).
 - fixed wrongly unpacked kwargs in process_segmentwise
 - deprecated doctests.txt for now - no longer functional and need updating.
+- process_segmentwise() now returns the indices of the slices made in the original data, these are appended to both the returned measures{} and working_data{}. Closes #14
