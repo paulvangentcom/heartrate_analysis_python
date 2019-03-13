@@ -735,7 +735,7 @@ def calc_breathing(rrlist, hrdata, sample_rate, measures={}, working_data={}):
     x_new = np.linspace(0, len(rrlist), len(rrlist)*10)
     interp = UnivariateSpline(x, rrlist, k=3)
     breathing = interp(x_new)
-    breathing_rolmean = rolmean(breathing, 0.75, 100.0)
+    breathing_rolmean = rolmean(breathing, 0.75, sample_rate)
     peaks, working_data = detect_peaks(breathing, breathing_rolmean, 1, sample_rate, 
                                        update_dict=False)
     
