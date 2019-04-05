@@ -715,6 +715,8 @@ def calc_fd_measures(rr_list, method='welch', measures={}):
         print("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
         raise SystemExit(0)
     
+    measures['frq'] = frq
+    measures['psd'] = psd
     measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq <= 0.15)]))
     measures['hf'] = np.trapz(abs(psd[(frq >= 0.16) & (frq <= 0.5)]))
     measures['lf/hf'] = measures['lf'] / measures['hf']
