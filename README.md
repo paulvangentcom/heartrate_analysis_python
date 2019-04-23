@@ -83,8 +83,8 @@ to do before V1.2
 - [X] Validate performance on Physionet datasets
 - [ ] Update threshold parameter optimization to handle cases of double peaks and large portion of signal containing little to no hr
 - [ ] Report validation performance on repo (published paper + key-points document)
-- [ ] Add R-position interpolation ('high accuracy' mode)
+- [X] Add R-position interpolation ('high accuracy' mode)
 - [X] Handle cases where strong T-peak in signal is present
 - [ ] Include example data on PIP release
 - [ ] Change peak fitting to optimize locally rather than globally, to handle long signals with noisy intermediate sections better
-- [ ] Change segmented analysis method to run peak detection once on whole signal, then do segmentwise computation from working_data object (drastic speed up)
+- [X] Change segmented analysis method to run peak detection once on whole signal, then do segmentwise computation from working_data object (drastic speed up)

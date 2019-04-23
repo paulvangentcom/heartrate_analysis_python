@@ -85,6 +85,8 @@ The figure below displays how the SDSD relates to peak fitting. In essence the f
 
 Whenever clipping occurs, the algorithm detects this and will attempt to reconstruct the waveform by spline interpolation. This is discussed under `Clipping detection and interpolation`_
 
+An optional 'high precision mode' is available that takes the signal surrounding each detected peak (+/- 100ms on both ends), and upsamples it to simulate a higher sampling rate for more accurate peak position estimation. By default it upsamples to 1000Hz to provide ms-accurate peak position estimations.
+
 
 Peak rejection
 ==============

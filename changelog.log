@@ -70,3 +70,9 @@ V1.1.6
 - process_segmentwise() now returns the indices of the slices made in the original data, these are appended to both the returned measures{} and working_data{}. Closes #14
 - updated process_segmentwise to allow control over last (likely incomplete) segment. Setting min_size to -1 now puts the tail end of the data into the last bin, making it larger than the others. Closes #16
 - fixed sample_rate not being passed to rolmean() when esitmating the breathing rate
+
+V1.1.7
+- added peak interpolation (high precision mode) method 'interpolate_peaks' that allows more accurate estimation of peak positions in signal of low sampling frequency
+- in segmentwise processing, fixed bug where the interquartile-range was also used when modified z-score approach was requested.
+- fixed mistake in argument order in process_segmentwise function docstring
+- updated docs to include new functionality.

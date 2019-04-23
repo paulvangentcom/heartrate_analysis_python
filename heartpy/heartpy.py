@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline
-from scipy.signal import butter, filtfilt, welch, periodogram, resample_poly
+from scipy.signal import butter, filtfilt, welch, periodogram, resample_poly, resample
 
 from . import exceptions
 
@@ -168,7 +168,7 @@ def mark_clipping(hrdata, threshold):
 
     return clipping_segments
 
-def interpolate_peaks(hrdata, sample_rate, threshold=1020):
+def interpolate_clipping(hrdata, sample_rate, threshold=1020):
     '''function that interpolates peaks between
     the clipping segments using cubic spline interpolation.
     
@@ -209,6 +209,37 @@ def interpolate_peaks(hrdata, sample_rate, threshold=1020):
                     segment[1] + num_datapoints] = interp_data
        
     return hrdata
+
+def interpolate_peaks(data, peaks, sample_rate, desired_sample_rate=1000.0, working_data={}):
+    '''function that enabled high-precision mode by taking the estimated peak position,
+    then upsampling the peak position +/- 100ms to the specified sampling rate, subsequently
+    estimating the real peak position
+
+    keyword arguments:
+    data - 1d list or array containing heart rate data
+    peaks - 1d list or array containing x-positions of peaks in signal
+    sample_rate - the sample rate of the signal (in Hz)
+    desired_sampled-rate - the sample rate to which to upsample in order to get higher
+                           accuracy peak positions. Must be sample_rate < desired_sample_rate
+    '''
+
+    assert desired_sample_rate > sample_rate, "desired sample rate is lower than actual sample rate \
+this would result in downsampling which will hurt accuracy."
+    
+    num_samples = int(0.1 * sample_rate)
+    ratio = sample_rate / desired_sample_rate
+    interpolation_slices = [(x - num_samples, x + num_samples) for x in peaks]
+    peaks = []
+
+    for i in interpolation_slices:
+        slice = data[i[0]:i[1]]
+        resampled = resample(slice, int(len(slice) * (desired_sample_rate / sample_rate)))
+        peakpos = np.argmax(resampled)
+        peaks.append((i[0] + (peakpos * ratio)))
+
+    working_data['peaklist'] = peaks
+
+    return working_data
 
 def raw_to_ecg(hrdata, enhancepeaks=False):
     '''Flips raw signal with negative mV peaks to normal ECG
@@ -571,8 +602,7 @@ def check_peaks(rr_arr, peaklist, ybeat, reject_segmentwise=False, working_data=
     if reject_segmentwise: 
         working_data = check_binary_quality(working_data['peaklist'], working_data['binary_peaklist'],
                                             working_data=working_data)
-    working_data = update_rr(working_data['RR_list'], working_data['binary_peaklist'],
-                             working_data=working_data)
+    working_data = update_rr(working_data=working_data)
     return working_data
 
 def check_binary_quality(peaklist, binary_peaklist, maxrejects=3, working_data={}):
@@ -623,7 +653,7 @@ def calc_rr(peaklist, sample_rate, working_data={}):
     working_data['RR_sqdiff'] = rr_sqdiff
     return working_data
 
-def update_rr(rr_source, b_peaklist, working_data={}):
+def update_rr(working_data={}):
     '''Updates RR differences and RR squared differences based on corrected RR list
 
     Uses information about rejected peaks to update RR_list_cor, and RR_diff, RR_sqdiff
@@ -789,7 +819,8 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
             calc_freq=False, freq_method='welch', interp_clipping=False, clipping_scale=False,
             interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180,
-            reject_segmentwise=False, measures={}, working_data={}):
+            reject_segmentwise=False, high_precision=False, high_precision_fs=1000.0,
+            measures={}, working_data={}):
     '''Processes the passed heart rate data. Returns measures{} dict containing results.
 
     Keyword arguments:
@@ -815,6 +846,10 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     bpmmax -- maximum value to see as likely for BPM when fitting peaks
     reject_segmentwise -- whether to reject segments with more than 30% rejected beats. 
                           By default looks at segments of 10 beats at a time. (default False)
+    high_precision -- whether to estimate peak positions by upsampling signal to sample rate
+                      as specified in high_precision_fs
+    high_precision_fs -- the sample rate to which to upsample for more accurate peak position
+                             estimation (Default = 1000 Hz)
     measures -- measures dict in which results are stored. Custom dictionary can be passed, 
                 otherwise one is created and returned.
     working_data -- working_data dict in which results are stored. Custom dictionary can be passed, 
@@ -825,7 +860,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     if interp_clipping:
         if clipping_scale:
             hrdata = scale_data(hrdata)
-        hrdata = interpolate_peaks(hrdata, sample_rate, threshold=interp_threshold)
+        hrdata = interpolate_clipping(hrdata, sample_rate, threshold=interp_threshold)
 
     if hampel_correct:
         hrdata = enhance_peaks(hrdata)
@@ -836,6 +871,11 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     working_data = fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=bpmmin,
                              bpmmax=bpmmax, working_data=working_data)
+    
+    if high_precision:
+        working_data = interpolate_peaks(hrdata, working_data['peaklist'], sample_rate=sample_rate, 
+                                         desired_sample_rate=high_precision_fs, working_data=working_data)
+
     working_data = calc_rr(working_data['peaklist'], sample_rate, working_data=working_data)
     working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
                                reject_segmentwise, working_data=working_data)
@@ -854,7 +894,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
 def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=0,
                         segment_min_size=20, replace_outliers=False, outlier_method='iqr',
-                        mode='fast', **kwargs)  :
+                        mode='fast', **kwargs):
     '''
     method that analyses a long heart rate data array by running a moving window 
     over the data, computing measures in each iteration. Both the window width
@@ -868,14 +908,13 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
                      will be computed.
     segment_overlap -- the fraction of overlap of adjacent segments, 
                        needs to be 0 <= segment_overlap < 1
+    segment_min_size -- After segmenting the data, a tail end will likely remain that is shorter than the specified
+                        segment_size. segment_min_size sets the minimum size for the last segment of the 
+                        generated series of segments to still be included. Default = 20.
     replace_outliers -- bool, whether to replace outliers (likely caused by peak fitting
                         errors on one or more segments) with the median.
     outlier_method -- which  method to use to detect outliers. Available are the
                       'interquartile-range' ('iqr') and the 'modified z-score' ('z-score') methods.
-    segment_min_size -- After segmenting the data, a tail end will likely remain that is shorter than the specified
-                        segment_size. segment_min_size sets the minimum size for the last segment of the 
-                        generated series of segments to still be included. Default = 20.
-
 
     returns: 'working_data' and 'measures', two keyed dictionary objects with segmented outputs
     '''
@@ -934,7 +973,7 @@ use either \'iqr\' or \'z-score\''
         elif outlier_method.lower() == 'z-score':
             for k in s_measures.keys():
                 if k not in ['nn20', 'nn50', 'interp_rr_function', 'interp_rr_linspace']: #skip these measures
-                    s_measures[k] = outliers_iqr_method(s_measures[k])
-                s_measures[k] = outliers_iqr_method(s_measures[k])
+                    s_measures[k] = outliers_modified_z(s_measures[k])
+                s_measures[k] = outliers_modified_z(s_measures[k])
 
     return s_working_data, s_measures
