@@ -1,5 +1,6 @@
 from datetime import datetime
 import time
+import os
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline
@@ -20,6 +21,7 @@ __all__ = ['enhance_peaks',
            'raw_to_ecg',
            'scale_data',
            'scale_sections',
+           'segment_plotter',
            'filtersignal']
 
 #Data handling
@@ -815,6 +817,61 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     else:
         return plt
 
+def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detection',
+                    path = '', start=0, end=None, step=1):
+    '''Plots analysis results of segmentwise processing of heart rate signal
+    
+    Keyword arguments:
+    title -- the title used in the plot
+    path -- the path where the files will be stored, folder must exist!
+    start -- int, start segment (default 0, beginning of results)
+    end -- int, last segment to plot (default None, will plot until end), must be smaller than total
+           number of segments
+    step -- int, stepsize of plots, every step'th segment will be plotted (default 1)
+    
+    '''
+    #sanity check
+    assert 0 < step < len(working_data['hr']), 'step must be larger than zero and smaller than total number of segments'
+    
+    #set endpoint if not explicitly defined
+    if end == None:
+        end = len(working_data['hr'])
+    else:
+        #make sure it is defined within boundary conditions
+        assert end <= len(working_data['hr']), 'defined "end" endpoint is larger than number of segments'
+    
+    #add trailing path slash if user omitted it
+    if not path.endswith('/') or path.endswith('\\'):
+        path += '/'
+
+    #create path if it doesn't exist
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    
+    #make plots
+    filenum = 0
+    for i in range(start, end, step):
+        wd_segment = {}
+        m_segment = {}
+        #assign values to sub-object for plotting purposes
+        wd_segment['peaklist'] = working_data['peaklist'][i]
+        wd_segment['ybeat'] = working_data['ybeat'][i]
+        wd_segment['removed_beats'] = working_data['removed_beats'][i]
+        wd_segment['removed_beats_y'] = working_data['removed_beats_y'][i]
+        wd_segment['hr'] = working_data['hr'][i]
+        wd_segment['rolmean'] = working_data['rolmean'][i]
+        m_segment['bpm'] = measures['bpm'][i]
+        try:
+            wd_segment['rejected_segments'] = working_data['rejected_segments'][i]
+        except:
+            pass
+
+        #plot it using built-in plotter
+        p = plotter(wd_segment, m_segment, show=False)
+        p.savefig('%s%i.jpg' %(path, filenum))
+        p.close()
+        filenum += 1
+
 #Wrapper functions
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
             calc_freq=False, freq_method='welch', interp_clipping=False, clipping_scale=False,
@@ -894,7 +951,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
 def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=0,
                         segment_min_size=20, replace_outliers=False, outlier_method='iqr',
-                        mode='fast', **kwargs):
+                        mode='full', **kwargs):
     '''
     method that analyses a long heart rate data array by running a moving window 
     over the data, computing measures in each iteration. Both the window width

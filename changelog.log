@@ -75,4 +75,5 @@ V1.1.7
 - added peak interpolation (high precision mode) method 'interpolate_peaks' that allows more accurate estimation of peak positions in signal of low sampling frequency
 - in segmentwise processing, fixed bug where the interquartile-range was also used when modified z-score approach was requested.
 - fixed mistake in argument order in process_segmentwise function docstring
+- implemented 'segment_plotter()' function. This will plot segments and save plots to folder after running 'process_segmentwise()'.
 - updated docs to include new functionality.

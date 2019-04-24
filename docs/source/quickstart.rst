@@ -238,7 +238,25 @@ Object can then be saved, appended to, or visualised:
     plot_object.savefig('plot_1.jpg') #saves the plot as JPEG image.
 
     plot_object.show() #displays plot 
+	
+	
+Plotting results of segmentwise analysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+After calling `process_segmentwise()`, the returned working_data and measures contain analysis results on the segmented data. This can be visualised using the function `segment_plotter()`:
+
+:code:`segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detection', path = '', start=0, end=None, step=1)`. The function has two required arguments:
+
+* **working_data** The working data :code:`dict{}` container returned by the :code:`process_segmentwise()` function.
+* **measures** The measures :code:`dict{}` container returned by the :code:`process_segmentwise()` function.
       
+Several optional arguments are available:
+
+* **title** _optional_: Sets the title of the plot. If not specified, default title is used.
+* **path** _optional_: Where to save the plots. Folder will be created if it doesn't exist.
+* **start** _optional_: segment index to start at, default = 0, beginning of segments.
+* **end** _optional_: plotting stops when this segment index is reached. Default=None, which is interpreted as meaning plot until end of segment list.
+* **step** _optional_: the stepsize of the plotting. Every step'th segment will be visualised. Default=1, meaning every segment.
+	
 	  
 Getting heart rate over time
 ============================
