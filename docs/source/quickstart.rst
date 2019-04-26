@@ -69,7 +69,7 @@ Several optional arguments are available:
 * **bpmmax:** maximum value to see as likely for BPM when fitting peaks. Default = 180
 * **reject_segmentwise:** whether to reject segments with more than 30% rejected beats. By default looks at segments of 10 beats at a time. Default = false.
 * **high_precision:** _optional_ boolean, whether to estimate peak positions by upsampling hr signal to sample rate as specified in _high_precision_fs_. Default = False
-* **high_precision_fs: ** _optional_: the sample rate to which to upsample for ore accurate peak position estimation. Default = 1000 Hz, resulting in 1 ms peak position accuracy
+* **high_precision_fs:** _optional_: the sample rate to which to upsample for ore accurate peak position estimation. Default = 1000 Hz, resulting in 1 ms peak position accuracy
 
 
 * **measures:** measures dict in which results are stored. Custom dictionary can be passed, otherwise one is created and returned.
