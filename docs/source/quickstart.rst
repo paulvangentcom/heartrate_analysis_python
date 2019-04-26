@@ -42,16 +42,17 @@ Analysis requires the sampling rate for your data. If you know this *a priori*, 
     working_data, measures = hp.process(data, 100.0)
 
 
-**process(dataset, fs, windowsize=0.75, report_time=False,
-calc_freq=False, freq_method='welch', interp_clipping=True, 
-clipping_scale=True, interp_threshold=1020, hampel_correct=False, 
-bpmmin=40, bpmmax=180, reject_segmentwise=False, measures = {},
-working_data = {})**
+**process(dataset, sample_rate, windowsize=0.75, report_time=False,
+calc_freq=False, freq_method='welch', interp_clipping=False, 
+clipping_scale=False, interp_threshold=1020, hampel_correct=False, 
+bpmmin=40, bpmmax=180, reject_segmentwise=False, 
+high_precision=False, high_precision_fs=1000.0, 
+measures = {}, working_data = {})**
                
 requires two arguments:
 
 * **dataset:** An 1-dimensional list, numpy array or array-like object containing the heart rate data;
-* **fs**: The samplerate of the signal in Hz;
+* **sample_rate**: The samplerate of the signal in Hz;
 
 Several optional arguments are available:
 
@@ -60,8 +61,8 @@ Several optional arguments are available:
 * **calc_fft:** _optional_ whether to calculate frequency domain measures. Default = false Note: can cause slowdowns in some cases.
 * **calc_freq:** _optional_ whether to calculate frequency domain measures. Default = false Note: can cause slowdowns in some cases.
 * **freq_method:** _optional_ method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 'periodogram', and 'welch' (Welch's method), Default = 'welch'
-* **interp_clipping:** if True, clipping parts of the signal are identified and the implied peak shape is interpolated. Default=True
-* **clipping_scale:** whether to scale the data priod to clipping detection. Can correct errors if signal amplitude has been affected after digitization (for example through filtering). Default = false
+* **interp_clipping:** if True, clipping parts of the signal are identified and the implied peak shape is interpolated. Default=False
+* **clipping_scale:** whether to scale the data priod to clipping detection. Can correct errors if signal amplitude has been affected after digitization (for example through filtering). Default = False
 * **interp_threshold**: the amplitude threshold beyond which will be checked for clipping. Recommended is to take this as the maximum value of the ADC with some margin for signal noise (default 1020, default ADC max 1024) 
 * **hampel_correct:** whether to reduce noisy segments using large median filter. Disabled by default due to computational complexity, and generally it is not necessary. Default = false.
 * **bpmmin:** minimum value to see as likely for BPM when fitting peaks. Default = 40
