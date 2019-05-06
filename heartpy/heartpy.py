@@ -993,10 +993,10 @@ use either \'iqr\' or \'z-score\''
                 working_data, measures = process(hrdata[i:ii], sample_rate, **kwargs)
                 for k in measures.keys():
                     s_measures = append_dict(s_measures, k, measures[k])
-                    s_measures = append_dict(s_measures, 'segment_indices', (i, ii))
                 for k in working_data.keys():
                     s_working_data = append_dict(s_working_data, k, working_data[k])
-                    s_working_data = append_dict(s_working_data, 'segment_indices', (i, ii))
+                s_measures = append_dict(s_measures, 'segment_indices', (i, ii))
+                s_working_data = append_dict(s_working_data, 'segment_indices', (i, ii))
             except exceptions.BadSignalWarning:
                 pass
     elif mode == 'fast':

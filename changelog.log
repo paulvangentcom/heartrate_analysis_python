@@ -77,3 +77,6 @@ V1.1.7
 - fixed mistake in argument order in process_segmentwise function docstring
 - implemented 'segment_plotter()' function. This will plot segments and save plots to folder after running 'process_segmentwise()'.
 - updated docs to include new functionality.
+
+V1.1.7a
+- hotfix for process_segmentwise issue where multiple copies of the same index range were placed in the output.
