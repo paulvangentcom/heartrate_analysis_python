@@ -12,7 +12,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/paulvangentcom/heartrate_analysis_python",
-    packages=["heartpy"],
+    packages=["heartpy", "heartpy.datasets"],
+    include_package_data=True,
+    package_data={'heartpy': ['datasets/data/*.csv']},
     install_requires=["numpy", "scipy", "matplotlib"],
     classifiers=[
         "Programming Language :: Python :: 3",
