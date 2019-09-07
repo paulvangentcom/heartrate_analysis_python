@@ -31,8 +31,8 @@ def load_example_basic():
     -------
 
     ```
-    > from heartpy.datasets import load_example_milliseconds
-    amplitude = load_example_milliseconds()
+    > from heartpy.datasets import load_example_basic
+    amplitude = load_example_basic()
     ```
     """
     return get_data(os.path.join(_get_data_dir(), "data", "data_basic.csv"))
