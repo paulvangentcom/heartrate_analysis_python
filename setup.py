@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="heartpy",
-    version="1.2",
+    version="1.2.2",
     author="Paul van Gent",
     author_email="P.vanGent@tudelft.nl",
     description="Heart Rate Analysis Toolkit",
@@ -16,7 +16,7 @@ setuptools.setup(
     install_requires=["numpy", "scipy", "matplotlib"],
     include_package_data=True,
     package_data={
-        '': ['data/*.csv', 'data/*.mat']       
+        '': ['data/*.csv', 'data/*.mat', 'data/*.log']       
     },
     classifiers=[
         "Programming Language :: Python :: 3",
