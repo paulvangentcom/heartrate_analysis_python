@@ -265,6 +265,11 @@ def clean_rr_intervals(sample_rate, working_data, method='iqr', calc_freq=False,
     >>> wd = clean_rr_intervals(sample_rate, working_data = wd)
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '965.849', '803.449']
+
+    You can also specify the outlier rejection method to be ssed:
+    >>> wd = clean_rr_intervals(sample_rate, working_data = wd, method = 'z-score')
+    >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
+    ['897.470', '811.997', '829.091', '965.849', '803.449']
     '''
 
     #clean rr-list
@@ -405,6 +410,11 @@ def calc_fd_measures(method='welch', measures={}, working_data={}):
     >>> wd, m = calc_fd_measures(method = 'periodogram', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
     1.368
+
+    Available methods are 'fft', 'welch' and 'periodogram'. To set another method, do:
+    >>> wd, m = calc_fd_measures(method = 'fft', measures = m, working_data = wd)
+    >>> print('%.3f' %m['lf/hf'])
+    1.368
     '''
     rr_list = working_data['RR_list_cor']
     rr_x = []
@@ -427,8 +437,7 @@ def calc_fd_measures(method='welch', measures={}, working_data={}):
     elif method=='welch':
         frq, psd = welch(interpolated_func(rr_x_new), fs=1000.0, nperseg=100000)
     else:
-        print("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
-        raise SystemExit(0)
+        raise ValueError("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
     
     working_data['frq'] = frq
     working_data['psd'] = psd
@@ -500,6 +509,6 @@ def calc_breathing(rrlist, hrdata, sample_rate, measures={}, working_data={}):
         signaltime = len(hrdata) / sample_rate
         measures['breathingrate'] = len(peaks) / signaltime
     else:
-        measures['breathingrate'] = np.nan
+        measures['breathingrate'] = np.nan # pragma: no cover
 
     return measures

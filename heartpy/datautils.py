@@ -28,7 +28,7 @@ from datetime import datetime
 from pkg_resources import resource_filename
 
 import numpy as np
-
+from scipy.io import loadmat
 
 __all__ = ['get_data',
            'get_samplerate_mstimer',
@@ -101,8 +101,15 @@ def get_data(filename, delim=',', column_name='None', encoding=None,
     Again you don't need the above. It is there for automated testing.
     Open matlab file by specifying the column name as well:
     >>> get_data(filepath, column_name='hr')
-    getting matlab file
     array([515., 514., 514., ..., 492., 494., 496.])
+
+    You can any csv formatted text file no matter the extension if you
+    set ignore_extension to True:
+    >>> filepath = resource_filename(__name__, 'data/data.csv')
+    >>> get_data(filepath, ignore_extension = True)
+    array([530., 518., 506., ..., 492., 493., 494.])
+
+    >>> 
     '''
     file_ext = filename.split('.')[-1]
     if file_ext == 'csv' or file_ext == 'txt':
@@ -111,22 +118,20 @@ def get_data(filename, delim=',', column_name='None', encoding=None,
             try:
                 hrdata = hrdata[column_name]
             except Exception as error:
-                print('\nError loading column "%s" from file "%s". \
-                Is column name specified correctly?\n' %(column_name, filename))
-                print('------\nError message: ' + str(error) + '\n------')
+                raise LookupError('\nError loading column "%s" from file "%s". \
+Is column name specified correctly?\n The following error was provided: %s' 
+                                 %(column_name, filename, error))
         elif column_name == 'None':
             hrdata = np.genfromtxt(filename, delimiter=delim, dtype=np.float64)
         else:
-            print('\nError: column name "%s" not found in header of "%s".\n'
-                  %(column_name, filename))
+            raise LookupError('\nError: column name "%s" not found in header of "%s".\n'
+                              %(column_name, filename))
     elif file_ext == 'mat':
-        print('getting matlab file')
-        import scipy.io
-        data = scipy.io.loadmat(filename)
+        data = loadmat(filename)
         if column_name != "None":
             hrdata = np.array(data[column_name][:, 0], dtype=np.float64)
         else:
-            print("\nError: column name required for Matlab .mat files\n\n")
+            raise LookupError('\nError: column name required for Matlab .mat files\n\n')
     else:
         if ignore_extension:
             if column_name != 'None':
@@ -134,17 +139,17 @@ def get_data(filename, delim=',', column_name='None', encoding=None,
                 try:
                     hrdata = hrdata[column_name]
                 except Exception as error:
-                    print('\nError loading column "%s" from file "%s". \
-                    Is column name specified correctly?\n' %(column_name, filename))
-                    print('------\nError message: ' + str(error) + '\n------')
+                    raise LookupError('\nError loading column "%s" from file "%s". \
+Is column name specified correctly?\n' 
+                                      %(column_name, filename))
             elif column_name == 'None':
                 hrdata = np.genfromtxt(filename, delimiter=delim, dtype=np.float64)
             else:
-                print('\nError: column name "%s" not found in header of "%s".\n'
-                      %(column_name, filename))
+                raise LookupError('\nError: column name "%s" not found in header of "%s".\n'
+                                  %(column_name, filename))
         else:
-            print('unknown file format')
-            return None
+            raise IncorrectFileType('unknown file format')
+            return None 
     return hrdata
 
 

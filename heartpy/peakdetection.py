@@ -22,7 +22,7 @@ import numpy as np
 from scipy.signal import resample
 
 from .analysis import calc_rr, update_rr
-from . import exceptions
+from .exceptions import BadSignalWarning
 
 
 __all__ = ['make_windows',
@@ -310,7 +310,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
                                     sample_rate, update_dict=True, working_data=working_data)
         return working_data
     else:
-        raise exceptions.BadSignalWarning('\n----------------\nCould not determine best fit for \
+        raise BadSignalWarning('\n----------------\nCould not determine best fit for \
 given signal. Please check the source signal.\n Probable causes:\n- detected heart rate falls \
 outside of bpmmin<->bpmmax constraints\n- no detectable heart rate present in signal\n\
 - very noisy signal (consider filtering and scaling)\nIf you\'re sure the signal contains heart\
