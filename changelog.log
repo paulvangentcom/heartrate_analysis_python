@@ -80,3 +80,11 @@ V1.1.7
 
 V1.1.7a
 - hotfix for process_segmentwise issue where multiple copies of the same index range were placed in the output.
+
+V1.2
+- Changed organisation HeartPy, it is now split into multiple modules to keep the growing library ordered. This opens the way to the  planned addition of a GUI.
+- Added examples that also function as doctests to all functions
+- Added extensive documentation docstrings to all functions
+- Added function load_exampledata() that loads the available example data files directly from github.
+- Added several jupyter notebooks in Examples folder, illustrating how to work with different types of data.
+- Added function to reject outliers in RR-list and compute measures based on cleaned list. See: clean_rr_intervals()

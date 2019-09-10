@@ -1,8 +1,8 @@
-# A note to our friends from the Humanist 2018 conference
+# Structural update
 
-This is the package presented at the Humanist 2018 conference in the Hague, Netherlands. Note that it is always in active development. Whenever including it in your research, pull the latest version from this GitHub. Support is always available at: P.vanGent@tudelft.nl.
+HeartPy V1.2 has landed! The structure of the package has been reworked to be in separate modules now in preparation of the next big update, which will feature many analysis expansions and the first steps towards a GUI for HeartPy. HeartPy has been growing steadily and had reached the point where it became cluttered and unwieldy to keep in a single file. The API remains unchanged.
 
-**Thank you for your interest**
+An 'Examples' folder has been added to the repo which will be expanded soon. Now there's two notebooks explaining how to analyse ppg signals from smartwatches and smart rings.
 
 # Installation
 ```
@@ -24,7 +24,7 @@ The official documentation is online! [You can find the official documentation h
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1324311.svg)](https://doi.org/10.5281/zenodo.1324311)
 
-**HeartPy**, the **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistisch driving and cycling experiments.
+**HeartPy**, the **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistic driving and cycling experiments.
 
 The module takes a discrete heart rate signal and outputs time-domain and frequency-domain measures often found in scientific literature:
 
@@ -81,10 +81,13 @@ The module is still in active development. See the changelog for past changes. T
 
 to do before V1.2
 - [X] Validate performance on Physionet datasets
+- [ ] Add several extra filtering options (Savitzky-Golay, Notch)
+- [ ] Add convolutional pre-processing pipeline for both PPG and ECG
+- [ ] Mark which RR-intervals are adjacent (no rejection gaps in between) to improve things like breathing rate detection
 - [ ] Update threshold parameter optimization to handle cases of double peaks and large portion of signal containing little to no hr
-- [ ] Report validation performance on repo (published paper + key-points document)
+- [ ] Report validation performance on repo (published paper + key-points document once published)
 - [X] Add R-position interpolation ('high accuracy' mode)
 - [X] Handle cases where strong T-peak in signal is present
-- [ ] Include example data on PIP release
+- [X] Include example data on PIP release
 - [ ] Change peak fitting to optimize locally rather than globally, to handle long signals with noisy intermediate sections better
 - [X] Change segmented analysis method to run peak detection once on whole signal, then do segmentwise computation from working_data object (drastic speed up)

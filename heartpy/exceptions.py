@@ -1,6 +1,10 @@
 '''
-This module contains the custom exceptions and warnings 
-for the HeartPy module
+Custom exceptions and warnings for HeartPy
+
+Signal Quality
+--------------
+- 'BadSignalWarning' -- Exception that is raised when no heart rate
+                        appears present in passed signal.
 '''
 
 __all__ = ['BadSignalWarning']
