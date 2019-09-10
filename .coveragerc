@@ -12,7 +12,7 @@ exclude_lines =
     raise AssertionError
     raise NotImplementedError
 	raise LookupError
-	raise BadSignalWArning
+	raise BadSignalWarning
 	raise IncorrectFileType
 	raise ValueError
 	except
