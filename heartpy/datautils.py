@@ -109,7 +109,9 @@ def get_data(filename, delim=',', column_name='None', encoding=None,
     >>> get_data(filepath, ignore_extension = True)
     array([530., 518., 506., ..., 492., 493., 494.])
 
-    >>> 
+    You can specify column names in the same way when using ignore_extension
+    >>> filepath = resource_filename(__name__, 'data/data2.log')
+    >>> data = get_data(filepath, column_name = 'hr', ignore_extension = True)
     '''
     file_ext = filename.split('.')[-1]
     if file_ext == 'csv' or file_ext == 'txt':
