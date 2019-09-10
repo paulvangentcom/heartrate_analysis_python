@@ -88,3 +88,4 @@ V1.2
 - Added function load_exampledata() that loads the available example data files directly from github.
 - Added several jupyter notebooks in Examples folder, illustrating how to work with different types of data.
 - Added function to reject outliers in RR-list and compute measures based on cleaned list. See: clean_rr_intervals()
+- Added build and code coverage badges and support
