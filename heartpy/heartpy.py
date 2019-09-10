@@ -196,6 +196,25 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     '34.743'
     >>> '%.3f' %m['lf/hf']
     '5.626'
+
+    High precision mode will upsample 200ms of data surrounding detected peak
+    and attempt to estimate the peak's real position with higher accuracy.
+    Use high_precision_fs to set the virtual sample rate to which the peak
+    will be upsampled (e.g. 1000Hz gives an estimated 1ms accuracy)
+    >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
+    ... high_precision = True, high_precision_fs = 1000.0)
+
+    Finally setting reject_segmentwise will reject segments with more than 30% rejected beats
+    See check_binary_quality in the peakdetection.py module.
+    >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
+    ... reject_segmentwise = True)
+
+    Final test for code coverage, let's turn all bells and whistles on that haven't been
+    tested yet
+    >>> data, _ = hp.load_exampledata(0)
+    >>> wd, m = hp.process(data, sample_rate = 100.0, calc_freq = True, 
+    ... interp_clipping = True, clipping_scale = True, hampel_correct = True,
+    ... reject_segmentwise = True, clean_rr = True)
     '''
     t1 = time.clock()
 
@@ -206,7 +225,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     if hampel_correct:
         hrdata = enhance_peaks(hrdata)
-        hrdata = hampel_correcter(hrdata, sample_rate, filtsize=sample_rate)
+        hrdata = hampel_correcter(hrdata, sample_rate)
 
     working_data['hr'] = hrdata
     rol_mean = rolling_mean(hrdata, windowsize, sample_rate)
@@ -236,7 +255,9 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     if calc_freq:
         working_data, measures = calc_fd_measures(method=freq_method, measures=measures,
                                                   working_data = working_data)
-    if report_time:
+    
+    #report time if requested. Exclude from tests, output is untestable.
+    if report_time: # pragma: no cover
         print('\nFinished in %.8s sec' %(time.clock()-t1))
 
     return working_data, measures
@@ -324,6 +345,18 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     measures (m) dict now contains a list of that measure for each segment.
     >>> [round(x, 1) for x in m['bpm']]
     [100.0, 96.8, 97.2, 97.9, 96.7, 96.8, 96.8, 95.0, 92.9, 96.7, 99.2]
+
+    Specifying mode = 'fast' will run peak detection once and use detections
+    to compute measures over each segment. Useful for speed ups, but typically
+    the full mode has better results.
+    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5,
+    ... mode = 'fast', replace_outliers = True)
+
+    You can specify the outlier detection method ('iqr' - interquartile range, or 'z-score' for 
+    modified z-score approach).
+
+
+
     '''
 
     assert 0 <= segment_overlap < 1.0, 'value error: segment_overlap needs to be \
@@ -397,46 +430,46 @@ def run_tests():
 
     print('testing analysis')
     results = doctest.testmod(analysis)
-    if results.failed == 0:
+    if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
         
     print('testing datautils')
     results = doctest.testmod(datautils)
-    if results.failed == 0:
+    if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing filtering')
     results = doctest.testmod(filtering)
-    if results.failed == 0:
-        print('success!')
+    if results.failed == 0: # pragma: no cover
+        print('success!') 
         succeeded += 1
 
     print('testing peakdetection')
     results = doctest.testmod(peakdetection)
-    if results.failed == 0:
+    if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing preprocessing')
     results = doctest.testmod(preprocessing)
-    if results.failed == 0:
+    if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing visualization utils')
     results = doctest.testmod(visualizeutils)
-    if results.failed == 0:
+    if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing main processing pipeline')
     from . import heartpy as hptester
     results = doctest.testmod(hptester)
-    if results.failed == 0:
+    if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
-    if succeeded == 7:
+    if succeeded == 7: # pragma: no cover
         print('all tests passed, ready to go!')

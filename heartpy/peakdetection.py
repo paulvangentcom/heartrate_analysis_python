@@ -75,6 +75,9 @@ def make_windows(data, sample_rate, windowsize=120, overlap=0, min_size=20):
     >>> indices = make_windows(data, 100.0, windowsize = 30, overlap = 0.5, min_size = 20)
     >>> indices.shape
     (9, 2)
+
+    Specifying min_size = -1 will include the last window no matter what
+    >>> indices = make_windows(data, 100.0, windowsize = 30, overlap = 0.5, min_size = -1)
     '''
     ln = len(data)
     window = windowsize * sample_rate
@@ -88,7 +91,7 @@ def make_windows(data, sample_rate, windowsize=120, overlap=0, min_size=20):
         start += stepsize
         end += stepsize
     
-    if min_size == -1:
+    if min_size == -1: 
         slices[-1] = (slices[-1][0], len(data))
     elif (ln - start) / sample_rate >= min_size:
         slices.append((start, ln))

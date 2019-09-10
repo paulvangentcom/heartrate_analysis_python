@@ -105,7 +105,7 @@ def get_data(filename, delim=',', column_name='None', encoding=None,
 
     You can any csv formatted text file no matter the extension if you
     set ignore_extension to True:
-    >>> filepath = resource_filename(__name__, 'data/data.csv')
+    >>> filepath = resource_filename(__name__, 'data/data.log')
     >>> get_data(filepath, ignore_extension = True)
     array([530., 518., 506., ..., 492., 493., 494.])
 
@@ -123,14 +123,14 @@ Is column name specified correctly?\n The following error was provided: %s'
                                  %(column_name, filename, error))
         elif column_name == 'None':
             hrdata = np.genfromtxt(filename, delimiter=delim, dtype=np.float64)
-        else:
+        else: # pragma: no cover
             raise LookupError('\nError: column name "%s" not found in header of "%s".\n'
                               %(column_name, filename))
     elif file_ext == 'mat':
         data = loadmat(filename)
         if column_name != "None":
             hrdata = np.array(data[column_name][:, 0], dtype=np.float64)
-        else:
+        else: # pragma: no cover
             raise LookupError('\nError: column name required for Matlab .mat files\n\n')
     else:
         if ignore_extension:
@@ -142,9 +142,9 @@ Is column name specified correctly?\n The following error was provided: %s'
                     raise LookupError('\nError loading column "%s" from file "%s". \
 Is column name specified correctly?\n' 
                                       %(column_name, filename))
-            elif column_name == 'None':
+            elif column_name == 'None': # pragma: no cover
                 hrdata = np.genfromtxt(filename, delimiter=delim, dtype=np.float64)
-            else:
+            else: # pragma: no cover
                 raise LookupError('\nError: column name "%s" not found in header of "%s".\n'
                                   %(column_name, filename))
         else:
@@ -295,7 +295,9 @@ def rolling_mean(data, windowsize, sample_rate):
     rol_mean = np.insert(rol_mean, 0, missing_vals)
     rol_mean = np.append(rol_mean, missing_vals)
 
-    if len(rol_mean) != len(data):
+    #only to catch length errors that sometimes unexplicably occur. 
+    ##Generally not executed, excluded from testing and coverage
+    if len(rol_mean) != len(data): # pragma: no cover
         lendiff = len(rol_mean) - len(data)
         if lendiff < 0:
             rol_mean = np.append(rol_mean, 0)
