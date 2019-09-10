@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 __all__ = ['plotter',
            'segment_plotter']
 
-def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Detection'):
+def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Detection'): # pragma: no cover
     '''plots the analysis results.
 
     Function that uses calculated measures and data stored in the working_data{} and measures{}
@@ -85,7 +85,7 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
         return plt
 
 def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detection',
-                    path = '', start=0, end=None, step=1):
+                    path = '', start=0, end=None, step=1): # pragma: no cover
     '''plots analysis results
    
     Function that plots the results of segmentwise processing of heart rate signal
