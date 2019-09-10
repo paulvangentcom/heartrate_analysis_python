@@ -15,7 +15,7 @@ Hidden helper functions
 - 'butter_bandpass' -- returns polynomials for bandpass IIR butterworth filter
 '''
 
-from scipy.signal import butter, filtfilt
+from scipy.signal import butter, filtfilt, iirnotch
 import numpy as np
 
 from .datautils import MAD
@@ -140,7 +140,6 @@ def butter_bandpass(lowcut, highcut, sample_rate, order=2):
     b, a = butter(order, [low, high], btype='band')
     return b, a
 
-
 def filter_signal(data, cutoff, sample_rate, order, filtertype='lowpass',
                   return_top = False):
     '''Apply the specified filed
@@ -163,6 +162,16 @@ def filter_signal(data, cutoff, sample_rate, order, filtertype='lowpass',
     order : int
         the filter order 
         default : 2
+
+    filtertype : str
+        The type of filter to use. Available:
+            - lowpass : a lowpass butterworth filter
+            - highpass : a highpass butterworth filter
+            - bandpass : a bandpass butterworth filter
+            - notch : a notch filter around specified frequency range
+        both the highpass and notch filter are useful for removing baseline wander. The notch
+        filter is especially useful for removing baseling wander in ECG signals.
+
 
     Returns
     -------
@@ -196,6 +205,8 @@ def filter_signal(data, cutoff, sample_rate, order, filtertype='lowpass',
     >>> print(np.around(filtered[0:6], 3))
     [-12.012 -23.159 -34.261 -45.12  -55.541 -65.336]
 
+    A Notch filter is also available
+
     Finally we can use the return_top flag to only return the filter response that
     has amplitute above zero. We're only interested in the peaks, and sometimes
     this can improve peak prediction:
@@ -204,15 +215,19 @@ def filter_signal(data, cutoff, sample_rate, order, filtertype='lowpass',
     >>> filtered[48:53]
     array([ 0.        ,  0.        ,  0.40944503, 17.08776349, 35.67256091])
     '''
-    if filtertype == 'lowpass':
+    if filtertype.lower() == 'lowpass':
         b, a = butter_lowpass(cutoff, sample_rate, order=order)
-    elif filtertype == 'highpass':
+    elif filtertype.lower() == 'highpass':
         b, a = butter_highpass(cutoff, sample_rate, order=order)
-    elif filtertype == 'bandpass':
+    elif filtertype.lower() == 'bandpass':
         assert type(cutoff) == tuple or list or np.array, 'if bandpass filter is specified, \
 cutoff needs to be array or tuple specifying lower and upper bound: [lower, upper].'
         b, a = butter_bandpass(cutoff[0], cutoff[1], sample_rate, order=order)
+    elif filtertype.lower() == 'notch':
+        b, a = iirnotch(cutoff, Q = 0.005, fs = sample_rate)
+
     filtered_data = filtfilt(b, a, data)
+    
     if return_top:
         return np.clip(filtered_data, a_min = 0, a_max = None)
     else:
