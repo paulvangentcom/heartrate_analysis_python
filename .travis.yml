@@ -1,0 +1,18 @@
+language: python
+
+python:
+  - "3.6"
+
+install:
+  # Install the codecov pip dependency
+  - pip install codecov
+  # run install to get dependencies and heartpy installed
+  - python setup.py install
+
+# Run the unit test
+script:
+  - coverage run run_tests.py
+
+# Push the results back to codecov
+after_success:
+  - codecov
