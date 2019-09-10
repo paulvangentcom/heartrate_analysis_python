@@ -1,11 +1,8 @@
 language: python
 
-matrix:
-  include:
-  - os: linux
-    env: PYTHON=2.7
-  - os: linux
-    env: PYTHON=3.6
+python:
+    - "2.7"
+    - "3.6"
     
 install:
 python setup.py install
