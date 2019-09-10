@@ -349,8 +349,7 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     Specifying mode = 'fast' will run peak detection once and use detections
     to compute measures over each segment. Useful for speed ups, but typically
     the full mode has better results.
-    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5,
-    ... mode = 'fast', replace_outliers = True)
+    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5, mode = 'fast', replace_outliers = True)
 
     You can specify the outlier detection method ('iqr' - interquartile range, or 'z-score' for 
     modified z-score approach).
@@ -408,11 +407,13 @@ use either \'iqr\' or \'z-score\''
     if replace_outliers:
         if outlier_method.lower() == 'iqr':
             for k in s_measures.keys():
-                if k not in ['nn20', 'nn50', 'interp_rr_function', 'interp_rr_linspace']: #skip these measures
+                if k not in ['nn20', 'nn50', 'interp_rr_function', 
+                             'interp_rr_linspace', 'segment_indices']: #skip these measures
                     s_measures[k] = outliers_iqr_method(s_measures[k])
         elif outlier_method.lower() == 'z-score':
             for k in s_measures.keys():
-                if k not in ['nn20', 'nn50', 'interp_rr_function', 'interp_rr_linspace']: #skip these measures
+                if k not in ['nn20', 'nn50', 'interp_rr_function', 
+                             'interp_rr_linspace', 'segment_indices']: #skip these measures
                     s_measures[k] = outliers_modified_z(s_measures[k])
                 s_measures[k] = outliers_modified_z(s_measures[k])
 
