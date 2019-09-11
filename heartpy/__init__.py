@@ -2,7 +2,7 @@ from .heartpy import *
 
 __name__ = "HeartPy"
 __author__ = "Paul van Gent"
-__version__ = "Version 1.2.3"
+__version__ = "Version 1.2.4"
 __license__ = "GNU General Public License V3.0"
 
 

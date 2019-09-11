@@ -26,8 +26,8 @@ That's it!
 
 The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
 
-# Python 2.7
-The module compiles and and runs fine on Python 2.7, **but** as of now the unit tests fail due to different formatting of outputs between Python 2 and Python 3. You can still install and use HeartPy on Python 2.7 if you want.
+# Python 2.7 support
+The module compiles and and runs fine on Python 2.7, **but** the unit tests fail due to formatting differences in outputs between Python 2 and Python 3. You can still install and use HeartPy on Python 2.7 if you want.
 
 # More information
 **HeartPy**, the **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistic driving and cycling experiments.
