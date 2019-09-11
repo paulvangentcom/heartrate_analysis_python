@@ -1,3 +1,9 @@
+# HeartPy - Python Heart Rate Analysis Toolkit
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1324311.svg)](https://doi.org/10.5281/zenodo.1324311) [![Build Status](https://travis-ci.org/paulvangentcom/heartrate_analysis_python.svg?branch=master)](https://travis-ci.org/paulvangentcom/heartrate_analysis_python) [![codecov](https://codecov.io/gh/paulvangentcom/heartrate_analysis_python/branch/master/graph/badge.svg)](https://codecov.io/gh/paulvangentcom/heartrate_analysis_python) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/heartpy)
+
+
+
 # Structural update
 
 HeartPy V1.2 has landed! The structure of the package has been reworked to be in separate modules now in preparation of the next big update, which will feature many analysis expansions and the first steps towards a GUI for HeartPy. HeartPy has been growing steadily and had reached the point where it became cluttered and unwieldy to keep in a single file. The API remains unchanged.
@@ -20,11 +26,10 @@ That's it!
 
 The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
 
-# HeartPy - Python Heart Rate Analysis Toolkit
+# Python 2.7
+The module compiles and and runs fine on Python 2.7, **but** as of now the unit tests fail due to different formatting of outputs between Python 2 and Python 3. You can still install and use HeartPy on Python 2.7 if you want.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1324311.svg)](https://doi.org/10.5281/zenodo.1324311) [![Build Status](https://travis-ci.org/paulvangentcom/heartrate_analysis_python.svg?branch=master)](https://travis-ci.org/paulvangentcom/heartrate_analysis_python) [![codecov](https://codecov.io/gh/paulvangentcom/heartrate_analysis_python/branch/master/graph/badge.svg)](https://codecov.io/gh/paulvangentcom/heartrate_analysis_python) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/heartpy)
-
-
+# More information
 **HeartPy**, the **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistic driving and cycling experiments.
 
 The module takes a discrete heart rate signal and outputs time-domain and frequency-domain measures often found in scientific literature:
