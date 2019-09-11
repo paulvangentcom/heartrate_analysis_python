@@ -14,10 +14,13 @@ setuptools.setup(
     url="https://github.com/paulvangentcom/heartrate_analysis_python",
     packages=["heartpy"],
     install_requires=[
+        "numpy<=1.15;python_version=='2.7'",
         "numpy<=1.15;python_version=='3.4'",
         "numpy;python_version>='3.5'", 
+        "scipy<=1.1.0;python_version=='2.7'",
         "scipy<=1.2.0;python_version=='3.4'",
         "scipy;python_version>='3.5'", 
+        "matplotlib<=2.2.3;python_version=='2.7'",
         "matplotlib<=2.2.3;python_version=='3.4'",
         "matplotlib<=3.0.0;python_version=='3.5'",
         'matplotlib;python_version>="3.6"'],
@@ -26,7 +29,8 @@ setuptools.setup(
         '': ['data/*.csv', 'data/*.mat', 'data/*.log']       
     },
     classifiers=[
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",

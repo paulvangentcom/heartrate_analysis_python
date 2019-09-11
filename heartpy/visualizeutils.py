@@ -53,8 +53,9 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     
     Then we can visualise
     >>> plot_object = plotter(wd, m, show=False, title='some awesome title')
-    >>> type(plot_object)
-    <class 'module'>
+
+    This returns a plot object which can be visualized or saved or appended. 
+    See matplotlib API for more information on how to do this.
     
     A matplotlib plotting object is returned. This can be further processed and saved 
     to a file. 
