@@ -212,8 +212,8 @@ def filter_signal(data, cutoff, sample_rate, order, filtertype='lowpass',
     this can improve peak prediction:
     >>> filtered = filter_signal(data, cutoff = [0.75, 3.5], sample_rate = 100.0, 
     ... order = 3, filtertype='bandpass', return_top = True)
-    >>> filtered[48:53]
-    array([ 0.        ,  0.        ,  0.40944503, 17.08776349, 35.67256091])
+    >>> print(np.around(filtered[48:53], 3))
+    [ 0.     0.     0.409 17.088 35.673]
     '''
     if filtertype.lower() == 'lowpass':
         b, a = butter_lowpass(cutoff, sample_rate, order=order)
