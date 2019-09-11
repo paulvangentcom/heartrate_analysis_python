@@ -19,12 +19,8 @@ setuptools.setup(
         '': ['data/*.csv', 'data/*.mat', 'data/*.log']       
     },
     classifiers=[
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8-dev",
-        "Programming Language :: Python :: nightly",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
     ],
