@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="heartpy",
-    version="1.2.2a",
+    version="1.2.3",
     author="Paul van Gent",
     author_email="P.vanGent@tudelft.nl",
     description="Heart Rate Analysis Toolkit",
@@ -13,12 +13,21 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/paulvangentcom/heartrate_analysis_python",
     packages=["heartpy"],
-    install_requires=["numpy", "scipy", "matplotlib>=1.0.1"],
+    install_requires=[
+        "numpy<=1.15;python_version=='3.4'",
+        "numpy;python_version>='3.5'", 
+        "scipy<=1.2.0;python_version=='3.4'",
+        "scipy;python_version>='3.5'", 
+        "matplotlib<=2.2.3;python_version=='3.4'",
+        "matplotlib<=3.0.0;python_version=='3.5'",
+        'matplotlib;python_version>="3.6"'],
     include_package_data=True,
     package_data={
         '': ['data/*.csv', 'data/*.mat', 'data/*.log']       
     },
     classifiers=[
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: GNU General Public License (GPL)",

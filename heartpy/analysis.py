@@ -27,7 +27,7 @@ from scipy.interpolate import UnivariateSpline
 from scipy.signal import welch, periodogram
 
 from .datautils import MAD, rolling_mean, outliers_iqr_method, outliers_modified_z
-from . import peakdetection
+import heartpy as hp
 
 
 __all__ = ['calc_rr',
@@ -502,8 +502,8 @@ def calc_breathing(rrlist, hrdata, sample_rate, measures={}, working_data={}):
     interp = UnivariateSpline(x, rrlist, k=3)
     breathing = interp(x_new)
     breathing_rolling_mean = rolling_mean(breathing, 0.75, sample_rate)
-    peaks, working_data = peakdetection.detect_peaks(breathing, breathing_rolling_mean, 1, sample_rate, 
-                                                     update_dict=False)
+    peaks, working_data = hp.peakdetection.detect_peaks(breathing, breathing_rolling_mean, 1, sample_rate, 
+                                                        update_dict=False)
     
     if len(peaks) > 1:
         signaltime = len(hrdata) / sample_rate

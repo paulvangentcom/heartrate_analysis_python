@@ -474,3 +474,5 @@ def run_tests():
 
     if succeeded == 7: # pragma: no cover
         print('all tests passed, ready to go!')
+    else:
+        print('some tests failed...')

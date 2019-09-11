@@ -22,7 +22,8 @@ The official documentation is online! [You can find the official documentation h
 
 # HeartPy - Python Heart Rate Analysis Toolkit
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1324311.svg)](https://doi.org/10.5281/zenodo.1324311) [![Build Status](https://travis-ci.org/paulvangentcom/heartrate_analysis_python.svg?branch=master)](https://travis-ci.org/paulvangentcom/heartrate_analysis_python) [![codecov](https://codecov.io/gh/paulvangentcom/heartrate_analysis_python/branch/master/graph/badge.svg)](https://codecov.io/gh/paulvangentcom/heartrate_analysis_python)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1324311.svg)](https://doi.org/10.5281/zenodo.1324311) [![Build Status](https://travis-ci.org/paulvangentcom/heartrate_analysis_python.svg?branch=master)](https://travis-ci.org/paulvangentcom/heartrate_analysis_python) [![codecov](https://codecov.io/gh/paulvangentcom/heartrate_analysis_python/branch/master/graph/badge.svg)](https://codecov.io/gh/paulvangentcom/heartrate_analysis_python) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/heartpy)
+
 
 **HeartPy**, the **Python Heart Rate Analysis Toolkit** is a module for heart rate analysis in Python. It started as pure-python implementation to analyse physiological data taken in naturalistic driving and cycling experiments.
 

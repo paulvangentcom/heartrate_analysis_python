@@ -133,8 +133,8 @@ def append_dict(dict_obj, measure_key, measure_value):
 
     A new key will be created if it doesn't exist:
     >>> example = append_dict(example, 'different_key', 'hello there!')
-    >>> example.keys()
-    dict_keys(['call', 'different_key'])
+    >>> sorted(example.keys())
+    ['call', 'different_key']
     ''' 
     try:
         dict_obj[measure_key].append(measure_value)
