@@ -435,7 +435,7 @@ def calc_fd_measures(method='welch', measures={}, working_data={}):
     elif method=='periodogram':
         frq, psd = periodogram(interpolated_func(rr_x_new), fs=1000.0)
     elif method=='welch':
-        frq, psd = welch(interpolated_func(rr_x_new), fs=1000.0, nperseg=100000)
+        frq, psd = welch(interpolated_func(rr_x_new), fs=1000.0, nperseg=len(rr_x_new) - 1)
     else:
         raise ValueError("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
     
