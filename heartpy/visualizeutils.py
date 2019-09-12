@@ -166,6 +166,6 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
 
         #plot it using built-in plotter
         p = plotter(wd_segment, m_segment, show=False)
-        p.savefig('%s%i.jpg' %(path, filenum))
+        p.savefig('%s%i.png' %(path, filenum))
         p.close()
         filenum += 1
