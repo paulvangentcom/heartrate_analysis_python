@@ -8,8 +8,11 @@ Data scaling
 - 'scale_section' -- applies scale_data within a moving window function
 - 'enhance_peaks' -- function to apply some linear scaling in order
                      to bring out peaks.
+- 'enhance_ecg_peaks' -- function that uses convolutions to improve signal
+                         to noise ratio.
 - 'flip_signal' -- inverts the signal. Useful when using certain types of ECG
-
+- 'enhance_ecg_peaks' -- uses convolutions and synthetic QRS templates to improve
+                         signal-to-noise ratio in ECG data.
 
 Clipping tools
 --------------
@@ -20,17 +23,26 @@ Hidden helper functions
 -----------------------
 - 'mark_clipping' -- marks beginning and end of clipping segments. Used by
                      interpolate_clipping() to find clipping segments.
+- 'denoise_convolutions' -- convolutional filter that accepts template(s)
+                            and applies them to signal for a specified number
+                            of iterations
+- 'generate_ecg_templates' -- generates a stack of synthetic ECG templates to use
+                              with 'denoise_convolutions'
 '''
 
 import numpy as np
-from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import UnivariateSpline, interp1d
+
+np.seterr(divide='ignore') #disable div by zero warnings
+np.seterr(invalid='ignore')
 
 from .filtering import filter_signal
 
 
 __all__ = ['scale_data',
            'scale_sections',
-           'enhance_peaks'
+           'enhance_peaks',
+           'enhance_ecg_peaks',
            'interpolate_clipping',
            'flip_signal']
 
@@ -334,8 +346,9 @@ def enhance_peaks(hrdata, iterations=2):
     
     Parameters
     ----------
-    data : 1-d numpy array or list 
+    hrdata : 1-d numpy array or list 
         sequence containing heart rate data
+
     iterations : int
         the number of scaling steps to perform 
         default : 2
@@ -358,3 +371,126 @@ def enhance_peaks(hrdata, iterations=2):
         hrdata = np.power(hrdata, 2)
         hrdata = scale_data(hrdata)
     return hrdata  
+
+
+def enhance_ecg_peaks(hrdata, sample_rate, iterations=4, aggregation='mean',
+                      notch_filter=True):
+    '''enhances ECG peaks
+
+    Function that convolves synthetic QRS templates with the signal, leading
+    to a strong increase signal-to-noise ratio. Function ends with an optional
+    Notch filterstep (default : true) to reduce noise from the iterating
+    convolution steps.
+
+    Parameters
+    ----------
+    hrdata : 1-d numpy array or list 
+        sequence containing heart rate data
+
+    sample_rate : int or float
+        sample rate with which the data is sampled 
+
+    iterations : int
+        how many convolutional iterations should be run. More will result in
+        stronger peak enhancement, but over a certain point (usually between 12-16)
+        overtones start appearing in the signal. Only increase this if the peaks
+        aren't amplified enough.
+        default : 4
+
+    aggregation : str
+        how the data from the different convolutions should be aggregated.
+        Can be either 'mean' or 'median'.
+        default : mean
+
+    notch_filter : bool
+        whether to apply a notch filter after the last convolution to get rid of
+        remaining low frequency noise.
+        default : true
+
+    Returns
+    -------
+    output : 1d array
+        The array containing the filtered data with enhanced peaks
+
+    Examples
+    --------
+    First let's import the module and load the data
+    >>> import heartpy as hp
+    >>> data, timer = hp.load_exampledata(1)
+    >>> sample_rate = hp.get_samplerate_mstimer(timer)
+
+    After loading the data we call the function like so:
+    >>> filtered_data = enhance_ecg_peaks(data, sample_rate, iterations = 3)
+
+    By default the module uses the mean to aggregate convolutional outputs. It
+    is also possible to use the median.
+    >>> filtered_data = enhance_ecg_peaks(data, sample_rate, iterations = 3,
+    ... aggregation = 'median', notch_filter = False)
+
+    In the last example we also disabled the notch filter.
+
+    '''
+
+    #assign output
+    output = np.copy(hrdata)
+
+    #generate synthetic QRS complexes
+    templates = generate_ecg_templates(sample_rate)
+
+    for i in range(int(iterations)):
+        convolved = denoise_convolutions(output, sample_rate, templates)
+        if aggregation == 'mean':
+            output = np.nanmean(convolved, axis=0)
+        elif aggregation == 'median':
+            output = np.nanmedian(convolved, axis=0)
+
+    #offset signal shift (shifts 1 datapoint for every iteration after the first)
+    output = output[int(iterations) - 1:-int(iterations)]
+
+    if notch_filter:
+        output = filter_signal(output, 0.05, sample_rate, filtertype='notch')
+
+    return output
+
+
+def generate_ecg_templates(sample_rate, widths=[50, 60, 70, 80, 100],
+                           presets=[[0, 2, 2.5, 3, 3.5, 5],
+                                    [0, 1, 1.5, 2, 2.5, 3],
+                                    [0, 3, 3.5, 4, 4.5, 6]],
+                           amplitude = [0, -0.1, 1, -0.5, 0, 0]):
+    '''helper function for enhance_ecg_peaks
+    
+    Helper function that generates synthetic QRS complexes of varying sizes
+    to convolve with the signal.
+    '''
+
+    templates = []
+
+    for i in presets:
+        for j in widths:
+            #duration < 120ms
+            duration = (j / 1000) * sample_rate
+            step = duration / len(i)
+            new_t = [int(step * x) for x in i]
+            new_x = np.linspace(new_t[0], new_t[-1], new_t[-1])
+            #interpolate peak to fit in correct sampling rate
+            interp_func = interp1d(new_t, amplitude, kind='linear')
+            templates.append(interp_func(new_x))
+    
+    return templates
+
+
+def denoise_convolutions(data, sample_rate, templates):
+    '''helper function for enhance_ecg_peaks
+    
+    Helper function that convolves the generated synthetic QRS templates
+    with the provided signal.
+    '''
+
+    convolutions = []
+
+    for i in range(len(templates)):
+            convolved = np.convolve(data, templates[i], mode='same')
+            convolutions.append(convolved)
+                         
+    return np.asarray(convolutions)

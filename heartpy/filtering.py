@@ -3,10 +3,12 @@ Functions for data filtering tasks.
 
 Frequency filtering
 -------------------
-- 'filter_singnal' -- filter specified frequency range from signal
+- 'filter_signal' -- filter specified frequency range from signal
 - 'hampel_filter' -- a type of median filter used to remove outliers
 - 'hampel_correcter' -- filter based on variant of hampel_filter that 
                         has good noise suppression characteristics.
+- 'remove_baseline_wander' -- notch filter with default settings to remove
+                              baseline wander (low freq noise) from ECG
 
 Hidden helper functions
 -----------------------
@@ -140,7 +142,8 @@ def butter_bandpass(lowcut, highcut, sample_rate, order=2):
     b, a = butter(order, [low, high], btype='band')
     return b, a
 
-def filter_signal(data, cutoff, sample_rate, order, filtertype='lowpass',
+
+def filter_signal(data, cutoff, sample_rate, order=2, filtertype='lowpass',
                   return_top = False):
     '''Apply the specified filed
 
@@ -175,9 +178,8 @@ def filter_signal(data, cutoff, sample_rate, order, filtertype='lowpass',
 
     Returns
     -------
-    out : tuple
-        numerator and denominator (b, a) polynomials
-        of the defined Butterworth IIR filter.
+    out : 1d array
+        1d array containing the filtered data
 
     Examples
     --------
@@ -232,6 +234,43 @@ cutoff needs to be array or tuple specifying lower and upper bound: [lower, uppe
         return np.clip(filtered_data, a_min = 0, a_max = None)
     else:
         return filtered_data
+
+
+def remove_baseline_wander(data, sample_rate, cutoff=0.05):
+    '''removes baseline wander
+
+    Function that uses a Notch filter to remove baseline
+    wander from (especially) ECG signals
+
+    Parameters
+    ----------
+    data : 1-dimensional numpy array or list 
+        Sequence containing the to be filtered data
+
+    sample_rate : int or float
+        the sample rate with which the passed data sequence was sampled
+
+    cutoff : int, float 
+        the cutoff frequency of the Notch filter. We recommend 0.05Hz.
+        default : 0.05
+
+    Returns
+    -------
+    out : 1d array
+        1d array containing the filtered data
+
+    Examples
+    --------
+    >>> import heartpy as hp
+    >>> data, _ = hp.load_exampledata(0)
+
+    baseline wander is removed by calling the function and specifying
+    the data and sample rate.
+    >>> filtered = remove_baseline_wander(data, 100.0)
+    '''
+
+    return filter_signal(data = data, cutoff = cutoff, sample_rate = sample_rate,
+                         filtertype='notch')
 
 
 def hampel_filter(data, filtsize=6):

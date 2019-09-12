@@ -21,8 +21,9 @@ from .datautils import get_data, get_samplerate_mstimer, get_samplerate_datetime
                        rolling_mean, outliers_iqr_method, outliers_modified_z, \
                        load_exampledata
 from .preprocessing import scale_data, scale_sections, interpolate_clipping, \
-                           flip_signal, enhance_peaks
-from .filtering import filter_signal, hampel_filter, hampel_correcter
+                           flip_signal, enhance_peaks, enhance_ecg_peaks
+from .filtering import filter_signal, hampel_filter, hampel_correcter, \
+                       remove_baseline_wander
 from .peakdetection import make_windows, append_dict, fit_peaks, check_peaks, \
                            check_binary_quality, interpolate_peaks
 from .visualizeutils import plotter, segment_plotter
@@ -30,6 +31,7 @@ from .analysis import calc_rr, calc_rr_segment, clean_rr_intervals, calc_ts_meas
                       calc_fd_measures, calc_breathing
 
 __all__ = ['enhance_peaks',
+           'enhance_ecg_peaks',
            'get_data',
            'get_samplerate_mstimer',
            'get_samplerate_datetime',
@@ -40,6 +42,7 @@ __all__ = ['enhance_peaks',
            'process',
            'process_segmentwise',
            'flip_signal',
+           'remove_baseline_wander',
            'scale_data',
            'scale_sections',
            'segment_plotter',
