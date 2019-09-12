@@ -367,7 +367,7 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     return working_data, measures
 
 
-def calc_fd_measures(method='welch', measures={}, working_data={}):
+def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_data={}):
     '''calculates the frequency-domain measurements.
 
     Function that calculates the frequency-domain measurements for HeartPy.
@@ -377,7 +377,11 @@ def calc_fd_measures(method='welch', measures={}, working_data={}):
     method : str
         method used to compute the spectrogram of the heart rate.
         available methods: fft, periodogram, and welch
-        default: welch
+        default : welch
+
+    square_spectrum : bool
+        whether to square the power spectrum returned.
+        default : true
 
     measures : dict
         dictionary object used by heartpy to store computed measures. Will be created

@@ -51,9 +51,10 @@ __all__ = ['enhance_peaks',
 
 
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
-            calc_freq=False, freq_method='welch', interp_clipping=False, clipping_scale=False,
-            interp_threshold=1020, hampel_correct=False, bpmmin=40, bpmmax=180,
-            reject_segmentwise=False, high_precision=False, high_precision_fs=1000.0,
+            calc_freq=False, freq_method='welch', freq_square=True,
+            interp_clipping=False, clipping_scale=False, interp_threshold=1020, 
+            hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False, 
+            high_precision=False, high_precision_fs=1000.0, 
             clean_rr=False, clean_rr_method='iqr', measures={}, working_data={}):
     '''processes passed heart rate data.
     
@@ -84,6 +85,10 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 
         'periodogram', and 'welch' (Welch's method). 
         default : 'welch'
+
+    freq_square : bool
+        whether to square the power spectrum returned when computing frequency measures
+        default : true
 
     interp_clipping : bool 
         whether to detect and interpolate clipping segments of the signal 
