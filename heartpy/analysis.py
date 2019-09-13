@@ -1,25 +1,6 @@
 '''
 Functions that handle computation of heart rate (HR) and
 heart rate variability (HRV) measures.
-
-
-Time series
------------
-- 'calc_ts_measrues' -- Computes time-series measures.
-
-Frequency series
-----------------
-- 'calc_ts_measures' -- Computes frequency domain measures.
-- 'calc_breathing' -- Estimates breathingrate from peak-peak intervals.
-
-Helper functions
-----------------
-- 'calc_rr' -- Computes peak-peak measures.
-- 'update_rr' -- Updates peak-peak measure, helper function for some
-                 analysis steps.
-- 'calc_rr_segment' -- Computes rr-measures, helper function called
-                       when analysing data segmentwise with 
-                       heartpy.process_segmentwise() function.
 '''
 
 import numpy as np
@@ -65,9 +46,11 @@ def calc_rr(peaklist, sample_rate, working_data={}):
     Examples
     --------
     Let's assume we detected peaks at these positions in the signal:
+
     >>> peaklist = [200, 280, 405, 501, 615]
     
     It is then easy to call calc_rr to compute what we need:
+
     >>> wd = calc_rr(peaklist, sample_rate = 100.0)
     >>> wd['RR_list']
     array([ 800., 1250.,  960., 1140.])
@@ -117,9 +100,11 @@ def update_rr(working_data={}):
     Examples
     --------
     Let's assume we detected peaks at these positions in the signal:
+    
     >>> peaklist = [200, 280, 405, 410, 501, 615]
     
     And we subsequently ran further analysis:
+    
     >>> wd = calc_rr(peaklist, sample_rate = 100.0)
 
     The peak at position 410 is likely an incorrect detection and 
@@ -140,6 +125,7 @@ def update_rr(working_data={}):
     >>> wd = update_rr(wd)
 
     This will have generated a corrected RR_list object in the dictionary:
+    
     >>> wd['RR_list_cor']
     [800.0, 1250.0, 1140.0]
 
@@ -256,17 +242,20 @@ def clean_rr_intervals(sample_rate, working_data, method='iqr', calc_freq=False,
     Examples
     --------
     Let's load some data
+
     >>> import heartpy as hp
     >>> data, timer = hp.load_exampledata(1)
     >>> sample_rate = hp.get_samplerate_mstimer(timer)
     
     Run at least one analysis cycle first so that the dicts are populated
+
     >>> wd, m = hp.process(data, sample_rate)
     >>> wd = clean_rr_intervals(sample_rate, working_data = wd)
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '965.849', '803.449']
 
-    You can also specify the outlier rejection method to be ssed:
+    You can also specify the outlier rejection method to be used:
+
     >>> wd = clean_rr_intervals(sample_rate, working_data = wd, method = 'z-score')
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '965.849', '803.449']
@@ -327,16 +316,19 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     of course also be used separately.
 
     Assuming we have the following peak-peak distances:
+
     >>> import numpy as np
     >>> rr_list = [1020.0, 990.0, 960.0, 1000.0, 1050.0, 1090.0, 990.0, 900.0, 900.0, 950.0, 1080.0]
     
     we can then compute the other two required lists by hand for now:
+
     >>> rr_diff = np.diff(rr_list)
     >>> rr_sqdiff = np.power(rr_diff, 2)
     >>> wd, m = calc_ts_measures(rr_list, rr_diff, rr_sqdiff)
 
     All output measures are then accessible from the measures object through
     their respective keys:
+
     >>> print('%.3f' %m['bpm'])
     60.384
     >>> print('%.3f' %m['rmssd'])
@@ -405,17 +397,20 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     of course also be used separately.
 
     Let's load an example and get a list of peak-peak intervals
+
     >>> import heartpy as hp
     >>> data, _ = hp.load_exampledata(0)
     >>> wd, m = hp.process(data, 100.0)
     
     wd now contains a list of peak-peak intervals that has been cleaned of
     outliers ('RR_list_cor'). Calling the function then is easy
+
     >>> wd, m = calc_fd_measures(method = 'periodogram', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
     1.368
 
     Available methods are 'fft', 'welch' and 'periodogram'. To set another method, do:
+
     >>> wd, m = calc_fd_measures(method = 'fft', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
     1.368
@@ -490,11 +485,13 @@ def calc_breathing(rrlist, hrdata, sample_rate, measures={}, working_data={}):
     of course also be used separately.
 
     Let's load an example and get a list of peak-peak intervals
+
     >>> import heartpy as hp
     >>> data, _ = hp.load_exampledata(0)
     >>> wd, m = hp.process(data, 100.0)
 
     Breathing is then computed with the function
+
     >>> m = calc_breathing(wd['RR_list_cor'], data, sample_rate = 100.0, measures = m, working_data = wd)
     >>> round(m['breathingrate'], 3)
     0.161

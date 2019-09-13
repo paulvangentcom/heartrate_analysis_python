@@ -1,10 +1,5 @@
 '''
 Functions that help visualize results
-
-Plotting functions
-------------------
-- 'plotter' -- plots results of analysis
-- 'segment_plotter' -- writes plots of process_segmentwise to separate files
 '''
 
 import os
@@ -47,11 +42,13 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     Examples
     --------
     First let's load and analyse some data to visualise
+
     >>> import heartpy as hp
     >>> data, _ = hp.load_exampledata(0)
     >>> wd, m = hp.process(data, 100.0)
     
     Then we can visualise
+
     >>> plot_object = plotter(wd, m, show=False, title='some awesome title')
 
     This returns a plot object which can be visualized or saved or appended. 

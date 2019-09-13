@@ -1,27 +1,5 @@
 '''
 Functions for loading and slicing data
-
-Loading data
-------------
-- 'get_data' -- load data from file, supports .txt, .csv, .mat
-- 'load_exampledata' -- retrieves specified example data file from github
-
-Computing metrics
------------------
-- 'get_samplerate_mstimer' -- find samplerate of segment based on ms-timer
-- 'get_samplerate_datetime' -- find samplerate of segment based on datetime timer
-- 'MAD' -- find Median Absolute Deviation
-- 'rolling_mean' -- compute rolling mean
-
-Slicing data
-------------
-- 'outliers_iqr_method' -- remove outliers from array using interquartile-range
-- 'outliers_modified_z' -- remove outliers from array using modified Z-score approach
-
-Hidden helper functions
------------------------
-- 'sliding_window' -- segments data into windows using sliding window
-                      helper function for rolling_mean
 '''
 
 from datetime import datetime
@@ -78,38 +56,46 @@ def get_data(filename, delim=',', column_name='None', encoding=None,
     As an example, let's load two example data files included in the package
     For this we use pkg_resources for automated testing purposes, you don't need
     this when using the function.
+
     >>> from pkg_resources import resource_filename
     >>> filepath = resource_filename(__name__, 'data/data.csv')
 
     So, assuming your file lives at 'filepath', you open it as such:
+
     >>> get_data(filepath)
     array([530., 518., 506., ..., 492., 493., 494.])
 
     Files with multiple columns can be opened by specifying the 'column_name' where
     the data resides:
+
     >>> filepath = resource_filename(__name__, 'data/data2.csv')
 
     Again you don't need the above. It is there for automated testing.
+
     >>> get_data(filepath, column_name='timer')
     array([0.00000000e+00, 8.54790319e+00, 1.70958064e+01, ...,
            1.28192904e+05, 1.28201452e+05, 1.28210000e+05])
 
     You can open matlab files in much the same way by specifying the column
     where the data lives:
+
     >>> filepath = resource_filename(__name__, 'data/data2.mat')
 
     Again you don't need the above. It is there for automated testing.
     Open matlab file by specifying the column name as well:
+
     >>> get_data(filepath, column_name='hr')
     array([515., 514., 514., ..., 492., 494., 496.])
 
     You can any csv formatted text file no matter the extension if you
     set ignore_extension to True:
+
     >>> filepath = resource_filename(__name__, 'data/data.log')
     >>> get_data(filepath, ignore_extension = True)
     array([530., 518., 506., ..., 492., 493., 494.])
 
     You can specify column names in the same way when using ignore_extension
+
     >>> filepath = resource_filename(__name__, 'data/data2.log')
     >>> data = get_data(filepath, column_name = 'hr', ignore_extension = True)
     '''
@@ -173,10 +159,12 @@ def get_samplerate_mstimer(timerdata):
     Examples
     --------
     first we load a provided example dataset
+
     >>> data, timer = load_exampledata(example = 1)
     
     since it's a timer that counts miliseconds, we use this function.
     Let's also round to three decimals
+
     >>> round(get_samplerate_mstimer(timer), 3)
     116.996
 
@@ -189,7 +177,7 @@ def get_samplerate_mstimer(timerdata):
 
 def get_samplerate_datetime(datetimedata, timeformat='%H:%M:%S.%f'):
     '''determine sample rate based on datetime
-    
+
     Function to determine sample rate of data from datetime-based timer
     list or array.
 
@@ -200,23 +188,24 @@ def get_samplerate_datetime(datetimedata, timeformat='%H:%M:%S.%f'):
 
     timeformat : string
         the format of the datetime-strings in datetimedata
-        default : '%H:%M:%S.f' 
-                  24-hour based time including ms: e.g. 21:43:12.569
+        default : '%H:%M:%S.f' (24-hour based time including ms: e.g. 21:43:12.569)
 
     Returns
     -------
     out : float
         the sample rate as determined from the timer sequence provided
-        
+
     Examples
     --------
     We load the data like before
+
     >>> data, timer = load_exampledata(example = 2)
     >>> timer[0]
     '2016-11-24 13:58:58.081000'
 
     Note that we need to specify the timeformat used so that datetime understands
     what it's working with:
+
     >>> round(get_samplerate_datetime(timer, timeformat = '%Y-%m-%d %H:%M:%S.%f'), 3)
     100.42
     '''
@@ -418,9 +407,9 @@ def load_exampledata(example=0):
     example : int (0, 1, 2)
         selects example data used in docs of three datafiles.
         Available (see github repo for source of files):
-            0 : data.csv
-            1 : data2.csv
-            2 : data3.csv
+        0 : data.csv
+        1 : data2.csv
+        2 : data3.csv
         default : 0
 
     Returns
@@ -436,9 +425,12 @@ def load_exampledata(example=0):
     with HeartPy. It returns both the data and a timer if that is present
 
     For example:
+
     >>> data, _ = load_exampledata(0)
     >>> data[0:5]
     array([530., 518., 506., 494., 483.])
+
+    And another example:
 
     >>> data, timer = load_exampledata(1)
     >>> [round(x, 2) for x in timer[0:5]]

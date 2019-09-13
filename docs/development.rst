@@ -35,7 +35,7 @@ V1.0
 - Added segment rejection based on percentage of incorrect peaks.
 
 V1.0.1
-~~~~
+~~~~~~
 - Changed segmentwise rejection API to simplify plotting
 
 V1.1

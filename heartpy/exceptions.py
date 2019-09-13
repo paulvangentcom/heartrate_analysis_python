@@ -1,13 +1,5 @@
 '''
 Custom exceptions and warnings for HeartPy
-
-Signal Quality
---------------
-- 'BadSignalWarning' -- Exception that is raised when no heart rate
-                        appears present in passed signal.
-- 'IncorrectFileType' -- Exception that is raised when incorrect file
-                         type or incorrectly formatted file is provided
-                         to data loader
 '''
 
 __all__ = ['BadSignalWarning']

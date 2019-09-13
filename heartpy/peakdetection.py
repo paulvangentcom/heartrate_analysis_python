@@ -1,21 +1,5 @@
 '''
 functions for peak detection and related tasks
-
-Peak detection
---------------
-- 'detect_peaks' -- detects peaks based on threshold
-- 'fit_peaks' -- finds best peak detection fit using adaptive threshold
-- 'check_peaks' -- checks peaks for outliers based on anomalous peak-peak 
-                   distances and corrects
-- 'interpolate_peaks' -- Approximates peak position with higher sampling rate.
-
-Helper functions
-----------------
-- 'make_windows' -- slices data into windows
-- 'append_dict' -- used by process_segmentwise to append results
-- 'check_binary_quality' -- Checks signal in chunks and rejects if too many
-                            rejected peaks present. Proxy for poor signal
-                            quality.
 '''
 
 import numpy as np
@@ -68,15 +52,18 @@ def make_windows(data, sample_rate, windowsize=120, overlap=0, min_size=20):
     Examples
     --------
     Assuming a given example data file:
+
     >>> import heartpy as hp
     >>> data, _ = hp.load_exampledata(1)
     
     We can split the data into windows:
+
     >>> indices = make_windows(data, 100.0, windowsize = 30, overlap = 0.5, min_size = 20)
     >>> indices.shape
     (9, 2)
 
-    Specifying min_size = -1 will include the last window no matter what
+    Specifying min_size = -1 will include the last window no matter what:
+
     >>> indices = make_windows(data, 100.0, windowsize = 30, overlap = 0.5, min_size = -1)
     '''
     ln = len(data)
@@ -123,15 +110,18 @@ def append_dict(dict_obj, measure_key, measure_value):
     Examples
     --------
     Given a dict object 'example' with some data in it:
+
     >>> example = {}
     >>> example['call'] = ['hello']
 
-    We can use the function to append it
+    We can use the function to append it:
+
     >>> example = append_dict(example, 'call', 'world')
     >>> example['call']
     ['hello', 'world']
 
     A new key will be created if it doesn't exist:
+
     >>> example = append_dict(example, 'different_key', 'hello there!')
     >>> sorted(example.keys())
     ['call', 'different_key']
@@ -182,10 +172,9 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
 
     Now the peaklist has been appended to the working data dict. Let's look
     at the first five peak positions:
+
     >>> wd['peaklist'][0:5]
     [63, 165, 264, 360, 460]
-
-    Here you can see the positions of the first five peaks.
     '''
     rmean = np.array(rol_mean)
 
@@ -276,9 +265,11 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
     >>> rol_mean = rolling_mean(data, windowsize = 0.75, sample_rate = 100.0)
 
     We can then call this function and let the optimizer do its work:
+
     >>> wd = fit_peaks(data, rol_mean, sample_rate = 100.0)
 
-    Now the wd dict contains the best fit paramaters:
+    Now the wd dict contains the best fit paramater(s):
+
     >>> wd['best']
     20
 
@@ -287,10 +278,12 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
     
     The results of the peak detection using these parameters are included too.
     To illustrate, these are the first five detected peaks:
+
     >>> wd['peaklist'][0:5]
     [63, 165, 264, 360, 460]
 
     and the corresponding peak-peak intervals:
+
     >>> wd['RR_list'][0:4]
     array([1020.,  990.,  960., 1000.])
     '''
@@ -457,6 +450,7 @@ def interpolate_peaks(data, peaks, sample_rate, desired_sample_rate=1000.0, work
     Examples
     --------
     Given the output of a normal analysis and the first five peak-peak intervals:
+
     >>> import heartpy as hp
     >>> data, _ = hp.load_exampledata(0)
     >>> wd, m = hp.process(data, 100.0)

@@ -1,35 +1,3 @@
-'''
-Functions to handle common preprocessing tasks
-
-Data scaling
-------------
-- 'scale_data' -- scales given array to be between specified values
-                  default range(0,1024)
-- 'scale_section' -- applies scale_data within a moving window function
-- 'enhance_peaks' -- function to apply some linear scaling in order
-                     to bring out peaks.
-- 'enhance_ecg_peaks' -- function that uses convolutions to improve signal
-                         to noise ratio.
-- 'flip_signal' -- inverts the signal. Useful when using certain types of ECG
-- 'enhance_ecg_peaks' -- uses convolutions and synthetic QRS templates to improve
-                         signal-to-noise ratio in ECG data.
-
-Clipping tools
---------------
-- 'interpolate_clipping' -- function able to find and correct clipping sections of
-                            the passed heart rate signal.
-
-Hidden helper functions
------------------------
-- 'mark_clipping' -- marks beginning and end of clipping segments. Used by
-                     interpolate_clipping() to find clipping segments.
-- 'denoise_convolutions' -- convolutional filter that accepts template(s)
-                            and applies them to signal for a specified number
-                            of iterations
-- 'generate_ecg_templates' -- generates a stack of synthetic ECG templates to use
-                              with 'denoise_convolutions'
-'''
-
 import numpy as np
 from scipy.interpolate import UnivariateSpline, interp1d
 
@@ -73,13 +41,14 @@ def scale_data(data, lower=0, upper=1024):
 
     Examples
     --------
+    When passing data without further arguments to the function means it scales 0-1024
+    
     >>> x = [2, 3, 4, 5]
-
-    Only passing data to the function means it scales 0-1024
     >>> scale_data(x)
     array([   0.        ,  341.33333333,  682.66666667, 1024.        ])
 
-    Or we can specify our own range.
+    Or you can specify a range:
+
     >>> scale_data(x, lower = 50, upper = 124)
     array([ 50.        ,  74.66666667,  99.33333333, 124.        ])
     '''
@@ -173,8 +142,13 @@ def mark_clipping(data, threshold=1020):
 
     Examples
     --------
-    >>> from heartpy import datautils
-    >>> data, _ = datautils.load_exampledata(example=2)
+    Import heartpy and load example data
+
+    >>> import heartpy as hp
+    >>> data, _ = hp.load_exampledata(example=2)
+
+    Let's slice a part of the data that I know contains clipping
+
     >>> x = data[2000:3000]
     >>> mark_clipping(x, threshold=970)
     [(369, 375), (426, 437), (486, 493), (544, 552), (604, 610), (663, 665), \
@@ -230,12 +204,17 @@ def interpolate_clipping(data, sample_rate, threshold=1020):
 
     Examples
     --------
-    >>> from heartpy import datautils
-    >>> data, _ = datautils.load_exampledata(example=2)
+    First let's load some example data:
+
+    >>> import heartpy as hp
+    >>> data, _ = hp.load_exampledata(example=2)
     >>> x = data[2000:3000]
     >>> x[425:445]
     array([948, 977, 977, 977, 977, 978, 978, 977, 978, 977, 977, 977, 977,
            914, 820, 722, 627, 536, 460, 394])
+
+    And interpolate any clipping segments as such:
+
     >>> intp = interpolate_clipping(x, sample_rate=117, threshold=970)
     >>> intp[425:445]
     array([ 972, 1043, 1098, 1138, 1163, 1174, 1173, 1159, 1134, 1098, 1053,
@@ -305,20 +284,24 @@ def flip_signal(data, enhancepeaks=False, keep_range=True):
     Examples
     --------
     Given an array of data
+
     >>> x = [200, 300, 500, 900, 500, 300, 200]
 
     We can call the function. If keep_range is False, the signal
     will be inverted relative to its mean.
+
     >>> flip_signal(x, keep_range=False)
     array([628.57142857, 528.57142857, 328.57142857, -71.42857143,
            328.57142857, 528.57142857, 628.57142857])
 
     However, by specifying keep_range, the inverted signal will be
     put 'back in place' in its original range.
+
     >>> flip_signal(x, keep_range=True)
     array([900., 800., 600., 200., 600., 800., 900.])
 
     It's also possible to use the enhance_peaks function:
+
     >>> flip_signal(x, enhancepeaks=True)
     array([1024.        ,  621.75746332,  176.85545623,    0.        ,
             176.85545623,  621.75746332, 1024.        ])
@@ -361,6 +344,7 @@ def enhance_peaks(hrdata, iterations=2):
     Examples
     --------
     Given an array of data, the peaks can be enhanced using the function
+
     >>> x = [200, 300, 500, 900, 500, 300, 200]
     >>> enhance_peaks(x)
     array([   0.        ,    4.31776016,   76.16528926, 1024.        ,
@@ -415,20 +399,22 @@ def enhance_ecg_peaks(hrdata, sample_rate, iterations=4, aggregation='mean',
     Examples
     --------
     First let's import the module and load the data
+
     >>> import heartpy as hp
     >>> data, timer = hp.load_exampledata(1)
     >>> sample_rate = hp.get_samplerate_mstimer(timer)
 
     After loading the data we call the function like so:
+
     >>> filtered_data = enhance_ecg_peaks(data, sample_rate, iterations = 3)
 
     By default the module uses the mean to aggregate convolutional outputs. It
     is also possible to use the median.
+
     >>> filtered_data = enhance_ecg_peaks(data, sample_rate, iterations = 3,
     ... aggregation = 'median', notch_filter = False)
 
     In the last example we also disabled the notch filter.
-
     '''
 
     #assign output

@@ -1,5 +1,5 @@
 Welcome to HeartPy - Python Heart Rate Analysis Toolkit's documentation!
-==============================================================
+========================================================================
 
 .. image:: images/output_4.jpg
 
@@ -24,8 +24,11 @@ Index
    :maxdepth: 3
    :caption: .
    
+
    quickstart
+   apiref
    heartrateanalysis
    algorithmfunctioning
    development
+   
 

@@ -1,11 +1,5 @@
 '''
-main file for HeartPy.
-
-Processing functions
---------------------
-- 'process' -- processes given heart rate signal in its entirety
-- 'process_segmentwise' -- processes given heart rate signal by
-                           segmenting it and analysing each segment.
+main module for HeartPy.
 '''
 
 from datetime import datetime
@@ -175,27 +169,32 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     heart rate analysis, as all measures are relative to this.
     
     With all data loaded and the sample rate determined, nalysis is now easy:
+
     >>> wd, m = hp.process(data, sample_rate = sample_rate)
 
     The measures ('m') dictionary returned contains all determined measures
+
     >>> '%.3f' %m['bpm']
     '62.376'
     >>> '%.3f' %m['rmssd']
     '57.070'
 
     Using a slightly longer example:
+
     >>> data, timer = hp.load_exampledata(2)
     >>> print(timer[0])
     2016-11-24 13:58:58.081000
 
     As you can see something is going on here: we have a datetime-based timer.
     HeartPy can accomodate this and determine sample rate nontheless:
+
     >>> sample_rate = hp.get_samplerate_datetime(timer, timeformat = '%Y-%m-%d %H:%M:%S.%f')
     >>> '%.3f' %sample_rate
     '100.420'
 
     Now analysis can proceed. Let's also compute frequency domain data and interpolate clipping.
     In this segment the clipping is visible around amplitude 980 so let's set that as well:
+
     >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
     ... interp_clipping = True, interp_threshold = 975)
     >>> '%.3f' %m['bpm']
@@ -209,16 +208,19 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     and attempt to estimate the peak's real position with higher accuracy.
     Use high_precision_fs to set the virtual sample rate to which the peak
     will be upsampled (e.g. 1000Hz gives an estimated 1ms accuracy)
+
     >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
     ... high_precision = True, high_precision_fs = 1000.0)
 
     Finally setting reject_segmentwise will reject segments with more than 30% rejected beats
     See check_binary_quality in the peakdetection.py module.
+
     >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
     ... reject_segmentwise = True)
 
     Final test for code coverage, let's turn all bells and whistles on that haven't been
     tested yet
+
     >>> data, _ = hp.load_exampledata(0)
     >>> wd, m = hp.process(data, sample_rate = 100.0, calc_freq = True, 
     ... interp_clipping = True, clipping_scale = True, hampel_correct = True,
@@ -342,6 +344,7 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     Examples
     --------
     Given one of the included example datasets we can demonstrate this function:
+
     >>> import heartpy as hp
     >>> data, timer = hp.load_exampledata(2)
     >>> sample_rate = hp.get_samplerate_datetime(timer, timeformat = '%Y-%m-%d %H:%M:%S.%f')
@@ -351,12 +354,14 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
 
     The function has split the data into 11 segments and analysed each one. Every key in the
     measures (m) dict now contains a list of that measure for each segment.
+
     >>> [round(x, 1) for x in m['bpm']]
     [100.0, 96.8, 97.2, 97.9, 96.7, 96.8, 96.8, 95.0, 92.9, 96.7, 99.2]
 
     Specifying mode = 'fast' will run peak detection once and use detections
     to compute measures over each segment. Useful for speed ups, but typically
     the full mode has better results.
+
     >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5, mode = 'fast', replace_outliers = True)
 
     You can specify the outlier detection method ('iqr' - interquartile range, or 'z-score' for 
