@@ -200,7 +200,7 @@ def filter_signal(data, cutoff, sample_rate, order=2, filtertype='lowpass',
 
     A 'Notch' filtertype is also available (see remove_baseline_wander).
     
-    >>> filtered = filter_signal(data, sample_rate = 100.0, filtertype='notch')
+    >>> filtered = filter_signal(data, cutoff = 0.05, sample_rate = 100.0, filtertype='notch')
 
     Finally we can use the return_top flag to only return the filter response that
     has amplitute above zero. We're only interested in the peaks, and sometimes
