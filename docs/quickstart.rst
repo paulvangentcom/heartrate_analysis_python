@@ -38,8 +38,10 @@ Analysis requires the sampling rate for your data. If you know this *a priori*, 
 
     import heartpy as hp
 
-    data = hp.get_data('data.csv') #data.csv is sampled at 100Hz
-    working_data, measures = hp.process(data, 100.0)
+    #load example data
+    data, _ = hp.load_exampledata(0) #this example set is sampled at 100Hz
+    
+	working_data, measures = hp.process(data, 100.0)
 
 
 **process(dataset, sample_rate, windowsize=0.75, report_time=False,
@@ -81,8 +83,8 @@ Two :code:`dict{}` objects are returned: one working data dict, and one containi
 
     import heartpy as hp
 
-    data = hp.get_data('data.csv') 
-    fs = 100.0 #example file 'data.csv' is sampled at 100.0 Hz
+    data = hp.load_exampledata(0) 
+    fs = 100.0 #example file 0 is sampled at 100.0 Hz
 
     working_data, measures = hp.process(data, fs, report_time=True)
 
@@ -100,7 +102,7 @@ Two :code:`dict{}` objects are returned: one working data dict, and one containi
     
 Getting Data From Files
 =======================
-The toolkit has functionality to open and parse delimited .csv and .txt files, as well as matlab .mat files. Opening a file is done by the :code:`get_data()` function:
+The toolkit has functionality to open and parse delimited .csv and .txt files, as well as matlab .mat files. [Find the data here](https://github.com/paulvangentcom/heartrate_analysis_python/tree/master/heartpy/data) Opening a file is done by the :code:`get_data()` function:
 
 .. code-block:: python
 
