@@ -1,8 +1,10 @@
 
 *.pyc
 
-physionet/
-experimental/*
 docs/build
 docs/make.bat
 docs/Makefile
+build/
+dist/
+heartpy.egg-info/
+papers/
