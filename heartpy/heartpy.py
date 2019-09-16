@@ -221,7 +221,6 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     Final test for code coverage, let's turn all bells and whistles on that haven't been
     tested yet
 
-    >>> data, _ = hp.load_exampledata(0)
     >>> wd, m = hp.process(data, sample_rate = 100.0, calc_freq = True, 
     ... interp_clipping = True, clipping_scale = True, hampel_correct = True,
     ... reject_segmentwise = True, clean_rr = True)

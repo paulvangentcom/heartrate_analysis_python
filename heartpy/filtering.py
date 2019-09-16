@@ -221,6 +221,9 @@ cutoff needs to be array or tuple specifying lower and upper bound: [lower, uppe
         b, a = butter_bandpass(cutoff[0], cutoff[1], sample_rate, order=order)
     elif filtertype.lower() == 'notch':
         b, a = iirnotch(cutoff, Q = 0.005, fs = sample_rate)
+    else:
+        raise ValueError('filtertype: %s is unknown, available are: \
+lowpass, highpass, bandpass, and notch' %filtertype)
 
     filtered_data = filtfilt(b, a, data)
     

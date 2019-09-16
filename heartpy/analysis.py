@@ -3,6 +3,8 @@ Functions that handle computation of heart rate (HR) and
 heart rate variability (HRV) measures.
 '''
 
+import warnings
+
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import welch, periodogram
@@ -399,23 +401,52 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     Let's load an example and get a list of peak-peak intervals
 
     >>> import heartpy as hp
-    >>> data, _ = hp.load_exampledata(0)
-    >>> wd, m = hp.process(data, 100.0)
+    >>> data, timer = hp.load_exampledata(1)
+    >>> sample_rate = hp.get_samplerate_mstimer(timer)
+    >>> wd, m = hp.process(data, sample_rate)
     
     wd now contains a list of peak-peak intervals that has been cleaned of
     outliers ('RR_list_cor'). Calling the function then is easy
 
     >>> wd, m = calc_fd_measures(method = 'periodogram', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    1.368
+    1.037
 
     Available methods are 'fft', 'welch' and 'periodogram'. To set another method, do:
 
     >>> wd, m = calc_fd_measures(method = 'fft', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    1.368
+    1.037
+
+    If there are not enough peak-peak intervals to reliably compute frequency measures, a
+    warning is raised and frequency measures are returned as np.nan:
+
+    --------------
+    RuntimeWarning: Short signal.
+    Warning: too few peak-peak intervals for (reliable) frequency domain measure 
+    computation, treat frequency output measures with caution!At least one full frequency 
+    period is required for LF (0.04-0.15Hz) computation, meaning at least 25 seconds of good signal.
+    --------------
     '''
     rr_list = working_data['RR_list_cor']
+
+    if len(rr_list) <= 1:
+        working_data['frq'] = np.nan
+        working_data['psd'] = np.nan
+        measures['lf'] = np.nan
+        measures['hf'] = np.nan
+        measures['lf/hf'] = np.nan
+        return working_data, measures
+
+    #TODO: find source for exact length required and implement
+    elif np.sum(rr_list) <= 25000: # pragma: no cover
+        msg = ''.join(('Short signal.\n',
+                       'Warning: too few peak-peak intervals for (reliable) frequency domain measure computation, ',
+                       'treat frequency output measures with caution!',
+                       'At least one full frequency period is required for LF ',
+                       '(0.04-0.15Hz) computation, meaning at least 25 seconds of good signal'))
+        warnings.warn(msg, RuntimeWarning)
+
     rr_x = []
     pointer = 0
     for x in rr_list:
