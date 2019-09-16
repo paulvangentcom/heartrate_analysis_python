@@ -445,7 +445,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
                        'treat frequency output measures with caution!',
                        'At least one full frequency period is required for LF ',
                        '(0.04-0.15Hz) computation, meaning at least 25 seconds of good signal'))
-        warnings.warn(msg, RuntimeWarning)
+        warnings.warn(msg, UserWarning)
 
     rr_x = []
     pointer = 0
