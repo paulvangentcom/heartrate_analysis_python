@@ -221,7 +221,7 @@ def clean_rr_intervals(sample_rate, working_data, method='quotient-filter', calc
     method : str
         which method to use for outlier rejection, included are 
         
-        - 'quotient-filter', based on the work in "Piskorki, J., Guzik, P. (2005), Filtering Poincaré plots",
+        - 'quotient-filter', based on the work in "Piskorki, J., Guzik, P. (2005), Filtering Poincare plots",
         - 'iqr', which uses the inter-quartile range, 
         - 'z-score', which uses the modified z-score method.
 
