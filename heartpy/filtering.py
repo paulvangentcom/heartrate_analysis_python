@@ -355,7 +355,7 @@ def quotient_filter(RR_list, RR_list_mask = [], iterations=2):
     '''applies a quotient filter
 
     Function that applies a quotient filter as described in
-    "Piskorki, J., Guzik, P. (2005), Filtering Poincaré plots"
+    "Piskorki, J., Guzik, P. (2005), Filtering Poincare plots"
 
     Parameters
     ----------
