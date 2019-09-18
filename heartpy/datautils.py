@@ -311,14 +311,15 @@ def outliers_iqr_method(hrvalues):
 
     Returns
     -------
-    out : list
-        cleaned sequence with identified outliers substituted for the median
+    out : tuple
+        [0] cleaned sequence with identified outliers substituted for the median
+        [1] list of indices that have been replaced in the original array or list
 
     Examples
     --------
     >>> x = [2, 4, 3, 4, 6, 7, 35, 2, 3, 4]
     >>> outliers_iqr_method(x)
-    [2, 4, 3, 4, 6, 7, 4.0, 2, 3, 4]
+    ([2, 4, 3, 4, 6, 7, 4.0, 2, 3, 4], [6])
     '''
     med = np.median(hrvalues)
     q1, q3 = np.percentile(hrvalues, [25, 75])
@@ -326,12 +327,14 @@ def outliers_iqr_method(hrvalues):
     lower = q1 - (1.5 * iqr)
     upper = q3 + (1.5 * iqr)
     output = []
+    replaced_indices = []
     for i in range(0,len(hrvalues)):
         if hrvalues[i] < lower or hrvalues[i] > upper:
             output.append(med)
+            replaced_indices.append(i)
         else:
             output.append(hrvalues[i])
-    return output
+    return output, replaced_indices
 
 
 def outliers_modified_z(hrvalues):
@@ -347,14 +350,15 @@ def outliers_modified_z(hrvalues):
 
     Returns
     -------
-    out : list
-        cleaned sequence with identified outliers substituted for the median
+    out : tuple
+        [0] cleaned sequence with identified outliers substituted for the median
+        [1] list of indices that have been replaced in the original array or list
 
     Examples
     --------
     >>> x = [2, 4, 3, 4, 6, 7, 35, 2, 3, 4]
     >>> outliers_modified_z(x)
-    [2, 4, 3, 4, 6, 7, 4.0, 2, 3, 4]
+    ([2, 4, 3, 4, 6, 7, 4.0, 2, 3, 4], [6])
     '''
     hrvalues = np.array(hrvalues)
     threshold = 3.5
@@ -362,12 +366,14 @@ def outliers_modified_z(hrvalues):
     mean_abs_dev = MAD(hrvalues)
     modified_z_result = 0.6745 * (hrvalues - med) / mean_abs_dev
     output = []
+    replaced_indices = []
     for i in range(0, len(hrvalues)):
         if np.abs(modified_z_result[i]) <= threshold:
             output.append(hrvalues[i])
         else:
             output.append(med)
-    return output
+            replaced_indices.append(i)
+    return output, replaced_indices
 
 
 def MAD(data):

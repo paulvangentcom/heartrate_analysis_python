@@ -10,6 +10,7 @@ from scipy.interpolate import UnivariateSpline
 from scipy.signal import welch, periodogram
 
 from .datautils import MAD, rolling_mean, outliers_iqr_method, outliers_modified_z
+from .filtering import quotient_filter
 import heartpy as hp
 
 
@@ -202,7 +203,7 @@ def calc_rr_segment(rr_source, b_peaklist):
     return rr_list, rr_diff, rr_sqdiff
 
 
-def clean_rr_intervals(sample_rate, working_data, method='iqr', calc_freq=False, freq_method='welch'):
+def clean_rr_intervals(sample_rate, working_data, method='quotient-filter', calc_freq=False, freq_method='welch'):
     '''detects and rejects outliers in peak-peak intervals
 
     Function that detects and rejects outliers in the peak-peak intervals. It updates
@@ -218,9 +219,13 @@ def clean_rr_intervals(sample_rate, working_data, method='iqr', calc_freq=False,
         Needs to contain RR_list_cor, meaning one analysis cycle has already completed.
 
     method : str
-        which method to use for outlier rejection, included are 'iqr', based on
-        the inter-quartile range, and 'z-score', which uses the modified z-score method.
-        default : iqr
+        which method to use for outlier rejection, included are 
+        
+        - 'quotient-filter', based on the work in "Piskorki, J., Guzik, P. (2005), Filtering Poincaré plots",
+        - 'iqr', which uses the inter-quartile range, 
+        - 'z-score', which uses the modified z-score method.
+
+        default : quotient-filter
 
     calc_freq : bool
         whether to compute time-series measurements 
@@ -254,28 +259,65 @@ def clean_rr_intervals(sample_rate, working_data, method='iqr', calc_freq=False,
     >>> wd, m = hp.process(data, sample_rate)
     >>> wd = clean_rr_intervals(sample_rate, working_data = wd)
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
-    ['897.470', '811.997', '829.091', '965.849', '803.449']
+    ['897.470', '811.997', '829.091', '777.807', '803.449']
 
-    You can also specify the outlier rejection method to be used:
+    You can also specify the outlier rejection method to be used, for example using 
+    the z-score method:
 
     >>> wd = clean_rr_intervals(sample_rate, working_data = wd, method = 'z-score')
+    >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
+    ['897.470', '811.997', '829.091', '777.807', '803.449']
+
+    Or the inter-quartile range (iqr) based method:
+    
+    >>> wd = clean_rr_intervals(sample_rate, working_data = wd, method = 'iqr')
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '965.849', '803.449']
     '''
 
+    #generate RR_list_cor indices relative to RR_list
+    RR_cor_indices = [i for i in range(len(working_data['RR_masklist']))
+                       if working_data['RR_masklist'][i] == 0]
+
     #clean rr-list
     if method.lower() == 'iqr':
-        rr_cleaned = outliers_iqr_method(working_data['RR_list_cor'])
+        rr_cleaned, replaced_indices = outliers_iqr_method(working_data['RR_list_cor'])
+        mask = working_data['RR_masklist']
+        for i in replaced_indices:
+            mask[RR_cor_indices[i]] = 1
+
     elif method.lower() == 'z-score':
-        rr_cleaned = outliers_modified_z(working_data[ 'RR_list_cor'])
+        rr_cleaned, replaced_indices = outliers_modified_z(working_data['RR_list_cor'])
+        mask = working_data['RR_masklist']
+        for i in replaced_indices:
+            mask[RR_cor_indices[i]] = 1
+
+    elif method.lower() == 'quotient-filter':
+        mask = quotient_filter(working_data['RR_list'], working_data['RR_masklist'])
+        rr_cleaned = [x for x,y in zip(working_data['RR_list'], mask) if y == 0]
+
+
+    else:
+        raise ValueError('Incorrect method specified, use either "iqr", "z-score" or "quotient-filtering". \
+Nothing to do!')
+
+    removed_beats = [x for x in working_data['removed_beats']]
+    removed_beats_y = [x for x in working_data['removed_beats_y']]
+    peaklist = working_data['peaklist']
+    ybeat = working_data['ybeat']
+
+    for i in range(len(mask)):
+        if mask[i] == 1 and peaklist[i] not in removed_beats:
+            removed_beats.append(peaklist[i])
+            removed_beats_y.append(ybeat[i])
 
     rr_diff = np.diff(rr_cleaned)
     rr_sqdiff = np.power(rr_diff, 2)
-    working_data['RR_list_cor'] = rr_cleaned
+    working_data['RR_list_cor'] = np.asarray(rr_cleaned)
     working_data['RR_diff'] = rr_diff
     working_data['RR_sqdiff'] = rr_sqdiff
-
-    #TODO: update rejected peaks for plotting!
+    working_data['removed_beats'] = np.asarray(removed_beats)
+    working_data['removed_beats_y'] = np.asarray(removed_beats_y)
 
     return working_data
 
@@ -529,6 +571,7 @@ def calc_breathing(rrlist, hrdata, sample_rate, measures={}, working_data={}):
 
     There we have it, .16Hz, or about one breathing cycle in 6.25 seconds.
     '''
+
     x = np.linspace(0, len(rrlist), len(rrlist))
     x_new = np.linspace(0, len(rrlist), len(rrlist)*10)
     interp = UnivariateSpline(x, rrlist, k=3)

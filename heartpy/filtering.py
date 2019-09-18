@@ -347,4 +347,56 @@ def hampel_correcter(data, sample_rate):
     >>> filtered = hampel_correcter(data, sample_rate = 116.995)
 
     '''
+
     return data - hampel_filter(data, filtsize=int(sample_rate))
+
+
+def quotient_filter(RR_list, RR_list_mask = [], iterations=2):
+    '''applies a quotient filter
+
+    Function that applies a quotient filter as described in
+    "Piskorki, J., Guzik, P. (2005), Filtering Poincaré plots"
+
+    Parameters
+    ----------
+    RR_list - 1d array or list
+        array or list of peak-peak intervals to be filtered
+
+    RR_list_mask - 1d array or list
+        array or list containing the mask for which intervals are 
+        rejected. If not supplied, it will be generated. Mask is 
+        zero for accepted intervals, one for rejected intervals.
+
+    iterations - int
+        how many times to apply the quotient filter. Multipled
+        iterations have a stronger filtering effect
+        default : 2
+
+    Returns
+    -------
+    RR_list_mask : 1d array
+        mask for RR_list, 1 where intervals are rejected, 0 where
+        intervals are accepted.
+
+    Examples
+    --------
+    
+    '''
+
+    if len(RR_list_mask) == 0:
+        RR_list_mask = np.zeros((len(RR_list)))
+    else:
+        assert len(RR_list) == len(RR_list_mask), \
+        'error: RR_list and RR_list_mask should be same length if RR_list_mask is specified'
+
+    for iteration in range(iterations):
+        for i in range(len(RR_list) - 1):
+            if RR_list_mask[i] + RR_list_mask[i + 1] != 0:
+                pass #skip if one of both intervals is already rejected
+            elif 0.8 <= RR_list[i] / RR_list[i + 1] <= 1.2:
+                pass #if R-R pair seems ok, do noting
+            else: #update mask
+                RR_list_mask[i] = 1
+                #RR_list_mask[i + 1] = 1
+
+    return np.asarray(RR_list_mask)

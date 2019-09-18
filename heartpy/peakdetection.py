@@ -7,6 +7,7 @@ from scipy.signal import resample
 
 from .analysis import calc_rr, update_rr
 from .exceptions import BadSignalWarning
+from .filtering import quotient_filter
 
 
 __all__ = ['make_windows',
@@ -203,21 +204,13 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
         working_data = calc_rr(working_data['peaklist'], sample_rate,
                                working_data=working_data)
         if len(working_data['RR_list']) > 0:
-            #try:
-            #   working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
-            #                               reject_segmentwise=True, working_data=working_data)
-            #    working_data = update_rr(working_data['RR_list'], working_data['binary_peaklist'],
-            #                             working_data=working_data)
-            #    peaklist = working_data['peaklist_cor']
-            #except:
-            #    pass
-            #working_data['rrsd'] = np.std(working_data['RR_list_cor'])
             working_data['rrsd'] = np.std(working_data['RR_list'])
         else:
             working_data['rrsd'] = np.inf
         return working_data
     else:
         return peaklist, working_data
+
 
 def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data={}):
     '''optimize for best peak detection
@@ -313,7 +306,8 @@ outside of bpmmin<->bpmmax constraints\n- no detectable heart rate present in si
 rate data, consider filtering and/or scaling first.\n----------------\n')
 
 
-def check_peaks(rr_arr, peaklist, ybeat, reject_segmentwise=False, working_data={}):
+def check_peaks(rr_arr, peaklist, ybeat, quotient_filter=False, reject_segmentwise=False, 
+                working_data={}):
     '''find anomalous peaks.
 
     Funcion that checks peaks for outliers based on anomalous peak-peak distances and corrects
@@ -358,21 +352,21 @@ def check_peaks(rr_arr, peaklist, ybeat, reject_segmentwise=False, working_data=
     mean_rr = np.mean(rr_arr)
     upper_threshold = mean_rr + 300 if (0.3 * mean_rr) <= 300 else mean_rr + (0.3 * mean_rr)
     lower_threshold = mean_rr - 300 if (0.3 * mean_rr) <= 300 else mean_rr - (0.3 * mean_rr)
-
-    peaklist_cor = peaklist[np.where((rr_arr > lower_threshold) &
-                                     (rr_arr < upper_threshold))[0]+1]
-    working_data['peaklist_cor'] = np.insert(peaklist_cor, 0, peaklist[0])
+    
     working_data['removed_beats'] = peaklist[np.where((rr_arr <= lower_threshold) |
                                                       (rr_arr >= upper_threshold))[0]+1]
     working_data['removed_beats_y'] = ybeat[np.where((rr_arr <= lower_threshold) |
                                                      (rr_arr >= upper_threshold))[0]+1]
     working_data['binary_peaklist'] = [0 if x in working_data['removed_beats'] 
                                        else 1 for x in peaklist]
+
     if reject_segmentwise: 
         working_data = check_binary_quality(peaklist, working_data['binary_peaklist'],
                                             working_data=working_data)
+
     working_data = update_rr(working_data=working_data)
     return working_data
+
 
 def check_binary_quality(peaklist, binary_peaklist, maxrejects=3, working_data={}):
     '''checks signal in chunks of 10 beats. 

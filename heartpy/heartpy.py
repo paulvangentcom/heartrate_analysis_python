@@ -49,7 +49,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
             interp_clipping=False, clipping_scale=False, interp_threshold=1020, 
             hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False, 
             high_precision=False, high_precision_fs=1000.0, 
-            clean_rr=False, clean_rr_method='iqr', measures={}, working_data={}):
+            clean_rr=False, clean_rr_method='quotient-filter', measures={}, working_data={}):
     '''processes passed heart rate data.
     
     Processes the passed heart rate data. Returns measures{} dict containing results.
@@ -133,7 +133,9 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         default : false
 
     clean_rr_method: str
-        how to find and reject outliers. Available methods are 
+        how to find and reject outliers. Available methods are ' quotient-filter', 
+        'iqr' (interquartile range), and 'z-score'.
+        default : 'quotient-filter'
 
     measures : dict
         dictionary object used by heartpy to store computed measures. Will be created
@@ -421,13 +423,12 @@ use either \'iqr\' or \'z-score\''
             for k in s_measures.keys():
                 if k not in ['nn20', 'nn50', 'interp_rr_function', 
                              'interp_rr_linspace', 'segment_indices']: #skip these measures
-                    s_measures[k] = outliers_iqr_method(s_measures[k])
+                    s_measures[k], _ = outliers_iqr_method(s_measures[k])
         elif outlier_method.lower() == 'z-score':
             for k in s_measures.keys():
                 if k not in ['nn20', 'nn50', 'interp_rr_function', 
                              'interp_rr_linspace', 'segment_indices']: #skip these measures
-                    s_measures[k] = outliers_modified_z(s_measures[k])
-                s_measures[k] = outliers_modified_z(s_measures[k])
+                    s_measures[k], _ = outliers_modified_z(s_measures[k])
 
     return s_working_data, s_measures
 
