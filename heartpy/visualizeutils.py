@@ -5,10 +5,13 @@ Functions that help visualize results
 import os
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
+import numpy as np
 
 
 __all__ = ['plotter',
-           'segment_plotter']
+           'segment_plotter',
+           'plot_poincare']
 
 def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Detection'): # pragma: no cover
     '''plots the analysis results.
@@ -166,3 +169,128 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
         p.savefig('%s%i.png' %(path, filenum))
         p.close()
         filenum += 1
+
+
+def plot_poincare(working_data, measures, show = True,
+                  title='Poincare plot'): # pragma: no cover
+    '''visualize poincare plot
+
+    function that visualises poincare plot.
+
+    Parameters
+    ----------
+    working_data : dict
+        dictionary object that contains all heartpy's working data (temp) objects.
+        will be created if not passed to function
+
+    measures : dict
+        dictionary object used by heartpy to store computed measures. Will be created
+        if not passed to function
+        
+    title : str
+        the title used in the plot
+
+    Returns
+    -------
+    out : matplotlib plot object
+        only returned if show == False.
+
+    Examples
+    --------
+    This function has no examples. See documentation of heartpy for more info.
+    '''
+    
+    #get values from dict
+    x_plus = working_data['poincare']['x_plus']
+    x_minus = working_data['poincare']['x_minus']
+    sd1 = measures['poincare']['sd1']
+    sd2 = measures['poincare']['sd2']
+
+    #define figure
+    fig, ax = plt.subplots(subplot_kw={'aspect': 'equal'})
+
+    #plot scatter
+    plt.scatter(x_plus, x_minus, color = 'gray', alpha = '0.5',
+                label = 'peak-peak intervals')
+
+    #plot identity line
+    mins = np.min([x_plus, x_minus])
+    maxs = np.max([x_plus, x_minus])
+    identity_line = np.linspace(np.min(mins), np.max(maxs))
+    plt.plot(identity_line, identity_line, color='black', alpha=0.5,
+             label = 'identity line')
+
+    #rotate SD1, SD2 vectors 45 degrees counterclockwise
+    sd1_xrot, sd1_yrot = rotate_vec(0, sd1, 45)
+    sd2_xrot, sd2_yrot = rotate_vec(0, sd2, 45)
+
+    #plot rotated SD1, SD2 lines
+    plt.plot([np.mean(x_plus), np.mean(x_plus) + sd1_xrot], 
+             [np.mean(x_minus), np.mean(x_minus) + sd1_yrot], 
+             color = 'blue', label = 'SD1')
+    plt.plot([np.mean(x_plus), np.mean(x_plus) - sd2_xrot], 
+             [np.mean(x_minus), np.mean(x_minus) + sd2_yrot], 
+             color = 'red', label = 'SD2')
+
+    #plot ellipse
+    xmn = np.mean(x_plus)
+    ymn = np.mean(x_minus)
+    el = Ellipse((xmn, ymn), width = sd2 * 2, height = sd1 * 2, angle = 45.0)
+    ax.add_artist(el)
+    el.set_edgecolor((0,0,0))
+    el.fill = False
+    
+    plt.legend(loc=4, framealpha=0.6)
+    plt.title(title)
+
+    if show:
+        plt.show()
+    else:
+        return plt
+
+
+def rotate_vec(x, y, angle):
+    '''rotates vector around origin point
+
+    Function that takes vector and angle, and rotates around origin point
+    with given amount of degrees.
+
+    Helper function for poincare plotting
+
+    Parameters
+    ----------
+    x : int or float
+        vector x coordinate
+
+    y : int or float
+        vector y coordinate
+
+    angle: int or float
+        the angle of rotation applied to the vecftor
+
+    Returns
+    -------
+    x_rot : float
+        new x coordinate with rotation applied
+
+    y_rot : float
+        new x coordinate with rotation applied
+
+    Examples
+    --------
+    Given a vector (0,1), if we apply a rotation of 90 degrees clockwise
+    we expect to get (1,0). Let's test
+
+    >>> x_new, y_new = rotate_vec(0, 1, -90)
+    >>> print('%.3f, %.3f' %(x_new, y_new))
+    1.000, 0.000
+    '''
+    theta = np.radians(angle)
+
+    cs = np.cos(theta)
+    sn = np.sin(theta)
+
+    x_rot = (x * cs) - (y * sn)
+    y_rot = (x * sn) + (y * cs)
+    
+    return x_rot, y_rot

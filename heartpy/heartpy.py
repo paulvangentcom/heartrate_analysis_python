@@ -20,9 +20,9 @@ from .filtering import filter_signal, hampel_filter, hampel_correcter, \
                        remove_baseline_wander
 from .peakdetection import make_windows, append_dict, fit_peaks, check_peaks, \
                            check_binary_quality, interpolate_peaks
-from .visualizeutils import plotter, segment_plotter
+from .visualizeutils import plotter, segment_plotter, plot_poincare
 from .analysis import calc_rr, calc_rr_segment, clean_rr_intervals, calc_ts_measures, \
-                      calc_fd_measures, calc_breathing
+                      calc_fd_measures, calc_breathing, calc_poincare
 
 __all__ = ['enhance_peaks',
            'enhance_ecg_peaks',
@@ -33,6 +33,7 @@ __all__ = ['enhance_peaks',
            'hampel_filter',
            'load_exampledata',
            'plotter',
+           'plot_poincare',
            'process',
            'process_segmentwise',
            'flip_signal',
@@ -259,10 +260,15 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     working_data, measures = calc_ts_measures(working_data['RR_list_cor'], working_data['RR_diff'],
                                               working_data['RR_sqdiff'], measures=measures, 
                                               working_data=working_data)
+    
+    measures = calc_poincare(working_data['RR_list'], working_data['RR_masklist'], measures = measures,
+                             working_data = working_data)
+
     try:
         measures = calc_breathing(working_data['RR_list_cor'], hrdata, sample_rate, measures=measures)
     except:
         measures['breathingrate'] = np.nan
+
     if calc_freq:
         working_data, measures = calc_fd_measures(method=freq_method, measures=measures,
                                                   working_data = working_data)

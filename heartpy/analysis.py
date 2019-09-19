@@ -587,3 +587,81 @@ def calc_breathing(rrlist, hrdata, sample_rate, measures={}, working_data={}):
         measures['breathingrate'] = np.nan # pragma: no cover
 
     return measures
+
+
+def calc_poincare(rr_list, rr_mask=[], measures={}, working_data={}):
+    '''computes poincare parameters
+
+    Function that takes peak-peak intervals and computes poincare parameters:
+    [0] standard deviation perpendicular to identity line (SD1)
+    [1] standard deviation along identity line (SD2)
+    [2] area of ellipse described by SD1 and SD2
+    [3] SD1/SD2 ratio
+
+    Based on:
+    "Shaffer, F., Ginsberg, J.P. (2017), An Overview of Heart Rate
+    Variability Metrics and Norms"
+
+    Parameters
+    ----------
+    rr_list : 1d array or list
+        list or array containing peak-peak intervals
+
+    rr_mask : 1d array or list
+        list or array containing mask for rejected peak-peak intervals
+
+    measures : dict
+        dictionary object used by heartpy to store computed measures. Will be created
+        if not passed to function.
+
+    working_data : dict
+        dictionary object that contains all heartpy's working data (temp) objects.
+        will be created if not passed to function
+
+    Returns
+    -------
+    working_data : dict
+        dictionary object that contains all heartpy's working data (temp) objects.
+
+    measures : dict
+        dictionary object used by heartpy to store computed measures.
+        poincare values are appended to measures['poincare']
+    '''
+
+    #generate vectors of adjacent peak-peak intervals
+    x_plus = []
+    x_minus = []
+
+    for i in range(len(working_data['RR_masklist']) - 1):
+        if working_data['RR_masklist'][i] + working_data['RR_masklist'][i + 1] == 0:
+            #only add adjacent RR-intervals that are not rejected
+            x_plus.append(working_data['RR_list'][i])
+            x_minus.append(working_data['RR_list'][i + 1])
+        else:
+            pass
+    
+    #cast to arrays so we can do numerical work easily
+    x_plus = np.asarray(x_plus)
+    x_minus = np.asarray(x_minus)
+
+    #compute parameters and append to dict
+    x_one = (x_plus - x_minus) / np.sqrt(2)
+    x_two = (x_plus + x_minus) / np.sqrt(2)
+    sd1 = np.sqrt(np.var(x_one)) #compute stdev perpendicular to identity line
+    sd2 = np.sqrt(np.var(x_two)) #compute stdev parallel to identity line
+    s = np.pi * sd1 * sd2 #compute area of ellipse
+
+    #write computed measures to dicts
+    measures['poincare'] = {}
+    measures['poincare']['sd1'] = sd1
+    measures['poincare']['sd2'] = sd2 
+    measures['poincare']['s'] = s
+    measures['poincare']['sd1sd2'] = sd1 / sd2
+
+    working_data['poincare'] = {}
+    working_data['poincare']['x_plus'] = x_plus
+    working_data['poincare']['x_minus'] = x_minus
+    working_data['poincare']['x_one'] = x_one
+    working_data['poincare']['x_two'] = x_two
+
+    return measures
