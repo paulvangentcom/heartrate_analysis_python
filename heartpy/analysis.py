@@ -652,11 +652,10 @@ def calc_poincare(rr_list, rr_mask=[], measures={}, working_data={}):
     s = np.pi * sd1 * sd2 #compute area of ellipse
 
     #write computed measures to dicts
-    measures['poincare'] = {}
-    measures['poincare']['sd1'] = sd1
-    measures['poincare']['sd2'] = sd2 
-    measures['poincare']['s'] = s
-    measures['poincare']['sd1sd2'] = sd1 / sd2
+    measures['sd1'] = sd1
+    measures['sd2'] = sd2 
+    measures['s'] = s
+    measures['sd1/sd2'] = sd1 / sd2
 
     working_data['poincare'] = {}
     working_data['poincare']['x_plus'] = x_plus

@@ -70,7 +70,7 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     rejectedpeaks = working_data['removed_beats']
     rejectedpeaks_y = working_data['removed_beats_y']
     plt.title(title)
-    plt.plot(working_data['hr'], color=colorpalette[0], label='heart rate signal')
+    plt.plot(working_data['hr'], color=colorpalette[0], label='heart rate signal', zorder=-10)
     plt.plot(working_data['rolling_mean'], color='gray', alpha=0.5)
     plt.scatter(peaklist, ybeat, color=colorpalette[1], label='BPM:%.2f' %(measures['bpm']))
     plt.scatter(rejectedpeaks, rejectedpeaks_y, color=colorpalette[2], label='rejected peaks')
@@ -210,8 +210,8 @@ def plot_poincare(working_data, measures, show = True,
     #get values from dict
     x_plus = working_data['poincare']['x_plus']
     x_minus = working_data['poincare']['x_minus']
-    sd1 = measures['poincare']['sd1']
-    sd2 = measures['poincare']['sd2']
+    sd1 = measures['sd1']
+    sd2 = measures['sd2']
 
     #define figure
     fig, ax = plt.subplots(subplot_kw={'aspect': 'equal'})
