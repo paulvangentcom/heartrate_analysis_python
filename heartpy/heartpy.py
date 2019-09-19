@@ -446,10 +446,16 @@ def run_tests():
     function to run doctest on all of HeartPy
     '''
 
-    from . import analysis, datautils, filtering, peakdetection, preprocessing, visualizeutils
+    from . import analysis, datautils, filtering, peakdetection, preprocessing, visualizeutils, config
     import doctest
     
     succeeded = 0
+
+    print('testing config')
+    results = doctest.testmod(config)
+    if results.failed == 0: # pragma: no cover
+        print('success!')
+        succeeded += 1
 
     print('testing analysis')
     results = doctest.testmod(analysis)
@@ -494,7 +500,7 @@ def run_tests():
         print('success!')
         succeeded += 1
 
-    if succeeded == 7: # pragma: no cover
+    if succeeded == 8: # pragma: no cover
         print('all tests passed, ready to go!')
     else:
         print('some tests failed...')

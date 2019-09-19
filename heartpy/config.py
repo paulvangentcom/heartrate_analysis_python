@@ -7,7 +7,7 @@ config file for heartpy
 
 __all__ = ['get_colorpalette_poincare']
 
-def init():
+def init(): # pragma: no cover
     global colorblind 
     colorblind = False
     global colorblind_type 
@@ -20,15 +20,31 @@ def get_colorpalette_poincare():
     '''returns color palettes for poincare plotting
 
     Function that returns color palettes for poincare plotting.
-    You can specify the color type: normal (no color blind mode), 
-    deuteranopia, protanopia, tritanopia
+    Takes arguments from config settings globals.
 
     Parameters
     ----------
-    color_type : str
-        Type of colors to use. Available are:
-        [0] 'normal'
+    None
 
+    Returns
+    -------
+    color_palette : list
+        list conntaining color palette for poincare plot, in order
+        of scatterplot, SD1 line, SD2 line.
+
+    Examples
+    --------
+    >>> import heartpy as hp
+    >>> hp.config.colorblind = False
+    >>> palette = hp.config.get_colorpalette_poincare()
+    >>> palette
+    ['gray', 'blue', 'red']
+
+    >>> hp.config.colorblind = True
+    >>> hp.config.colorblind_type = 'protanopia'
+    >>> palette = hp.config.get_colorpalette_poincare()
+    >>> palette
+    ['#4C4C9B', '#EBAFBE', '#DCDCC7']
     '''
 
     #poincare color palettes
@@ -68,7 +84,33 @@ def get_colorpalette_poincare():
 
 def get_colorpalette_plotter():
     '''returns color palettes for regular plotting
+    
+    Function that returns color palettes for regular plotting coloring.
+    Takes arguments from config settings globals.
+    
+    Parameters
+    ----------
+    None
 
+    Returns
+    -------
+    color_palette : list
+        list conntaining color palette for plotter function, in order
+        of line color, accepted peaks color, rejected peaks color.
+
+    Examples
+    --------
+    >>> import heartpy as hp
+    >>> hp.config.colorblind = False
+    >>> palette = hp.config.get_colorpalette_plotter()
+    >>> palette
+    ['#7F7FFF', 'green', 'red']
+
+    >>> hp.config.colorblind = True
+    >>> hp.config.colorblind_type = 'protanopia'
+    >>> palette = hp.config.get_colorpalette_plotter()
+    >>> palette
+    ['#4C4C9B', '#EBAFBE', '#DCDCC7']
     '''
 
     #plotter color palettes
