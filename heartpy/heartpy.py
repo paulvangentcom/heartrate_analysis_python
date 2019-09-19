@@ -24,6 +24,9 @@ from .visualizeutils import plotter, segment_plotter, plot_poincare
 from .analysis import calc_rr, calc_rr_segment, clean_rr_intervals, calc_ts_measures, \
                       calc_fd_measures, calc_breathing, calc_poincare
 
+from . import config
+config.init() #initialize global conf vars
+
 __all__ = ['enhance_peaks',
            'enhance_ecg_peaks',
            'get_data',
@@ -369,13 +372,12 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     to compute measures over each segment. Useful for speed ups, but typically
     the full mode has better results.
 
-    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5, mode = 'fast', replace_outliers = True)
+    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5, 
+    ... mode = 'fast', replace_outliers = True)
 
     You can specify the outlier detection method ('iqr' - interquartile range, or 'z-score' for 
     modified z-score approach).
-
-
-
+    
     '''
 
     assert 0 <= segment_overlap < 1.0, 'value error: segment_overlap needs to be \
@@ -401,6 +403,7 @@ use either \'iqr\' or \'z-score\''
                 s_working_data = append_dict(s_working_data, 'segment_indices', (i, ii))
             except exceptions.BadSignalWarning:
                 pass
+
     elif mode == 'fast':
         working_data, measures = process(hrdata, sample_rate, **kwargs)
         peaklist = np.asarray(working_data['peaklist'])

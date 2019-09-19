@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 import numpy as np
 
+from . import config
 
 __all__ = ['plotter',
            'segment_plotter',
@@ -61,15 +62,18 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     to a file. 
 
     '''
+    #get color palette
+    colorpalette = config.get_colorpalette_plotter()
+
     peaklist = working_data['peaklist']
     ybeat = working_data['ybeat']
     rejectedpeaks = working_data['removed_beats']
     rejectedpeaks_y = working_data['removed_beats_y']
     plt.title(title)
-    plt.plot(working_data['hr'], alpha=0.5, color='blue', label='heart rate signal')
-    plt.plot(working_data['rolling_mean'])
-    plt.scatter(peaklist, ybeat, color='green', label='BPM:%.2f' %(measures['bpm']))
-    plt.scatter(rejectedpeaks, rejectedpeaks_y, color='red', label='rejected peaks')
+    plt.plot(working_data['hr'], color=colorpalette[0], label='heart rate signal')
+    plt.plot(working_data['rolling_mean'], color='gray', alpha=0.5)
+    plt.scatter(peaklist, ybeat, color=colorpalette[1], label='BPM:%.2f' %(measures['bpm']))
+    plt.scatter(rejectedpeaks, rejectedpeaks_y, color=colorpalette[2], label='rejected peaks')
     
     #check if rejected segment detection is on and has rejected segments
     try:
@@ -200,6 +204,9 @@ def plot_poincare(working_data, measures, show = True,
     This function has no examples. See documentation of heartpy for more info.
     '''
     
+    #get color palette
+    colorpalette = config.get_colorpalette_poincare()
+
     #get values from dict
     x_plus = working_data['poincare']['x_plus']
     x_minus = working_data['poincare']['x_minus']
@@ -210,8 +217,8 @@ def plot_poincare(working_data, measures, show = True,
     fig, ax = plt.subplots(subplot_kw={'aspect': 'equal'})
 
     #plot scatter
-    plt.scatter(x_plus, x_minus, color = 'gray', alpha = '0.5',
-                label = 'peak-peak intervals')
+    plt.scatter(x_plus, x_minus, color = colorpalette[0], 
+                alpha = '0.75', label = 'peak-peak intervals')
 
     #plot identity line
     mins = np.min([x_plus, x_minus])
@@ -227,10 +234,10 @@ def plot_poincare(working_data, measures, show = True,
     #plot rotated SD1, SD2 lines
     plt.plot([np.mean(x_plus), np.mean(x_plus) + sd1_xrot], 
              [np.mean(x_minus), np.mean(x_minus) + sd1_yrot], 
-             color = 'blue', label = 'SD1')
+             color = colorpalette[1], label = 'SD1')
     plt.plot([np.mean(x_plus), np.mean(x_plus) - sd2_xrot], 
              [np.mean(x_minus), np.mean(x_minus) + sd2_yrot], 
-             color = 'red', label = 'SD2')
+             color = colorpalette[2], label = 'SD2')
 
     #plot ellipse
     xmn = np.mean(x_plus)
