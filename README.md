@@ -10,6 +10,8 @@ HeartPy V1.2 has landed! The structure of the package has been reworked to be in
 
 An 'Examples' folder has been added to the repo which will be expanded soon. Now there's two notebooks explaining how to analyse ppg signals from smartwatches and smart rings.
 
+Colorblind support has been added, see [this notebook in the examples folder](https://github.com/paulvangentcom/heartrate_analysis_python/blob/master/examples/colorblind_mode/Colorblind_mode.ipynb)
+
 # Installation
 ```
 python -m setup.py install
@@ -38,6 +40,7 @@ We recommend you follow the notebooks in order:
 - [3. Analysing smartwatch data](https://github.com/paulvangentcom/heartrate_analysis_python/blob/master/examples/smartwatch_data/Analysing_Smartwatch_Data.ipynb), a notebook on analysing low resolution PPG data from a smartwatch.
 - [4. Analysing smart ring data](https://github.com/paulvangentcom/heartrate_analysis_python/blob/master/examples/smartring_data/Analysing_Smart_Ring_Data.ipynb), a notebook on analysing smart ring PPG data.
 - [5. Analysing noisy ECG data](https://github.com/paulvangentcom/heartrate_analysis_python/blob/master/examples/noisy_ECG/Analysing_Noisy_ECG.ipynb), an advanced notebook on working with very noisy ECG data, using data from the MIT-BIH noise stress test dataset.
+- [6. Colorblind mode - How To and Styles](https://github.com/paulvangentcom/heartrate_analysis_python/blob/master/examples/colorblind_mode/Colorblind_mode.ipynb)
 
 
 
