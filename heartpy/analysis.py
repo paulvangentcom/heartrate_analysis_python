@@ -75,9 +75,11 @@ def calc_rr(peaklist, sample_rate, working_data={}):
             working_data['ybeat'] = np.delete(working_data['ybeat'], 0)
 
     rr_list = (np.diff(peaklist) / sample_rate) * 1000.0
+    rr_indices = [(peaklist[i], peaklist[i+1]) for i in range(len(peaklist) - 1)]
     rr_diff = np.abs(np.diff(rr_list))
     rr_sqdiff = np.power(rr_diff, 2)
     working_data['RR_list'] = rr_list
+    working_data['RR_indices'] = rr_indices
     working_data['RR_diff'] = rr_diff
     working_data['RR_sqdiff'] = rr_sqdiff
     return working_data
