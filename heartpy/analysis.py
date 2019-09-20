@@ -445,8 +445,8 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     Let's load an example and get a list of peak-peak intervals
 
     >>> import heartpy as hp
-    >>> data, timer = hp.load_exampledata(1)
-    >>> sample_rate = hp.get_samplerate_mstimer(timer)
+    >>> data, timer = hp.load_exampledata(2)
+    >>> sample_rate = hp.get_samplerate_datetime(timer, timeformat='%Y-%m-%d %H:%M:%S.%f')
     >>> wd, m = hp.process(data, sample_rate)
     
     wd now contains a list of peak-peak intervals that has been cleaned of
@@ -454,13 +454,13 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
 
     >>> wd, m = calc_fd_measures(method = 'periodogram', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    1.037
+    4.964
 
     Available methods are 'fft', 'welch' and 'periodogram'. To set another method, do:
 
     >>> wd, m = calc_fd_measures(method = 'fft', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    1.037
+    4.964
 
     If there are not enough peak-peak intervals to reliably compute frequency measures, a
     warning is raised and frequency measures are returned as np.nan:
