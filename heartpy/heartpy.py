@@ -17,7 +17,7 @@ from .datautils import get_data, get_samplerate_mstimer, get_samplerate_datetime
 from .preprocessing import scale_data, scale_sections, interpolate_clipping, \
                            flip_signal, enhance_peaks, enhance_ecg_peaks
 from .filtering import filter_signal, hampel_filter, hampel_correcter, \
-                       remove_baseline_wander
+                       remove_baseline_wander, smooth_signal
 from .peakdetection import make_windows, append_dict, fit_peaks, check_peaks, \
                            check_binary_quality, interpolate_peaks
 from .visualizeutils import plotter, segment_plotter, plot_poincare
@@ -44,6 +44,7 @@ __all__ = ['enhance_peaks',
            'scale_data',
            'scale_sections',
            'segment_plotter',
+           'smooth_signal',
            'filter_signal',
            'run_tests']
 

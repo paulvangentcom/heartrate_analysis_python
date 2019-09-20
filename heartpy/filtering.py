@@ -2,14 +2,15 @@
 Functions for data filtering tasks.
 '''
 
-from scipy.signal import butter, filtfilt, iirnotch
+from scipy.signal import butter, filtfilt, iirnotch, savgol_filter
 import numpy as np
 
 from .datautils import MAD
 
 __all__ = ['filter_signal',
            'hampel_filter',
-           'hampel_correcter']
+           'hampel_correcter',
+           'smooth_signal']
 
 def butter_lowpass(cutoff, sample_rate, order=2):
     '''standard lowpass filter.
@@ -400,3 +401,54 @@ def quotient_filter(RR_list, RR_list_mask = [], iterations=2):
                 #RR_list_mask[i + 1] = 1
 
     return np.asarray(RR_list_mask)
+
+
+def smooth_signal(data, sample_rate, window_length=None, polyorder=3):
+    '''smooths given signal using savitzky-golay filter
+
+    Function that smooths data using savitzky-golay filter using default settings.
+
+    Functionality requested by Eirik Svendsen. Added since 1.2.4
+
+    Parameters
+    ----------
+    data : 1d array or list
+        array or list containing the data to be filtered
+
+    sample_rate : int or float
+        the sample rate with which data is sampled
+
+    window_length : int or None
+        window length parameter for savitzky-golay filter, see Scipy.signal.savgol_filter docs.
+        Must be uneven, if an even int is given, one will be added to make it uneven.
+        default : 0.1  * sample_rate
+
+    polyorder : int
+        the order of the polynomial fitted to the signal. See scipy.signal.savgol_filter docs.
+        default : 3
+
+    Returns
+    -------
+    smoothed : 1d array
+        array containing the smoothed data
+
+    Examples
+    --------
+    Given a fictional signal, a smoothed signal can be obtained by smooth_signal():
+
+    >>> x = [1, 3, 4, 5, 6, 7, 5, 3, 1, 1]
+    >>> smoothed = smooth_signal(x, 2, window_length=4, polyorder=2)
+    >>> np.around(smoothed[0:4], 3)
+    array([1.114, 2.743, 4.086, 5.   ])
+
+    '''
+
+    if window_length == None:
+        window_length = sample_rate // 10
+        
+    if window_length % 2 == 0: window_length += 1
+
+    smoothed = savgol_filter(data, window_length = window_length,
+                             polyorder = polyorder)
+
+    return smoothed
