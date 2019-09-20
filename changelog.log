@@ -89,3 +89,11 @@ V1.2
 - Added several jupyter notebooks in Examples folder, illustrating how to work with different types of data.
 - Added function to reject outliers in RR-list and compute measures based on cleaned list. See: clean_rr_intervals()
 - Added build and code coverage badges and support
+
+V1.2.4
+- Added colorblind mode
+- Added convolutional pipeline to filter very noisy ECG without distorting the QRS-complex
+- Added Savitzky-Golay signal smoothing filter (heartpy.smooth_signal).
+- Added baseline wander filter (heartpy.remove_baseline_wander()) based on a Notch filter.
+- Added Poincare analysis (written to measures{} dict) and plotting capabitity (heartpy.plot_poincare(working_data, measures)
+- API is now generated on the docs automatically.
