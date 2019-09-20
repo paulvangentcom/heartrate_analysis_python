@@ -102,13 +102,13 @@ The module is still in active development. See the changelog for past changes. T
 
 to do before V1.2
 - [X] Validate performance on Physionet datasets
-- [ ] Add several extra filtering options (Savitzky-Golay, Notch)
-- [ ] Add convolutional pre-processing pipeline for both PPG and ECG
-- [ ] Mark which RR-intervals are adjacent (no rejection gaps in between) to improve things like breathing rate detection
-- [ ] Update threshold parameter optimization to handle cases of double peaks and large portion of signal containing little to no hr
+- [X] Add several extra filtering options (Savitzky-Golay, Notch)
+- [X] Add convolutional pre-processing pipeline for ECG
+- [ ] Same but for PPG
+- [X] Mark which RR-intervals are adjacent (no rejection gaps in between) to improve things like breathing rate detection
+- [X] Update threshold parameter optimization to handle cases of double peaks and large portion of signal containing little to no hr
 - [ ] Report validation performance on repo (published paper + key-points document once published)
 - [X] Add R-position interpolation ('high accuracy' mode)
 - [X] Handle cases where strong T-peak in signal is present
 - [X] Include example data on PIP release
-- [ ] Change peak fitting to optimize locally rather than globally, to handle long signals with noisy intermediate sections better
 - [X] Change segmented analysis method to run peak detection once on whole signal, then do segmentwise computation from working_data object (drastic speed up)
