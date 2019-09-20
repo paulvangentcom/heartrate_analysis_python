@@ -481,14 +481,21 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
         measures['hf'] = np.nan
         measures['lf/hf'] = np.nan
         return working_data, measures
-
-    #TODO: find source for exact length required and implement
-    elif np.sum(rr_list) <= 25000: # pragma: no cover
+    elif np.sum(rr_list) <= 300000: # pragma: no cover
+        #warn if signal is short
         msg = ''.join(('Short signal.\n',
-                       'Warning: too few peak-peak intervals for (reliable) frequency domain measure computation, ',
-                       'treat frequency output measures with caution!',
-                       'At least one full frequency period is required for LF ',
-                       '(0.04-0.15Hz) computation, meaning at least 25 seconds of good signal'))
+                       '\n---------Warning:---------\n',
+                       'too few peak-peak intervals for (reliable) frequency domain measure computation, ',
+                       'frequency output measures are still computed but treat them with caution!\n\n',
+                       'HF is usually computed over a minimum of 1 minute of good signal. ',
+                       'LF is usually computed over a minimum of 2 minutes of good signal.',
+                       'The LF/HF ratio is usually computed over minimum 24 hours, although an ',
+                       'absolute minimum of 5 min has also been suggested.\n\n',
+                       'For more info see: \nShaffer, F., Ginsberg, J.P. (2017), ',
+                       'An Overview of Heart Rate Variability Metrics and Norms.\n\n',
+                       'Task Force of Pacing and Electrophysiology (1996), Heart Rate Variability, ',
+                       'in: European Heart Journal, vol.17, issue 3, pp354-381'
+                       '\n\nThis warning will not repeat'))
         warnings.warn(msg, UserWarning)
 
     rr_x = []
