@@ -22,9 +22,9 @@ Alternatively, we're also on PIP:
 python -m pip install heartpy
 ```
 
-That's it!
+That's it! Note that Github always has the newest version.
 
-# Official Documentation
+# Documentation
 
 The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
 
@@ -58,6 +58,8 @@ Time domain:
 * root mean square of successive differences between adjacend R-R intervals, RMSSD
 * proportion of differences between R-R intervals greater than 20ms, 50ms, pNN20, pNN50
 * median absolute deviation, MAD
+* Poincare analysis (SD1, SD2, S, SD1/SD1)
+* Poincare plotting
 
 Frequency domain
 * low frequency component (0.04-0.15Hz), LF
@@ -68,7 +70,7 @@ Frequency domain
 
 van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data. In Proceedings of the 6th HUMANIST Conference (pp. 173–178).
 
-van Gent, P. Van, Farah, H., Nes, N. Van, & Arem, B. Van. (manuscript submitted). Analysing Noisy Driver Physiology Real-Time Using Off-the-Shelf Sensors: Heart Rate Analysis Software from the Taking the Fast Lane Project.. Doi: doi.org/10.13140/RG.2.2.24895.56485
+van Gent, P. Van, Farah, H., Nes, N. Van, & Arem, B. Van. (manuscript submitted). Analysing Noisy Driver Physiology Real-Time Using Off-the-Shelf Sensors: Heart Rate Analysis Software from the Taking the Fast Lane Project. Doi: doi.org/10.13140/RG.2.2.24895.56485
 
 
 ## Documentation
