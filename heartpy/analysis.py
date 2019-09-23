@@ -205,7 +205,7 @@ def calc_rr_segment(rr_source, b_peaklist):
     return rr_list, rr_diff, rr_sqdiff
 
 
-def clean_rr_intervals(sample_rate, working_data, method='quotient-filter', calc_freq=False, freq_method='welch'):
+def clean_rr_intervals(working_data, method='quotient-filter'):
     '''detects and rejects outliers in peak-peak intervals
 
     Function that detects and rejects outliers in the peak-peak intervals. It updates
@@ -213,34 +213,16 @@ def clean_rr_intervals(sample_rate, working_data, method='quotient-filter', calc
 
     Parameters
     ----------
-    sample_rate : int or float
-        the sample rate with which the original signal was recorded in Hz.
-
     working_data : dict
         dictionary object that contains all heartpy's working data (temp) objects.
         Needs to contain RR_list_cor, meaning one analysis cycle has already completed.
 
     method : str
-        which method to use for outlier rejection, included are 
-        
+        which method to use for outlier rejection, included are:
         - 'quotient-filter', based on the work in "Piskorki, J., Guzik, P. (2005), Filtering Poincare plots",
         - 'iqr', which uses the inter-quartile range, 
         - 'z-score', which uses the modified z-score method.
-
         default : quotient-filter
-
-    calc_freq : bool
-        whether to compute time-series measurements 
-        default : False
-
-    freq_method : str
-        method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 
-        'periodogram', and 'welch' (Welch's method). 
-        default : 'welch'
-
-    measures : dict
-        dictionary object used by heartpy to store computed measures. Will be created
-        if not passed to function.
 
     Returns
     -------
@@ -259,20 +241,20 @@ def clean_rr_intervals(sample_rate, working_data, method='quotient-filter', calc
     Run at least one analysis cycle first so that the dicts are populated
 
     >>> wd, m = hp.process(data, sample_rate)
-    >>> wd = clean_rr_intervals(sample_rate, working_data = wd)
+    >>> wd = clean_rr_intervals(working_data = wd)
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '777.807', '803.449']
 
     You can also specify the outlier rejection method to be used, for example using 
     the z-score method:
 
-    >>> wd = clean_rr_intervals(sample_rate, working_data = wd, method = 'z-score')
+    >>> wd = clean_rr_intervals(working_data = wd, method = 'z-score')
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '777.807', '803.449']
 
     Or the inter-quartile range (iqr) based method:
     
-    >>> wd = clean_rr_intervals(sample_rate, working_data = wd, method = 'iqr')
+    >>> wd = clean_rr_intervals(working_data = wd, method = 'iqr')
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '965.849', '803.449']
     '''
