@@ -38,6 +38,7 @@ __all__ = ['enhance_peaks',
            'plotter',
            'plot_poincare',
            'process',
+           'process_rr',
            'process_segmentwise',
            'flip_signal',
            'remove_baseline_wander',
@@ -258,8 +259,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
                                reject_segmentwise, working_data=working_data)
 
     if clean_rr:
-        working_data = clean_rr_intervals(sample_rate, working_data, method = clean_rr_method,
-                                          calc_freq = calc_freq, freq_method = freq_method)
+        working_data = clean_rr_intervals(working_data, method = clean_rr_method)
 
     working_data, measures = calc_ts_measures(working_data['RR_list_cor'], working_data['RR_diff'],
                                               working_data['RR_sqdiff'], measures=measures, 
@@ -441,6 +441,127 @@ use either \'iqr\' or \'z-score\''
                     s_measures[k], _ = outliers_modified_z(s_measures[k])
 
     return s_working_data, s_measures
+
+
+def process_rr(rr_list, threshold_rr=False, clean_rr=False, 
+               clean_rr_method='quotient-filter', calc_freq=False, 
+               freq_method='welch', square_spectrum=True, 
+               measures={}, working_data={}):
+    '''process rr-list
+
+    Function that takes and processes a list of peak-peak intervals.
+    Computes all measures as computed by the regular process() function, and
+    sets up all dicts required for plotting poincare plots.
+    
+    Several filtering methods are available as well.
+
+    Parameters
+    ----------
+    rr_list : 1d array or list
+        list or array containing peak-peak intervals (in ms).
+
+    threshold_rr : bool
+        if true, the peak-peak intervals are cleaned using a threshold filter, which
+        rejects all intervals that differ 30% from the mean peak-peak interval, with
+        a minimum of 300ms. 
+        default : false
+
+    clean_rr : bool
+        if true, the RR_list is further cleaned with an outlier rejection pass. This pass
+        is performed after threshold_rr, if that is specified.
+        default : false
+
+    clean_rr_method: str
+        how to find and reject outliers. Available methods are ' quotient-filter', 
+        'iqr' (interquartile range), and 'z-score'.
+        default : 'quotient-filter'
+
+    calc_freq : bool
+        whether to compute time-series measurements 
+        default : False
+
+    freq_method : str
+        method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 
+        'periodogram', and 'welch' (Welch's method). 
+        default : 'welch'
+
+    square_spectrum : bool
+        whether to square the power spectrum returned.
+        default : true
+
+    measures : dict
+        dictionary object used by heartpy to store computed measures. Will be created
+        if not passed to function.
+
+    working_data : dict
+        dictionary object that contains all heartpy's working data (temp) objects.
+        will be created if not passed to function
+
+    Returns
+    -------
+    working_data : dict
+        dictionary object used to store temporary values.
+    
+    measures : dict
+        dictionary object used by heartpy to store computed measures.
+
+    Examples
+    --------
+    Let's generate an RR-list first.
+
+    >>> import heartpy as hp
+    >>> data, timer = hp.load_exampledata(2)
+    >>> sample_rate = hp.get_samplerate_datetime(timer, timeformat = '%Y-%m-%d %H:%M:%S.%f')
+    >>> wd, m = hp.process(data, sample_rate)
+    >>> rr_list = wd['RR_list']
+
+    Using only the RR-list (in ms!) we can now call this function, and let's put the results
+    into a differently named container so we're sure all measures are unique:
+    >>> wd2, m2 = process_rr(rr_list, threshold_rr = True, clean_rr = True, calc_freq = True)
+    >>> '%.3f' %m2['rmssd']
+    '45.641'
+    '''
+
+    working_data['RR_list'] = rr_list
+
+    if threshold_rr:
+        #do thresholding pass
+        mean_rr = np.mean(rr_list)
+        upper_threshold = mean_rr + 300 if (0.3 * mean_rr) <= 300 else mean_rr + (0.3 * mean_rr)
+        lower_threshold = mean_rr - 300 if (0.3 * mean_rr) <= 300 else mean_rr - (0.3 * mean_rr)
+        rr_list_cor = [x for x in rr_list if x > lower_threshold and x < upper_threshold]
+        rr_mask = [1 if x <= lower_threshold or x >= upper_threshold else 0 for x in rr_list]
+        working_data['RR_list_cor'] = rr_list_cor
+        working_data['RR_masklist'] = rr_mask
+
+    if clean_rr:
+        #do clean_rr pass
+        working_data = clean_rr_intervals(working_data = working_data, method = clean_rr_method)
+
+    if not threshold_rr and not clean_rr:
+        working_data['RR_list_cor'] = rr_list
+        working_data['RR_masklist'] = [0 for i in range(len(rr_list))]
+        rr_diff = np.abs(np.diff(rr_list))
+        rr_sqdiff = np.power(rr_diff, 2)
+    else:
+        rr_diff = np.abs(np.diff(working_data['RR_list_cor']))
+        rr_sqdiff = np.power(rr_diff, 2)
+
+
+    #compute ts measures
+    working_data, measures = calc_ts_measures(rr_list = working_data['RR_list_cor'], rr_diff = rr_diff, 
+                                              rr_sqdiff = rr_sqdiff, measures = measures, 
+                                              working_data = working_data)
+
+    measures = calc_poincare(rr_list = working_data['RR_list'], rr_mask = working_data['RR_masklist'], 
+                             measures = measures, working_data = working_data)
+    if calc_freq:
+        #compute freq measures
+        working_data, measures = calc_fd_measures(method = freq_method, square_spectrum = square_spectrum,
+                                                  measures = measures, working_data = working_data)
+        
+    return working_data, measures
+
 
 def run_tests():
     '''

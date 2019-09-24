@@ -285,23 +285,27 @@ def clean_rr_intervals(working_data, method='quotient-filter'):
         raise ValueError('Incorrect method specified, use either "iqr", "z-score" or "quotient-filtering". \
 Nothing to do!')
 
-    removed_beats = [x for x in working_data['removed_beats']]
-    removed_beats_y = [x for x in working_data['removed_beats_y']]
-    peaklist = working_data['peaklist']
-    ybeat = working_data['ybeat']
-
-    for i in range(len(mask)):
-        if mask[i] == 1 and peaklist[i] not in removed_beats:
-            removed_beats.append(peaklist[i])
-            removed_beats_y.append(ybeat[i])
-
     rr_diff = np.diff(rr_cleaned)
     rr_sqdiff = np.power(rr_diff, 2)
     working_data['RR_list_cor'] = np.asarray(rr_cleaned)
     working_data['RR_diff'] = rr_diff
     working_data['RR_sqdiff'] = rr_sqdiff
-    working_data['removed_beats'] = np.asarray(removed_beats)
-    working_data['removed_beats_y'] = np.asarray(removed_beats_y)
+
+    try:
+        removed_beats = [x for x in working_data['removed_beats']]
+        removed_beats_y = [x for x in working_data['removed_beats_y']]
+        peaklist = working_data['peaklist']
+        ybeat = working_data['ybeat']
+
+        for i in range(len(mask)):
+            if mask[i] == 1 and peaklist[i] not in removed_beats:
+                removed_beats.append(peaklist[i])
+                removed_beats_y.append(ybeat[i])
+
+        working_data['removed_beats'] = np.asarray(removed_beats)
+        working_data['removed_beats_y'] = np.asarray(removed_beats_y)
+    except:
+        pass
 
     return working_data
 
