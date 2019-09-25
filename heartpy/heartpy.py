@@ -379,6 +379,9 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     You can specify the outlier detection method ('iqr' - interquartile range, or 'z-score' for 
     modified z-score approach).
     
+    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5, 
+    ... mode = 'fast', replace_outliers = True, outlier_method = 'z-score')
+
     '''
 
     assert 0 <= segment_overlap < 1.0, 'value error: segment_overlap needs to be \
@@ -520,6 +523,14 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
     >>> wd2, m2 = process_rr(rr_list, threshold_rr = True, clean_rr = True, calc_freq = True)
     >>> '%.3f' %m2['rmssd']
     '45.641'
+
+    If you want to, you can turn off all filters and rejection features:
+    >>> wd2, m2 = process_rr(rr_list, threshold_rr = False, clean_rr = False)
+    >>> '%.3f' %m2['rmssd']
+    '162.645'
+
+    In this case it seems the filtering was necessary: without the RMSSD lies outside the
+    range expected in healthy humans.
     '''
 
     working_data['RR_list'] = rr_list

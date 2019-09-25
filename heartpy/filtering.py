@@ -381,6 +381,20 @@ def quotient_filter(RR_list, RR_list_mask = [], iterations=2):
 
     Examples
     --------
+    Given some example data let's generate an RR-list first
+    >>> import heartpy as hp
+    >>> data, timer = hp.load_exampledata(1)
+    >>> sample_rate = hp.get_samplerate_mstimer(timer)
+    >>> wd, m = hp.process(data, sample_rate)
+    >>> rr = wd['RR_list']
+    >>> rr_mask = wd['RR_masklist']
+
+    Given this data we can use this function to further clean the data:
+    >>> new_mask = quotient_filter(rr, rr_mask)
+
+    Although specifying the mask is optional, as you may not always have a
+    pre-computed mask available:
+    >>> new_mask = quotient_filter(rr)
     
     '''
 
@@ -420,7 +434,7 @@ def smooth_signal(data, sample_rate, window_length=None, polyorder=3):
 
     window_length : int or None
         window length parameter for savitzky-golay filter, see Scipy.signal.savgol_filter docs.
-        Must be uneven, if an even int is given, one will be added to make it uneven.
+        Must be odd, if an even int is given, one will be added to make it uneven.
         default : 0.1  * sample_rate
 
     polyorder : int
@@ -437,16 +451,22 @@ def smooth_signal(data, sample_rate, window_length=None, polyorder=3):
     Given a fictional signal, a smoothed signal can be obtained by smooth_signal():
 
     >>> x = [1, 3, 4, 5, 6, 7, 5, 3, 1, 1]
-    >>> smoothed = smooth_signal(x, 2, window_length=4, polyorder=2)
+    >>> smoothed = smooth_signal(x, sample_rate = 2, window_length=4, polyorder=2)
     >>> np.around(smoothed[0:4], 3)
     array([1.114, 2.743, 4.086, 5.   ])
+
+    If you don't specify the window_length, it is computed to be 10% of the 
+    sample rate (+1 if needed to make odd)
+    >>> import heartpy as hp
+    >>> data, timer = hp.load_exampledata(0)
+    >>> smoothed = smooth_signal(data, sample_rate = 100)
 
     '''
 
     if window_length == None:
         window_length = sample_rate // 10
         
-    if window_length % 2 == 0: window_length += 1
+    if window_length % 2 == 0 or window_length == 0: window_length += 1
 
     smoothed = savgol_filter(data, window_length = window_length,
                              polyorder = polyorder)

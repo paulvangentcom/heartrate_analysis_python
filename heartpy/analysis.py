@@ -448,14 +448,34 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     >>> print('%.3f' %m['lf/hf'])
     4.964
 
-    If there are not enough peak-peak intervals to reliably compute frequency measures, a
-    warning is raised and frequency measures are returned as np.nan:
+    If there are no valid peak-peak intervals specified, returned measures are NaN:
+    >>> wd['RR_list_cor'] = []
+    >>> wd, m = calc_fd_measures(working_data = wd)
+    >>> np.isnan(m['lf/hf'])
+    True
+
+    If there are rr-intervals but not enough to reliably compute frequency measures, a
+    warning is raised:
 
     --------------
     RuntimeWarning: Short signal.
-    Warning: too few peak-peak intervals for (reliable) frequency domain measure 
-    computation, treat frequency output measures with caution!At least one full frequency 
-    period is required for LF (0.04-0.15Hz) computation, meaning at least 25 seconds of good signal.
+    ---------Warning:---------
+    too few peak-peak intervals for (reliable) frequency domain measure computation,
+    frequency output measures are still computed but treat them with caution!
+
+    HF is usually computed over a minimum of 1 minute of good signal.
+    LF is usually computed over a minimum of 2 minutes of good signal.
+    The LF/HF ratio is usually computed over minimum 24 hours, although an
+    absolute minimum of 5 min has also been suggested.
+
+    For more info see: \nShaffer, F., Ginsberg, J.P. (2017).
+    An Overview of Heart Rate Variability Metrics and Norms.
+
+    Task Force of Pacing and Electrophysiology (1996), Heart Rate Variability
+    in: European Heart Journal, vol.17, issue 3, pp354-381
+    
+    
+    This warning will not repeat'
     --------------
     '''
     rr_list = working_data['RR_list_cor']

@@ -400,6 +400,16 @@ def check_binary_quality(peaklist, binary_peaklist, maxrejects=3, working_data={
     --------
     Part of peak detection pipeline. No standalone examples exist. See docstring
     for hp.process() function for more info
+
+    Given some peaklist and binary mask:
+    >>> peaklist = [30, 60, 90, 110, 130, 140, 160, 170, 200, 220]
+    >>> binary_peaklist = [0, 1, 1, 0, 0, 1, 0, 1, 0, 0]
+    >>> wd = check_binary_quality(peaklist, binary_peaklist)
+    >>> wd['rejected_segments']
+    [(30, 220)]
+
+    The whole segment is rejected as it contains more than the specified 3 rejections 
+    per 10 beats.
     '''
     idx = 0
     working_data['rejected_segments'] = []
