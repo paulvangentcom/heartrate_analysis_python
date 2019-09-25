@@ -235,6 +235,10 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     '''
     t1 = time.clock()
 
+    assert np.asarray(hrdata).ndim == 1, 'error: multi-dimensional data passed to process() \
+function. Please supply a 1d array or list containing heart rate signal data. \n\nDid you perhaps \
+include an index column?'
+
     if interp_clipping:
         if clipping_scale:
             hrdata = scale_data(hrdata)
