@@ -133,7 +133,7 @@ def butter_bandpass(lowcut, highcut, sample_rate, order=2):
 
 def filter_signal(data, cutoff, sample_rate, order=2, filtertype='lowpass',
                   return_top = False):
-    '''Apply the specified filed
+    '''Apply the specified filter
 
     Function that applies the specified lowpass, highpass or bandpass filter to
     the provided dataset.

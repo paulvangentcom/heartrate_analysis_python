@@ -14,7 +14,7 @@ Colorblind support has been added, see [this notebook in the examples folder](ht
 
 # Installation
 ```
-python -m setup.py install
+python setup.py install
 ```
 
 Alternatively, we're also on PIP:
