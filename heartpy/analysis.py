@@ -142,7 +142,6 @@ def update_rr(working_data={}):
     rr_list = [rr_source[i] for i in range(len(rr_source)) if b_peaklist[i] + b_peaklist[i+1] == 2]
     rr_mask = [0 if (b_peaklist[i] + b_peaklist[i+1] == 2) else 1 for i in range(len(rr_source))]
     rr_masked = np.ma.array(rr_source, mask=rr_mask)
-    #TODO: don't do diff between rr-intervals where masked entry/entries lie in between
     rr_diff = np.abs(np.diff(rr_masked))
     rr_diff = rr_diff[~rr_diff.mask]
     rr_sqdiff = np.power(rr_diff, 2)
@@ -266,27 +265,30 @@ def clean_rr_intervals(working_data, method='quotient-filter'):
     #clean rr-list
     if method.lower() == 'iqr':
         rr_cleaned, replaced_indices = outliers_iqr_method(working_data['RR_list_cor'])
-        mask = working_data['RR_masklist']
+        rr_mask = working_data['RR_masklist']
         for i in replaced_indices:
-            mask[RR_cor_indices[i]] = 1
+            rr_mask[RR_cor_indices[i]] = 1
 
     elif method.lower() == 'z-score':
         rr_cleaned, replaced_indices = outliers_modified_z(working_data['RR_list_cor'])
-        mask = working_data['RR_masklist']
+        rr_mask = working_data['RR_masklist']
         for i in replaced_indices:
-            mask[RR_cor_indices[i]] = 1
+            rr_mask[RR_cor_indices[i]] = 1
 
     elif method.lower() == 'quotient-filter':
-        mask = quotient_filter(working_data['RR_list'], working_data['RR_masklist'])
-        rr_cleaned = [x for x,y in zip(working_data['RR_list'], mask) if y == 0]
+        rr_mask = quotient_filter(working_data['RR_list'], working_data['RR_masklist'])
+        rr_cleaned = [x for x,y in zip(working_data['RR_list'], rr_mask) if y == 0]
 
 
     else:
         raise ValueError('Incorrect method specified, use either "iqr", "z-score" or "quotient-filtering". \
 Nothing to do!')
 
-    rr_diff = np.diff(rr_cleaned)
+    rr_masked = np.ma.array(working_data['RR_list'], mask=rr_mask)
+    rr_diff = np.abs(np.diff(rr_masked))
+    rr_diff = rr_diff[~rr_diff.mask]
     rr_sqdiff = np.power(rr_diff, 2)
+    working_data['RR_masked'] = rr_masked
     working_data['RR_list_cor'] = np.asarray(rr_cleaned)
     working_data['RR_diff'] = rr_diff
     working_data['RR_sqdiff'] = rr_sqdiff
