@@ -357,8 +357,8 @@ def check_peaks(rr_arr, peaklist, ybeat, quotient_filter=False, reject_segmentwi
                                                       (rr_arr >= upper_threshold))[0]+1]
     working_data['removed_beats_y'] = ybeat[np.where((rr_arr <= lower_threshold) |
                                                      (rr_arr >= upper_threshold))[0]+1]
-    working_data['binary_peaklist'] = [0 if x in working_data['removed_beats'] 
-                                       else 1 for x in peaklist]
+    working_data['binary_peaklist'] = np.asarray([0 if x in working_data['removed_beats'] 
+                                                  else 1 for x in peaklist])
 
     if reject_segmentwise: 
         working_data = check_binary_quality(peaklist, working_data['binary_peaklist'],
