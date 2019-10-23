@@ -90,7 +90,7 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
         return plt
 
 def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detection',
-                    path = '', start=0, end=None, step=1): # pragma: no cover
+                    figsize=(6, 6), path='', start=0, end=None, step=1): # pragma: no cover
     '''plots analysis results
    
     Function that plots the results of segmentwise processing of heart rate signal
@@ -108,6 +108,9 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
         
     title : str
         the title used in the plot
+
+    figsize : tuple
+        figsize tuple to be passed to matplotlib
 
     path : str
         the path where the files will be stored, folder must exist.
@@ -143,12 +146,11 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
         assert end <= len(working_data['hr']), 'defined "end" endpoint is larger than number of segments'
     
     #add trailing path slash if user omitted it
-    if not path.endswith('/') or path.endswith('\\'):
+    if not (path.endswith('/') or path.endswith('\\')) and len(path) > 0:
         path += '/'
-
-    #create path if it doesn't exist
-    if not os.path.isdir(path):
-        os.makedirs(path)
+        #create path if it doesn't exist
+        if not os.path.isdir(path):
+            os.makedirs(path)
     
     #make plots
     filenum = 0
@@ -169,6 +171,7 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
             pass
 
         #plot it using built-in plotter
+        plt.figure(figsize = figsize)
         p = plotter(wd_segment, m_segment, show=False)
         p.savefig('%s%i.png' %(path, filenum))
         p.close()
