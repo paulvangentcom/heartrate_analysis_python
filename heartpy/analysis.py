@@ -299,8 +299,8 @@ Nothing to do!')
         peaklist = working_data['peaklist']
         ybeat = working_data['ybeat']
 
-        for i in range(len(mask)):
-            if mask[i] == 1 and peaklist[i] not in removed_beats:
+        for i in range(len(rr_mask)):
+            if rr_mask[i] == 1 and peaklist[i] not in removed_beats:
                 removed_beats.append(peaklist[i])
                 removed_beats_y.append(ybeat[i])
 
