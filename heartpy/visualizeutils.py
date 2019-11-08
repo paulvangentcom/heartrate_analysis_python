@@ -14,7 +14,8 @@ __all__ = ['plotter',
            'segment_plotter',
            'plot_poincare']
 
-def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Detection'): # pragma: no cover
+def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Detection',
+            moving_average=False): # pragma: no cover
     '''plots the analysis results.
 
     Function that uses calculated measures and data stored in the working_data{} and measures{}
@@ -37,6 +38,11 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     title : string
         title for the plot.
         default : "Heart Rate Signal Peak Detection"
+
+    moving_average : bool
+        whether to display the moving average on the plot.
+        The moving average is used for peak fitting.
+        default: False
 
     Returns
     -------
@@ -71,7 +77,8 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     rejectedpeaks_y = working_data['removed_beats_y']
     plt.title(title)
     plt.plot(working_data['hr'], color=colorpalette[0], label='heart rate signal', zorder=-10)
-    plt.plot(working_data['rolling_mean'], color='gray', alpha=0.5)
+    if moving_average:
+        plt.plot(working_data['rolling_mean'], color='gray', alpha=0.5)
     plt.scatter(peaklist, ybeat, color=colorpalette[1], label='BPM:%.2f' %(measures['bpm']))
     plt.scatter(rejectedpeaks, rejectedpeaks_y, color=colorpalette[2], label='rejected peaks')
     
