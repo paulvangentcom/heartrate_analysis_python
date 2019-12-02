@@ -79,7 +79,7 @@ During the peak detection phase, the algorithm adjusts the amplitude of the calc
 
 The figure below displays how the SDSD relates to peak fitting. In essence the fitting function exploits the strong regularity expected in the heart rate signal.
 
-.. image:: images/Figure_PeakDetection.jpeg
+.. image:: images/Figure_PeakDetection2.jpeg
 
 *Figure showing how the SDSD responds strongly even to a single missed beat (bottom plot), and is lowest when all peaks are properly detected (middle plot).*
 
