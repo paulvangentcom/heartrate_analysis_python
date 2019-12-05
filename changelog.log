@@ -97,3 +97,6 @@ V1.2.4
 - Added baseline wander filter (heartpy.remove_baseline_wander()) based on a Notch filter.
 - Added Poincare analysis (written to measures{} dict) and plotting capabitity (heartpy.plot_poincare(working_data, measures)
 - API is now generated on the docs automatically.
+- Improved breathing rate estimation
+
+V1.2.5

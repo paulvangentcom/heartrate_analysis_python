@@ -24,9 +24,9 @@ copyright = '2018, Paul van Gent'
 author = 'Paul van Gent'
 
 # The short X.Y version
-version = '1.2.4'
+version = '1.2.5'
 # The full version, including alpha/beta/rc tags
-release = '1.2.4'
+release = '1.2.5'
 
 
 # -- General configuration ---------------------------------------------------
