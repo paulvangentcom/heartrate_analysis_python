@@ -20,7 +20,7 @@ from .filtering import filter_signal, hampel_filter, hampel_correcter, \
                        remove_baseline_wander, smooth_signal
 from .peakdetection import make_windows, append_dict, fit_peaks, check_peaks, \
                            check_binary_quality, interpolate_peaks
-from .visualizeutils import plotter, segment_plotter, plot_poincare
+from .visualizeutils import plotter, segment_plotter, plot_poincare, plot_breathing
 from .analysis import calc_rr, calc_rr_segment, clean_rr_intervals, calc_ts_measures, \
                       calc_fd_measures, calc_breathing, calc_poincare
 
@@ -36,6 +36,7 @@ __all__ = ['enhance_peaks',
            'hampel_filter',
            'load_exampledata',
            'plotter',
+           'plot_breathing',
            'plot_poincare',
            'process',
            'process_rr',
@@ -54,7 +55,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
             calc_freq=False, freq_method='welch', freq_square=True,
             interp_clipping=False, clipping_scale=False, interp_threshold=1020, 
             hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False, 
-            high_precision=False, high_precision_fs=1000.0, 
+            high_precision=False, high_precision_fs=1000.0, breathing_method='fft',
             clean_rr=False, clean_rr_method='quotient-filter', measures={}, working_data={}):
     '''processes passed heart rate data.
     
@@ -133,6 +134,10 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     high_precision_fs : int or float 
         the sample rate to which to upsample for more accurate peak position estimation 
         default : 1000 Hz
+
+    breathing_method : str
+        method to use for estimating breathing rate, should be 'welch' or 'fft'
+        default : fft
 
     clean_rr : bool
         if true, the RR_list is further cleaned with an outlier rejection pass
@@ -273,7 +278,9 @@ include an index column?'
                              working_data = working_data)
 
     try:
-        measures = calc_breathing(working_data['RR_list_cor'], hrdata, sample_rate, measures=measures)
+        measures, working_data = calc_breathing(working_data['RR_list_cor'], hrdata, sample_rate, 
+                                                method = breathing_method, measures=measures, 
+                                                working_data=working_data)
     except:
         measures['breathingrate'] = np.nan
 

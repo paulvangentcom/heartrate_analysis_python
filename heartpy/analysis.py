@@ -538,7 +538,8 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     return working_data, measures
 
 
-def calc_breathing(rrlist, hrdata, sample_rate, measures={}, working_data={}):
+def calc_breathing(rrlist, hrdata, sample_rate, method='fft',
+                   measures={}, working_data={}):
     '''estimates breathing rate
 
     Function that estimates breathing rate from heart rate signal. 
@@ -582,28 +583,42 @@ def calc_breathing(rrlist, hrdata, sample_rate, measures={}, working_data={}):
 
     Breathing is then computed with the function
 
-    >>> m = calc_breathing(wd['RR_list_cor'], data, sample_rate = 100.0, measures = m, working_data = wd)
+    >>> m, wd = calc_breathing(wd['RR_list_cor'], data, sample_rate = 100.0, measures = m, working_data = wd)
     >>> round(m['breathingrate'], 3)
-    0.161
+    0.128
 
     There we have it, .16Hz, or about one breathing cycle in 6.25 seconds.
     '''
 
+    #resample RR-list to 1000Hz
     x = np.linspace(0, len(rrlist), len(rrlist))
-    x_new = np.linspace(0, len(rrlist), len(rrlist)*10)
+    x_new = np.linspace(0, len(rrlist), np.sum(rrlist))
     interp = UnivariateSpline(x, rrlist, k=3)
     breathing = interp(x_new)
-    breathing_rolling_mean = rolling_mean(breathing, 0.75, sample_rate)
-    peaks, working_data = hp.peakdetection.detect_peaks(breathing, breathing_rolling_mean, 1, sample_rate, 
-                                                        update_dict=False)
-    
-    if len(peaks) > 1:
-        signaltime = len(hrdata) / sample_rate
-        measures['breathingrate'] = len(peaks) / signaltime
-    else:
-        measures['breathingrate'] = np.nan # pragma: no cover
 
-    return measures
+    if method.lower() == 'fft':
+        datalen = len(breathing)
+        frq_ = np.fft.fftfreq(datalen, d=((1/1000.0)))
+        frq_ = frq_[range(int(datalen/2))]
+        Y = np.fft.fft(breathing)/datalen
+        Y = Y[range(int(datalen/2))]
+        psd_ = np.power(np.abs(Y), 2)
+    elif method.lower() == 'welch':
+        frq_, psd_ = welch(breathing, fs=1000, nperseg=len(breathing))
+    else:
+        raise ValueError('Breathing rate extraction method not understood! Must be \'welch\' or \'fft\'!')
+
+    #take out lowest peak
+    frq = frq_[frq_ >= 0.04]
+    psd = psd_[frq_ >= 0.04]
+    
+    #find max
+    measures['breathingrate'] = frq[np.argmax(psd)]
+    working_data['breathing_signal'] = breathing
+    working_data['breathing_psd'] = psd
+    working_data['breathing_frq'] = frq
+
+    return measures, working_data
 
 
 def calc_poincare(rr_list, rr_mask=[], measures={}, working_data={}):

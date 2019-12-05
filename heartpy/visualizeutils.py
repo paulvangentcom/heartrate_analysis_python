@@ -12,7 +12,8 @@ from . import config
 
 __all__ = ['plotter',
            'segment_plotter',
-           'plot_poincare']
+           'plot_poincare',
+           'plot_breathing']
 
 def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Detection',
             moving_average=False): # pragma: no cover
@@ -201,6 +202,10 @@ def plot_poincare(working_data, measures, show = True,
         dictionary object used by heartpy to store computed measures. Will be created
         if not passed to function
         
+    show : bool
+        whether to show the plot right away, or return a matplotlib object for
+        further manipulation
+
     title : str
         the title used in the plot
 
@@ -311,3 +316,54 @@ def rotate_vec(x, y, angle):
     y_rot = (x * sn) + (y * cs)
     
     return x_rot, y_rot
+
+
+def plot_breathing(working_data, measures, show=True): # pragma: no cover
+    '''plots extracted breathing signal and spectrogram
+
+    Function that plots the breathing signal extracted from RR-intervals alongside
+    its computed spectrogram representation.
+
+    Parameters
+    ----------
+    working_data : dict
+        dictionary object that contains all heartpy's working data (temp) objects.
+        will be created if not passed to function
+
+    measures : dict
+        dictionary object used by heartpy to store computed measures. Will be created
+        if not passed to function
+        
+    show : bool
+        whether to show the plot right away, or return a matplotlib object for
+        further manipulation
+
+    Returns
+    -------
+    out : matplotlib plot object
+        only returned if show == False.
+
+    Examples
+    --------
+    This function has no examples. See documentation of heartpy for more info.
+    '''
+
+    plt.subplot(211)
+    plt.plot(working_data['breathing_signal'], label='breathing signal')
+    plt.xlabel('ms')
+    plt.title('breathing signal extracted from RR-intervals')
+
+    plt.subplot(212)
+    plt.plot(working_data['breathing_frq'], working_data['breathing_psd'], label='spectrogram')
+    plt.xlim(0, 2)
+    plt.xlabel('Hz')
+    plt.title('spectrogram extracted from breathing rate signal')
+
+    plt.legend()
+    plt.tight_layout()
+
+    if show:
+        plt.show()
+    else:
+        return plt
+
