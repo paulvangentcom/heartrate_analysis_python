@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="heartpy",
-    version="1.2.5",
+    version="1.2.6",
     author="Paul van Gent",
     author_email="P.vanGent@tudelft.nl",
     description="Heart Rate Analysis Toolkit",
@@ -34,6 +34,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
     ],
