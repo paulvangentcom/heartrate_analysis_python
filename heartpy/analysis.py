@@ -511,7 +511,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     for x in rr_list:
         pointer += x
         rr_x.append(pointer)
-    rr_x_new = np.linspace(rr_x[0], rr_x[-1], rr_x[-1])
+    rr_x_new = np.linspace(int(rr_x[0]), int(rr_x[-1]), int(rr_x[-1]))
     interpolated_func = UnivariateSpline(rr_x, rr_list, k=3)
     
     if method=='fft':
@@ -592,7 +592,7 @@ def calc_breathing(rrlist, hrdata, sample_rate, method='fft',
 
     #resample RR-list to 1000Hz
     x = np.linspace(0, len(rrlist), len(rrlist))
-    x_new = np.linspace(0, len(rrlist), np.sum(rrlist))
+    x_new = np.linspace(0, len(rrlist), np.sum(rrlist, dtype=np.int32))
     interp = UnivariateSpline(x, rrlist, k=3)
     breathing = interp(x_new)
 

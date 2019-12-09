@@ -238,7 +238,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     ... interp_clipping = True, clipping_scale = True, hampel_correct = True,
     ... reject_segmentwise = True, clean_rr = True)
     '''
-    t1 = time.clock()
+    t1 = time.perf_counter()
 
     assert np.asarray(hrdata).ndim == 1, 'error: multi-dimensional data passed to process() \
 function. Please supply a 1d array or list containing heart rate signal data. \n\nDid you perhaps \
@@ -290,7 +290,7 @@ include an index column?'
     
     #report time if requested. Exclude from tests, output is untestable.
     if report_time: # pragma: no cover
-        print('\nFinished in %.8s sec' %(time.clock()-t1))
+        print('\nFinished in %.8s sec' %(time.perf_counter()-t1))
 
     return working_data, measures
 
