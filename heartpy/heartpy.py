@@ -584,7 +584,7 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
     return working_data, measures
 
 
-def run_tests():
+def run_tests(verbose=0):
     '''
     function to run doctest on all of HeartPy
     '''
@@ -595,50 +595,50 @@ def run_tests():
     succeeded = 0
 
     print('testing config')
-    results = doctest.testmod(config)
+    results = doctest.testmod(config, verbose=verbose)
     if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing analysis')
-    results = doctest.testmod(analysis)
+    results = doctest.testmod(analysis, verbose=verbose)
     if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
         
     print('testing datautils')
-    results = doctest.testmod(datautils)
+    results = doctest.testmod(datautils, verbose=verbose)
     if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing filtering')
-    results = doctest.testmod(filtering)
+    results = doctest.testmod(filtering, verbose=verbose)
     if results.failed == 0: # pragma: no cover
         print('success!') 
         succeeded += 1
 
     print('testing peakdetection')
-    results = doctest.testmod(peakdetection)
+    results = doctest.testmod(peakdetection, verbose=verbose)
     if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing preprocessing')
-    results = doctest.testmod(preprocessing)
+    results = doctest.testmod(preprocessing, verbose=verbose)
     if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing visualization utils')
-    results = doctest.testmod(visualizeutils)
+    results = doctest.testmod(visualizeutils, verbose=verbose)
     if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
 
     print('testing main processing pipeline')
     from . import heartpy as hptester
-    results = doctest.testmod(hptester)
+    results = doctest.testmod(hptester, verbose=verbose)
     if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
