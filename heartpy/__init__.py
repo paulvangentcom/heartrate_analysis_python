@@ -24,10 +24,11 @@ Heart Rate Analysis for Human Factors: Development and Validation of an
 Open Source Toolkit for Noisy Naturalistic Heart Rate Data. 
 In Proceedings of the 6th HUMANIST Conference (pp. 173 to 178)
 
-van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). 
+van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2019). 
 Analysing Noisy Driver Physiology Real-Time Using Off-the-Shelf Sensors: 
-Heart Rate Analysis Software from the Taking the Fast Lane Project.
-Manuscript submitted for publication, doi.org/10.13140/RG.2.2.24895.56485
+Heart Rate Analysis Software from the Taking the Fast Lane Project. 
+Journal of Open Research Software, 7(1), 32. 
+DOI: http://doi.org/10.5334/jors.241
 
 
 Documentation
