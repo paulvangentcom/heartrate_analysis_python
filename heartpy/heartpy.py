@@ -235,8 +235,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     tested yet
 
     >>> wd, m = hp.process(data, sample_rate = 100.0, calc_freq = True, 
-    ... interp_clipping = True, clipping_scale = True, hampel_correct = True,
-    ... reject_segmentwise = True, clean_rr = True)
+    ... interp_clipping = True, clipping_scale = True, reject_segmentwise = True, clean_rr = True)
     '''
     t1 = time.perf_counter()
 
@@ -249,7 +248,7 @@ include an index column?'
             hrdata = scale_data(hrdata)
         hrdata = interpolate_clipping(hrdata, sample_rate, threshold=interp_threshold)
 
-    if hampel_correct:
+    if hampel_correct: # pragma: no cover
         hrdata = enhance_peaks(hrdata)
         hrdata = hampel_correcter(hrdata, sample_rate)
 
