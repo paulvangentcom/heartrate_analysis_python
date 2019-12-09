@@ -181,7 +181,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     The sample rate is one of the most important characteristics during the
     heart rate analysis, as all measures are relative to this.
     
-    With all data loaded and the sample rate determined, nalysis is now easy:
+    With all data loaded and the sample rate determined, analysis is now easy:
 
     >>> wd, m = hp.process(data, sample_rate = sample_rate)
 
@@ -208,14 +208,16 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     Now analysis can proceed. Let's also compute frequency domain data and interpolate clipping.
     In this segment the clipping is visible around amplitude 980 so let's set that as well:
 
+    >>> data, timer = hp.load_exampledata(1)
+    >>> sample_rate = hp.get_samplerate_mstimer(timer)  
     >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
     ... interp_clipping = True, interp_threshold = 975)
     >>> '%.3f' %m['bpm']
-    '97.270'
+    '62.376'
     >>> '%.3f' %m['rmssd']
-    '34.743'
+    '57.070'
     >>> '%.3f' %m['lf/hf']
-    '4.960'
+    '0.893'
 
     High precision mode will upsample 200ms of data surrounding detected peak
     and attempt to estimate the peak's real position with higher accuracy.
