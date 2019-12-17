@@ -55,7 +55,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
             calc_freq=False, freq_method='welch', freq_square=True,
             interp_clipping=False, clipping_scale=False, interp_threshold=1020, 
             hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False, 
-            high_precision=False, high_precision_fs=1000.0, breathing_method='fft',
+            high_precision=False, high_precision_fs=1000.0, breathing_method='welch',
             clean_rr=False, clean_rr_method='quotient-filter', measures={}, working_data={}):
     '''processes passed heart rate data.
     
@@ -279,9 +279,8 @@ include an index column?'
                              working_data = working_data)
 
     try:
-        measures, working_data = calc_breathing(working_data['RR_list_cor'], hrdata, sample_rate, 
-                                                method = breathing_method, measures=measures, 
-                                                working_data=working_data)
+        measures, working_data = calc_breathing(working_data['RR_list_cor'], method=breathing_method, 
+                                                measures=measures, working_data=working_data)
     except:
         measures['breathingrate'] = np.nan
 
@@ -461,13 +460,15 @@ use either \'iqr\' or \'z-score\''
 def process_rr(rr_list, threshold_rr=False, clean_rr=False, 
                clean_rr_method='quotient-filter', calc_freq=False, 
                freq_method='welch', square_spectrum=True, 
-               measures={}, working_data={}):
+               breathing_method='welch', measures={}, working_data={}):
     '''process rr-list
 
-    Function that takes and processes a list of peak-peak intervals.
+    Function that takes and processes a list of peak-peak intervals (tachogram).
     Computes all measures as computed by the regular process() function, and
     sets up all dicts required for plotting poincare plots.
     
+    Note: This method assumes ms-based tachogram
+
     Several filtering methods are available as well.
 
     Parameters
@@ -570,7 +571,6 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
         rr_diff = np.abs(np.diff(working_data['RR_list_cor']))
         rr_sqdiff = np.power(rr_diff, 2)
 
-
     #compute ts measures
     working_data, measures = calc_ts_measures(rr_list = working_data['RR_list_cor'], rr_diff = rr_diff, 
                                               rr_sqdiff = rr_sqdiff, measures = measures, 
@@ -583,6 +583,13 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
         working_data, measures = calc_fd_measures(method = freq_method, square_spectrum = square_spectrum,
                                                   measures = measures, working_data = working_data)
         
+    #compute breathing
+    try:
+        measures, working_data = calc_breathing(working_data['RR_list_cor'], method = breathing_method, 
+                                                measures=measures, working_data=working_data)
+    except:
+        measures['breathingrate'] = np.nan
+
     return working_data, measures
 
 

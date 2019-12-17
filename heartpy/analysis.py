@@ -538,8 +538,8 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     return working_data, measures
 
 
-def calc_breathing(rrlist, hrdata, sample_rate, method='fft',
-                   measures={}, working_data={}):
+def calc_breathing(rrlist, method='welch', filter_breathing=True,
+                   bw_cutoff=[0.1, 0.4], measures={}, working_data={}):
     '''estimates breathing rate
 
     Function that estimates breathing rate from heart rate signal. 
@@ -551,11 +551,17 @@ def calc_breathing(rrlist, hrdata, sample_rate, method='fft',
     rr_list : 1d list or array
         list or array containing peak-peak intervals
 
-    hrdata : 1d array or list
-        sequence containing raw heart rate data
+    method : str
+        method to use to get the spectrogram, must be 'fft' or 'welch'
+        default : fft
 
-    sample_rate : int or float
-        sample rate with which the heart rate data was measured.
+    filter_breathing : bool
+        whether to filter the breathing signal derived from the peak-peak intervals
+        default : True
+
+    bw_cutoff : list or tuple
+        breathing frequency range expected
+        default : [0.1, 0.4], meaning between 6 and 24 breaths per minute
 
     measures : dict
         dictionary object used by heartpy to store computed measures. Will be created
@@ -583,11 +589,11 @@ def calc_breathing(rrlist, hrdata, sample_rate, method='fft',
 
     Breathing is then computed with the function
 
-    >>> m, wd = calc_breathing(wd['RR_list_cor'], data, sample_rate = 100.0, measures = m, working_data = wd)
+    >>> m, wd = calc_breathing(wd['RR_list_cor'], measures = m, working_data = wd)
     >>> round(m['breathingrate'], 3)
-    0.128
+    0.171
 
-    There we have it, .16Hz, or about one breathing cycle in 6.25 seconds.
+    There we have it, .17Hz, or about one breathing cycle in 6.25 seconds.
     '''
 
     #resample RR-list to 1000Hz
@@ -596,21 +602,28 @@ def calc_breathing(rrlist, hrdata, sample_rate, method='fft',
     interp = UnivariateSpline(x, rrlist, k=3)
     breathing = interp(x_new)
 
+    if filter_breathing:
+        breathing = hp.filtering.filter_signal(breathing, cutoff=bw_cutoff, 
+                                               sample_rate = 1000.0, filtertype='bandpass')
+
     if method.lower() == 'fft':
         datalen = len(breathing)
-        frq_ = np.fft.fftfreq(datalen, d=((1/1000.0)))
-        frq_ = frq_[range(int(datalen/2))]
+        frq = np.fft.fftfreq(datalen, d=((1/1000.0)))
+        frq = frq[range(int(datalen/2))]
         Y = np.fft.fft(breathing)/datalen
         Y = Y[range(int(datalen/2))]
-        psd_ = np.power(np.abs(Y), 2)
+        psd = np.power(np.abs(Y), 2)
     elif method.lower() == 'welch':
-        frq_, psd_ = welch(breathing, fs=1000, nperseg=len(breathing))
+        if len(breathing) < 30000:
+            frq, psd = welch(breathing, fs=1000, nperseg=len(breathing))
+        else:
+            frq, psd = welch(breathing, fs=1000, nperseg=np.clip(len(breathing) // 10, 
+                                                                 a_min=30000, a_max=None))
+    elif method.lower() == 'periodogram':
+        frq, psd = periodogram(breathing, fs=1000.0, nfft=30000)
+
     else:
         raise ValueError('Breathing rate extraction method not understood! Must be \'welch\' or \'fft\'!')
-
-    #take out lowest peak
-    frq = frq_[frq_ >= 0.04]
-    psd = psd_[frq_ >= 0.04]
     
     #find max
     measures['breathingrate'] = frq[np.argmax(psd)]
