@@ -355,7 +355,7 @@ def plot_breathing(working_data, measures, show=True): # pragma: no cover
 
     plt.subplot(212)
     plt.plot(working_data['breathing_frq'], working_data['breathing_psd'], label='spectrogram')
-    plt.xlim(0, 2)
+    plt.xlim(0, 1)
     plt.xlabel('Hz')
     plt.title('spectrogram extracted from breathing rate signal')
 
