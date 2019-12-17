@@ -102,7 +102,8 @@ Initial results of the validation have been reported in [1, 2]. Updates here are
 The module is still in active development. See the changelog for past changes. The to-do for the coming months is:
 
 to do before V1.3
-- [ ] Same but for PPG
+- [X] Same but for PPG - morphology too variable, method unstable
+- [ ] clean_rr method now removes incorrect values, update to allow for replacement by median of surrounding data points
 - [ ] Report validation performance on repo (published paper + key-points document once published)
 - [ ] Change backend structure in anticipation of GUI development
 - [ ] Develop GUI for HeartPy
