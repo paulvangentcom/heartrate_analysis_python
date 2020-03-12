@@ -103,6 +103,7 @@ The module is still in active development. See the changelog for past changes. T
 
 to do before V1.3
 - [X] Same but for PPG - morphology too variable, method unstable
+- [ ] Add method to handle NaN data automatically
 - [ ] clean_rr method now removes incorrect values, update to allow for replacement by median of surrounding data points
 - [ ] Report validation performance on repo (published paper + key-points document once published)
 - [ ] Change backend structure in anticipation of GUI development
