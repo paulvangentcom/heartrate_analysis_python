@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from scipy.interpolate import UnivariateSpline, interp1d
 
@@ -97,6 +99,13 @@ def scale_sections(data, sample_rate, windowsize=2.5, lower=0, upper=1024):
     array([20., 30., 20., 30., 20., 30., 20., 30., 20., 30.])
     '''
 
+    #deprecation suppresses since 2.7, disable filter
+    warnings.simplefilter('always', DeprecationWarning)  
+    warnings.warn('scale_sections function is deprecated and will be removed in a future release',
+                    category=DeprecationWarning,
+                    stacklevel=2)
+    warnings.simplefilter('default', DeprecationWarning)  #enable default filter
+
     total_length = len(data) / sample_rate
     window_dimension = int(windowsize * sample_rate)
     
@@ -114,7 +123,7 @@ def scale_sections(data, sample_rate, windowsize=2.5, lower=0, upper=1024):
         data_start += window_dimension
         data_end += window_dimension
         
-    return np.array(output)
+    return np.array(output[0:data_start])
 
 
 def mark_clipping(data, threshold=1020):
