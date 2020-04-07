@@ -56,7 +56,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
             interp_clipping=False, clipping_scale=False, interp_threshold=1020, 
             hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False, 
             high_precision=False, high_precision_fs=1000.0, breathing_method='welch',
-            clean_rr=False, clean_rr_method='quotient-filter', measures={}, working_data={}):
+            clean_rr=False, clean_rr_method='quotient-filter', measures=None, working_data=None):
     '''processes passed heart rate data.
     
     Processes the passed heart rate data. Returns measures{} dict containing results.
@@ -239,6 +239,14 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     >>> wd, m = hp.process(data, sample_rate = 100.0, calc_freq = True, 
     ... interp_clipping = True, clipping_scale = True, reject_segmentwise = True, clean_rr = True)
     '''
+
+    #initialize dicts if needed
+    if measures == None:
+        measures = {}
+
+    if working_data == None:
+        working_data = {}
+
     t1 = time.perf_counter()
 
     assert np.asarray(hrdata).ndim == 1, 'error: multi-dimensional data passed to process() \
