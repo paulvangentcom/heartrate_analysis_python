@@ -28,8 +28,8 @@ That's it! Note that Github always has the newest version.
 
 The official documentation is online! [You can find the official documentation here](https://python-heart-rate-analysis-toolkit.readthedocs.io)
 
-# Python 2.7 and 3.4 support
-The module compiles and and runs fine on Python 2.7 and 3.4, **but** the unit tests stopped working on Travis-CI without changes to the repo.
+# Python 2.7
+The module compiles and and runs fine on Python 2.7, **but** the some unit tests fail.
 
 # Tutorial notebooks are now available in Examples/
 These show how to handle various analysis tasks with HeartPy, from smartwatch data, smart ring data, regular PPG, and regular (and very noisy) ECG. The notebooks sometimes don't render through the github engine, so either open them locally, or use an online viewer like [nbviewer](https://nbviewer.jupyter.org/).
