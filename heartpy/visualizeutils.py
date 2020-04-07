@@ -233,7 +233,7 @@ def plot_poincare(working_data, measures, show = True,
 
     #plot scatter
     plt.scatter(x_plus, x_minus, color = colorpalette[0], 
-                alpha = '0.75', label = 'peak-peak intervals')
+                alpha = 0.75, label = 'peak-peak intervals')
 
     #plot identity line
     mins = np.min([x_plus, x_minus])
