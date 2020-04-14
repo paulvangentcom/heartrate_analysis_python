@@ -5,6 +5,7 @@ main module for HeartPy.
 from datetime import datetime
 import time
 import os
+import sys
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline
@@ -247,7 +248,12 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     if working_data == None:
         working_data = {}
 
-    t1 = time.perf_counter()
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 3:
+        #if python >= 3.3
+        t1 = time.perf_counter()
+    else:
+        t1 = time.clock()
+
 
     assert np.asarray(hrdata).ndim == 1, 'error: multi-dimensional data passed to process() \
 function. Please supply a 1d array or list containing heart rate signal data. \n\nDid you perhaps \
@@ -298,8 +304,10 @@ include an index column?'
     
     #report time if requested. Exclude from tests, output is untestable.
     if report_time: # pragma: no cover
-        print('\nFinished in %.8s sec' %(time.perf_counter()-t1))
-
+        if sys.version_info[0] >= 3 and sys.version_info[1] >= 3:
+            print('\nFinished in %.8s sec' %(time.perf_counter()-t1))
+        else:
+            print('\nFinished in %.8s sec' %(time.clock()-t1))
     return working_data, measures
 
 
