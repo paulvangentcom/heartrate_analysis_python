@@ -15,7 +15,7 @@ __all__ = ['plotter',
            'plot_poincare',
            'plot_breathing']
 
-def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Detection',
+def plotter(working_data, measures, show=True, figsize=None, title='Heart Rate Signal Peak Detection',
             moving_average=False): # pragma: no cover
     '''plots the analysis results.
 
@@ -35,6 +35,10 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     show : bool
         when False, function will return a plot object rather than display the results.
         default : True
+
+    figsize: tuple
+        Set dimensions of image in inches like in matplotlib. figsize=(x, y)
+        default: None => (6.4, 4.8)
 
     title : string
         title for the plot.
@@ -76,6 +80,9 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     ybeat = working_data['ybeat']
     rejectedpeaks = working_data['removed_beats']
     rejectedpeaks_y = working_data['removed_beats_y']
+
+    if figsize and hasattr(figsize, '__iter__') and len(figsize) == 2:
+        plt.figure(figsize=figsize)
     plt.title(title)
     plt.plot(working_data['hr'], color=colorpalette[0], label='heart rate signal', zorder=-10)
     if moving_average:
@@ -233,7 +240,7 @@ def plot_poincare(working_data, measures, show = True,
 
     #plot scatter
     plt.scatter(x_plus, x_minus, color = colorpalette[0], 
-                alpha = 0.75, label = 'peak-peak intervals')
+                alpha = '0.75', label = 'peak-peak intervals')
 
     #plot identity line
     mins = np.min([x_plus, x_minus])
@@ -355,7 +362,7 @@ def plot_breathing(working_data, measures, show=True): # pragma: no cover
 
     plt.subplot(212)
     plt.plot(working_data['breathing_frq'], working_data['breathing_psd'], label='spectrogram')
-    plt.xlim(0, 1)
+    plt.xlim(0, 2)
     plt.xlabel('Hz')
     plt.title('spectrogram extracted from breathing rate signal')
 
