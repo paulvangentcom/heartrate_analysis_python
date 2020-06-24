@@ -193,7 +193,7 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
         filenum += 1
 
 
-def plot_poincare(working_data, measures, show = True,
+def plot_poincare(working_data, measures, show = True, figsize=None,
                   title='Poincare plot'): # pragma: no cover
     '''visualize poincare plot
 
@@ -212,6 +212,10 @@ def plot_poincare(working_data, measures, show = True,
     show : bool
         whether to show the plot right away, or return a matplotlib object for
         further manipulation
+
+    figsize: tuple
+        Set dimensions of image in inches like in matplotlib. figsize=(x, y)
+        default: None => (6.4, 4.8)
 
     title : str
         the title used in the plot
@@ -234,6 +238,9 @@ def plot_poincare(working_data, measures, show = True,
     x_minus = working_data['poincare']['x_minus']
     sd1 = measures['sd1']
     sd2 = measures['sd2']
+
+    if figsize and hasattr(figsize, '__iter__') and len(figsize) == 2:
+        plt.figure(figsize=figsize)
 
     #define figure
     fig, ax = plt.subplots(subplot_kw={'aspect': 'equal'})
@@ -325,7 +332,7 @@ def rotate_vec(x, y, angle):
     return x_rot, y_rot
 
 
-def plot_breathing(working_data, measures, show=True): # pragma: no cover
+def plot_breathing(working_data, measures, show=True, figsize=None): # pragma: no cover
     '''plots extracted breathing signal and spectrogram
 
     Function that plots the breathing signal extracted from RR-intervals alongside
@@ -345,6 +352,10 @@ def plot_breathing(working_data, measures, show=True): # pragma: no cover
         whether to show the plot right away, or return a matplotlib object for
         further manipulation
 
+    figsize: tuple
+        Set dimensions of image in inches like in matplotlib. figsize=(x, y)
+        default: None => (6.4, 4.8)
+
     Returns
     -------
     out : matplotlib plot object
@@ -354,6 +365,9 @@ def plot_breathing(working_data, measures, show=True): # pragma: no cover
     --------
     This function has no examples. See documentation of heartpy for more info.
     '''
+
+    if figsize and hasattr(figsize, '__iter__') and len(figsize) == 2:
+        plt.figure(figsize=figsize)
 
     plt.subplot(211)
     plt.plot(working_data['breathing_signal'], label='breathing signal')
