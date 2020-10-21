@@ -76,8 +76,8 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         default : 0.75
 
     report_time : bool
-        whether to report total processing time of algorithm 
-        default : True
+        whether to report total processing time of algorithm
+        default : False
 
     calc_freq : bool
         whether to compute frequency domain measurements 
@@ -90,11 +90,11 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     freq_square : bool
         whether to square the power spectrum returned when computing frequency measures
-        default : true
-
-    interp_clipping : bool 
-        whether to detect and interpolate clipping segments of the signal 
         default : True
+
+    interp_clipping : bool
+        whether to detect and interpolate clipping segments of the signal
+        default : False
 
     clipping_scale : bool
         whether to scale the data prior to clipping detection. Can correct errors 
@@ -130,7 +130,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     high_precision : bool 
         whether to estimate peak positions by upsampling signal to sample rate
         as specified in high_precision_fs
-        default : false
+        default : False
 
     high_precision_fs : int or float 
         the sample rate to which to upsample for more accurate peak position estimation 
@@ -138,11 +138,11 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     breathing_method : str
         method to use for estimating breathing rate, should be 'welch' or 'fft'
-        default : fft
+        default : welch
 
     clean_rr : bool
         if true, the RR_list is further cleaned with an outlier rejection pass
-        default : false
+        default : False
 
     clean_rr_method: str
         how to find and reject outliers. Available methods are ' quotient-filter', 
@@ -155,7 +155,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     working_data : dict
         dictionary object that contains all heartpy's working data (temp) objects.
-        will be created if not passed to function
+        Will be created if not passed to function.
 
     Returns
     -------
