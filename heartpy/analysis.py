@@ -467,6 +467,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
 
     HF is usually computed over a minimum of 1 minute of good signal.
     LF is usually computed over a minimum of 2 minutes of good signal.
+    VLF is usually computed over a minimum of 5 minutes of good signal.
     The LF/HF ratio is usually computed over minimum 24 hours, although an
     absolute minimum of 5 min has also been suggested.
 
@@ -485,6 +486,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     if len(rr_list) <= 1:
         working_data['frq'] = np.nan
         working_data['psd'] = np.nan
+        measures['vlf'] = np.nan
         measures['lf'] = np.nan
         measures['hf'] = np.nan
         measures['lf/hf'] = np.nan
@@ -497,6 +499,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
                        'frequency output measures are still computed but treat them with caution!\n\n',
                        'HF is usually computed over a minimum of 1 minute of good signal. ',
                        'LF is usually computed over a minimum of 2 minutes of good signal.',
+                       'VLF is usually computed over a minimum of 5 minutes of good signal.',
                        'The LF/HF ratio is usually computed over minimum 24 hours, although an ',
                        'absolute minimum of 5 min has also been suggested.\n\n',
                        'For more info see: \nShaffer, F., Ginsberg, J.P. (2017), ',
@@ -530,8 +533,9 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
 
     working_data['frq'] = frq
     working_data['psd'] = psd
-    measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq <= 0.15)]))
-    measures['hf'] = np.trapz(abs(psd[(frq >= 0.16) & (frq <= 0.5)]))
+    measures['vlf'] = np.trapz(abs(psd[(frq >= 0.0033) & (frq < 0.04)]))
+    measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq < 0.15)]))
+    measures['hf'] = np.trapz(abs(psd[(frq >= 0.15) & (frq < 0.4)]))
     measures['lf/hf'] = measures['lf'] / measures['hf']
     working_data['interp_rr_function'] = interpolated_func
     working_data['interp_rr_linspace'] = (rr_x[0], rr_x[-1], rr_x[-1])
