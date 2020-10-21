@@ -57,16 +57,16 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     >>> import heartpy as hp
     >>> data, _ = hp.load_exampledata(0)
     >>> wd, m = hp.process(data, 100.0)
-    
+
     Then we can visualise
 
     >>> plot_object = plotter(wd, m, show=False, title='some awesome title')
 
-    This returns a plot object which can be visualized or saved or appended. 
+    This returns a plot object which can be visualized or saved or appended.
     See matplotlib API for more information on how to do this.
-    
-    A matplotlib plotting object is returned. This can be further processed and saved 
-    to a file. 
+
+    A matplotlib plotting object is returned. This can be further processed and saved
+    to a file.
 
     '''
     #get color palette
@@ -82,7 +82,7 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
         plt.plot(working_data['rolling_mean'], color='gray', alpha=0.5)
     plt.scatter(peaklist, ybeat, color=colorpalette[1], label='BPM:%.2f' %(measures['bpm']))
     plt.scatter(rejectedpeaks, rejectedpeaks_y, color=colorpalette[2], label='rejected peaks')
-    
+
     #check if rejected segment detection is on and has rejected segments
     try:
         if len(working_data['rejected_segments']) >= 1:
@@ -100,10 +100,10 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
 def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detection',
                     figsize=(6, 6), path='', start=0, end=None, step=1): # pragma: no cover
     '''plots analysis results
-   
+
     Function that plots the results of segmentwise processing of heart rate signal
     and writes all results to separate files at the path provided.
-    
+
     Parameters
     ----------
     working_data : dict
@@ -113,7 +113,7 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
     measures : dict
         dictionary object used by heartpy to store computed measures. Will be created
         if not passed to function
-        
+
     title : str
         the title used in the plot
 
@@ -129,7 +129,7 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
 
     end : int
         last segment to plot. Must be smaller than total number of segments
-        default : None, will plot until end 
+        default : None, will plot until end
 
     step : int
         stepsize used when iterating over plots every step'th segment will be plotted
@@ -145,21 +145,21 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
     '''
     #sanity check
     assert 0 < step < len(working_data['hr']), 'step must be larger than zero and smaller than total number of segments'
-    
+
     #set endpoint if not explicitly defined
     if end == None:
         end = len(working_data['hr'])
     else:
         #make sure it is defined within boundary conditions
         assert end <= len(working_data['hr']), 'defined "end" endpoint is larger than number of segments'
-    
+
     #add trailing path slash if user omitted it
     if not (path.endswith('/') or path.endswith('\\')) and len(path) > 0:
         path += '/'
         #create path if it doesn't exist
         if not os.path.isdir(path):
             os.makedirs(path)
-    
+
     #make plots
     filenum = 0
     for i in range(start, end, step):
@@ -201,7 +201,7 @@ def plot_poincare(working_data, measures, show = True,
     measures : dict
         dictionary object used by heartpy to store computed measures. Will be created
         if not passed to function
-        
+
     show : bool
         whether to show the plot right away, or return a matplotlib object for
         further manipulation
@@ -218,7 +218,7 @@ def plot_poincare(working_data, measures, show = True,
     --------
     This function has no examples. See documentation of heartpy for more info.
     '''
-    
+
     #get color palette
     colorpalette = config.get_colorpalette_poincare()
 
@@ -232,7 +232,7 @@ def plot_poincare(working_data, measures, show = True,
     fig, ax = plt.subplots(subplot_kw={'aspect': 'equal'})
 
     #plot scatter
-    plt.scatter(x_plus, x_minus, color = colorpalette[0], 
+    plt.scatter(x_plus, x_minus, color = colorpalette[0],
                 alpha = 0.75, label = 'peak-peak intervals')
 
     #plot identity line
@@ -247,11 +247,11 @@ def plot_poincare(working_data, measures, show = True,
     sd2_xrot, sd2_yrot = rotate_vec(0, sd2, 45)
 
     #plot rotated SD1, SD2 lines
-    plt.plot([np.mean(x_plus), np.mean(x_plus) + sd1_xrot], 
-             [np.mean(x_minus), np.mean(x_minus) + sd1_yrot], 
+    plt.plot([np.mean(x_plus), np.mean(x_plus) + sd1_xrot],
+             [np.mean(x_minus), np.mean(x_minus) + sd1_yrot],
              color = colorpalette[1], label = 'SD1')
-    plt.plot([np.mean(x_plus), np.mean(x_plus) - sd2_xrot], 
-             [np.mean(x_minus), np.mean(x_minus) + sd2_yrot], 
+    plt.plot([np.mean(x_plus), np.mean(x_plus) - sd2_xrot],
+             [np.mean(x_minus), np.mean(x_minus) + sd2_yrot],
              color = colorpalette[2], label = 'SD2')
 
     #plot ellipse
@@ -261,7 +261,7 @@ def plot_poincare(working_data, measures, show = True,
     ax.add_artist(el)
     el.set_edgecolor((0,0,0))
     el.fill = False
-    
+
     plt.legend(loc=4, framealpha=0.6)
     plt.title(title)
 
@@ -314,7 +314,7 @@ def rotate_vec(x, y, angle):
 
     x_rot = (x * cs) - (y * sn)
     y_rot = (x * sn) + (y * cs)
-    
+
     return x_rot, y_rot
 
 
@@ -333,7 +333,7 @@ def plot_breathing(working_data, measures, show=True): # pragma: no cover
     measures : dict
         dictionary object used by heartpy to store computed measures. Will be created
         if not passed to function
-        
+
     show : bool
         whether to show the plot right away, or return a matplotlib object for
         further manipulation
