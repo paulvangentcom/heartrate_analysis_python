@@ -279,14 +279,19 @@ def rolling_mean(data, windowsize, sample_rate):
            514.45333333, 514.45333333, 514.45333333, 514.45333333,
            514.48      , 514.52      ])
     '''
-    avg_hr = (np.mean(data))
+
+    # calculate rolling mean
     data_arr = np.array(data)
     rol_mean = np.mean(_sliding_window(data_arr, int(windowsize*sample_rate)), axis=1)
-    missing_vals = np.array([avg_hr for i in range(0, int(abs(len(data_arr) - len(rol_mean))/2))])
-    rol_mean = np.insert(rol_mean, 0, missing_vals)
-    rol_mean = np.append(rol_mean, missing_vals)
 
-    #only to catch length errors that sometimes unexplicably occur. 
+    # need to fill 1/2 windowsize gap at the start and end
+    n_missvals = int(abs(len(data_arr) - len(rol_mean))/2)
+    missvals_a = np.array([rol_mean[0]]*n_missvals)
+    missvals_b = np.array([rol_mean[-1]]*n_missvals)
+
+    rol_mean = np.concatenate((missvals_a, rol_mean, missvals_b))
+
+    #only to catch length errors that sometimes unexplicably occur.
     ##Generally not executed, excluded from testing and coverage
     if len(rol_mean) != len(data): # pragma: no cover
         lendiff = len(rol_mean) - len(data)
