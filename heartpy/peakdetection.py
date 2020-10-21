@@ -7,7 +7,6 @@ from scipy.signal import resample
 
 from .analysis import calc_rr, update_rr
 from .exceptions import BadSignalWarning
-from .filtering import quotient_filter
 
 
 __all__ = ['make_windows',
@@ -306,8 +305,7 @@ outside of bpmmin<->bpmmax constraints\n- no detectable heart rate present in si
 rate data, consider filtering and/or scaling first.\n----------------\n')
 
 
-def check_peaks(rr_arr, peaklist, ybeat, quotient_filter=False, reject_segmentwise=False, 
-                working_data={}):
+def check_peaks(rr_arr, peaklist, ybeat, reject_segmentwise=False, working_data={}):
     '''find anomalous peaks.
 
     Funcion that checks peaks for outliers based on anomalous peak-peak distances and corrects
