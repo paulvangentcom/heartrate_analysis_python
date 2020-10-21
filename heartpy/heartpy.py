@@ -269,6 +269,8 @@ include an index column?'
         hrdata = hampel_correcter(hrdata, sample_rate)
 
     working_data['hr'] = hrdata
+    working_data['sample_rate'] = sample_rate
+
     rol_mean = rolling_mean(hrdata, windowsize, sample_rate)
 
     working_data = fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=bpmmin,
