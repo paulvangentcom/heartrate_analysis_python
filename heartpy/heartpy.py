@@ -80,7 +80,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         default : True
 
     calc_freq : bool
-        whether to compute time-series measurements 
+        whether to compute frequency domain measurements 
         default : False
 
     freq_method : str
