@@ -26,7 +26,7 @@ __all__ = ['calc_rr',
 def calc_rr(peaklist, sample_rate, working_data={}):
     '''calculates peak-peak intervals
 
-    Function that calculates the peak-peak data required for 
+    Function that calculates the peak-peak data required for
     further analysis. Stores results in the working_data{} dict.
 
     Parameters
@@ -51,7 +51,7 @@ def calc_rr(peaklist, sample_rate, working_data={}):
     Let's assume we detected peaks at these positions in the signal:
 
     >>> peaklist = [200, 280, 405, 501, 615]
-    
+
     It is then easy to call calc_rr to compute what we need:
 
     >>> wd = calc_rr(peaklist, sample_rate = 100.0)
@@ -87,8 +87,8 @@ def calc_rr(peaklist, sample_rate, working_data={}):
 
 def update_rr(working_data={}):
     '''updates differences between adjacent peak-peak distances
-    
-    Function that updates RR differences and RR squared differences 
+
+    Function that updates RR differences and RR squared differences
     based on corrected RR list
 
     Parameters
@@ -105,21 +105,21 @@ def update_rr(working_data={}):
     Examples
     --------
     Let's assume we detected peaks at these positions in the signal:
-    
+
     >>> peaklist = [200, 280, 405, 410, 501, 615]
-    
+
     And we subsequently ran further analysis:
-    
+
     >>> wd = calc_rr(peaklist, sample_rate = 100.0)
 
-    The peak at position 410 is likely an incorrect detection and 
+    The peak at position 410 is likely an incorrect detection and
     will be marked as such by other heartpy functions. This is indicated
     by an array 'binary_peaklist' in working_data. Binary peaklist is of
     the same length as peaklist, and is formatted as a mask:
 
     For now let's set it manually, normally this is done by the check_peaks()
     function from HeartPy's peakdetection module.
-    
+
     >>> wd['binary_peaklist'] = [1, 1, 1, 0, 1, 1]
 
     Rejected peaks are marked with a zero and accepted with a 1.
@@ -130,11 +130,11 @@ def update_rr(working_data={}):
     >>> wd = update_rr(wd)
 
     This will have generated a corrected RR_list object in the dictionary:
-    
+
     >>> wd['RR_list_cor']
     [800.0, 1250.0, 1140.0]
 
-    As well as updated the lists RR_diff (differences between adjacent peak-peak intervals) and 
+    As well as updated the lists RR_diff (differences between adjacent peak-peak intervals) and
     RR_sqdiff (squared differences between adjacent peak-peak intervals).
     '''
     rr_source = working_data['RR_list']
@@ -145,7 +145,7 @@ def update_rr(working_data={}):
     rr_diff = np.abs(np.diff(rr_masked))
     rr_diff = rr_diff[~rr_diff.mask]
     rr_sqdiff = np.power(rr_diff, 2)
-    
+
     working_data['RR_masklist'] = rr_mask
     working_data['RR_list_cor'] = rr_list
     working_data['RR_diff'] = rr_diff
@@ -157,7 +157,7 @@ def update_rr(working_data={}):
 def calc_rr_segment(rr_source, b_peaklist):
     '''calculates peak-peak differences for segmentwise processing
 
-    Function that calculates rr-measures when analysing segmentwise 
+    Function that calculates rr-measures when analysing segmentwise
     in the 'fast' mode.
 
     Parameters
@@ -185,7 +185,7 @@ def calc_rr_segment(rr_source, b_peaklist):
     three separate objects. It's used by process_segmentwise.
     Revert to doc on update_rr for more information.
 
-    >>> rr, rrd, rrsd = calc_rr_segment(rr_source = [ 800., 1250.,   50.,  910., 1140., 1002., 1142.], 
+    >>> rr, rrd, rrsd = calc_rr_segment(rr_source = [ 800., 1250.,   50.,  910., 1140., 1002., 1142.],
     ... b_peaklist = [1, 1, 1, 0, 1, 1, 1, 1])
     >>> print(rr)
     [800.0, 1250.0, 1140.0, 1002.0, 1142.0]
@@ -200,7 +200,7 @@ def calc_rr_segment(rr_source, b_peaklist):
     rr_diff = np.abs(np.diff(rr_masked))
     rr_diff = rr_diff[~rr_diff.mask]
     rr_sqdiff = np.power(rr_diff, 2)
-    
+
     return rr_list, rr_diff, rr_sqdiff
 
 
@@ -219,7 +219,7 @@ def clean_rr_intervals(working_data, method='quotient-filter'):
     method : str
         which method to use for outlier rejection, included are:
         - 'quotient-filter', based on the work in "Piskorki, J., Guzik, P. (2005), Filtering Poincare plots",
-        - 'iqr', which uses the inter-quartile range, 
+        - 'iqr', which uses the inter-quartile range,
         - 'z-score', which uses the modified z-score method.
         default : quotient-filter
 
@@ -236,7 +236,7 @@ def clean_rr_intervals(working_data, method='quotient-filter'):
     >>> import heartpy as hp
     >>> data, timer = hp.load_exampledata(1)
     >>> sample_rate = hp.get_samplerate_mstimer(timer)
-    
+
     Run at least one analysis cycle first so that the dicts are populated
 
     >>> wd, m = hp.process(data, sample_rate)
@@ -244,7 +244,7 @@ def clean_rr_intervals(working_data, method='quotient-filter'):
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '777.807', '803.449']
 
-    You can also specify the outlier rejection method to be used, for example using 
+    You can also specify the outlier rejection method to be used, for example using
     the z-score method:
 
     >>> wd = clean_rr_intervals(working_data = wd, method = 'z-score')
@@ -252,7 +252,7 @@ def clean_rr_intervals(working_data, method='quotient-filter'):
     ['897.470', '811.997', '829.091', '777.807', '803.449']
 
     Or the inter-quartile range (iqr) based method:
-    
+
     >>> wd = clean_rr_intervals(working_data = wd, method = 'iqr')
     >>> ['%.3f' %x for x in wd['RR_list_cor'][0:5]]
     ['897.470', '811.997', '829.091', '965.849', '803.449']
@@ -314,7 +314,7 @@ Nothing to do!')
 
 def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     '''calculates standard time-series measurements.
-    
+
     Function that calculates the time-series measurements for HeartPy.
 
     Parameters
@@ -353,7 +353,7 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
 
     >>> import numpy as np
     >>> rr_list = [1020.0, 990.0, 960.0, 1000.0, 1050.0, 1090.0, 990.0, 900.0, 900.0, 950.0, 1080.0]
-    
+
     we can then compute the other two required lists by hand for now:
 
     >>> rr_diff = np.diff(rr_list)
@@ -368,11 +368,11 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     >>> print('%.3f' %m['rmssd'])
     67.082
     '''
-    
+
     measures['bpm'] = 60000 / np.mean(rr_list)
     measures['ibi'] = np.mean(rr_list)
 
-    ##TODO: 
+    ##TODO:
     measures['sdnn'] = np.std(rr_list)
     measures['sdsd'] = np.std(rr_diff)
     measures['rmssd'] = np.sqrt(np.mean(rr_sqdiff))
@@ -436,7 +436,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
     >>> data, timer = hp.load_exampledata(2)
     >>> sample_rate = hp.get_samplerate_datetime(timer, timeformat='%Y-%m-%d %H:%M:%S.%f')
     >>> wd, m = hp.process(data, sample_rate)
-    
+
     wd now contains a list of peak-peak intervals that has been cleaned of
     outliers ('RR_list_cor'). Calling the function then is easy
 
@@ -475,8 +475,8 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
 
     Task Force of Pacing and Electrophysiology (1996), Heart Rate Variability
     in: European Heart Journal, vol.17, issue 3, pp354-381
-    
-    
+
+
     This warning will not repeat'
     --------------
     '''
@@ -513,7 +513,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
         rr_x.append(pointer)
     rr_x_new = np.linspace(int(rr_x[0]), int(rr_x[-1]), int(rr_x[-1]))
     interpolated_func = UnivariateSpline(rr_x, rr_list, k=3)
-    
+
     if method=='fft':
         datalen = len(rr_x_new)
         frq = np.fft.fftfreq(datalen, d=((1/1000.0)))
@@ -527,7 +527,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
         frq, psd = welch(interpolated_func(rr_x_new), fs=1000.0, nperseg=len(rr_x_new) - 1)
     else:
         raise ValueError("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
-    
+
     working_data['frq'] = frq
     working_data['psd'] = psd
     measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq <= 0.15)]))
@@ -542,8 +542,8 @@ def calc_breathing(rrlist, method='welch', filter_breathing=True,
                    bw_cutoff=[0.1, 0.4], measures={}, working_data={}):
     '''estimates breathing rate
 
-    Function that estimates breathing rate from heart rate signal. 
-    Upsamples the list of detected rr_intervals by interpolation then 
+    Function that estimates breathing rate from heart rate signal.
+    Upsamples the list of detected rr_intervals by interpolation then
     tries to extract breathing peaks in the signal.
 
     Parameters
@@ -603,7 +603,7 @@ def calc_breathing(rrlist, method='welch', filter_breathing=True,
     breathing = interp(x_new)
 
     if filter_breathing:
-        breathing = hp.filtering.filter_signal(breathing, cutoff=bw_cutoff, 
+        breathing = hp.filtering.filter_signal(breathing, cutoff=bw_cutoff,
                                                sample_rate = 1000.0, filtertype='bandpass')
 
     if method.lower() == 'fft':
@@ -617,14 +617,14 @@ def calc_breathing(rrlist, method='welch', filter_breathing=True,
         if len(breathing) < 30000:
             frq, psd = welch(breathing, fs=1000, nperseg=len(breathing))
         else:
-            frq, psd = welch(breathing, fs=1000, nperseg=np.clip(len(breathing) // 10, 
+            frq, psd = welch(breathing, fs=1000, nperseg=np.clip(len(breathing) // 10,
                                                                  a_min=30000, a_max=None))
     elif method.lower() == 'periodogram':
         frq, psd = periodogram(breathing, fs=1000.0, nfft=30000)
 
     else:
         raise ValueError('Breathing rate extraction method not understood! Must be \'welch\' or \'fft\'!')
-    
+
     #find max
     measures['breathingrate'] = frq[np.argmax(psd)]
     working_data['breathing_signal'] = breathing
@@ -684,7 +684,7 @@ def calc_poincare(rr_list, rr_mask=[], measures={}, working_data={}):
             x_minus.append(working_data['RR_list'][i + 1])
         else:
             pass
-    
+
     #cast to arrays so we can do numerical work easily
     x_plus = np.asarray(x_plus)
     x_minus = np.asarray(x_minus)
@@ -698,7 +698,7 @@ def calc_poincare(rr_list, rr_mask=[], measures={}, working_data={}):
 
     #write computed measures to dicts
     measures['sd1'] = sd1
-    measures['sd2'] = sd2 
+    measures['sd2'] = sd2
     measures['s'] = s
     measures['sd1/sd2'] = sd1 / sd2
 
