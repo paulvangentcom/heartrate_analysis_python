@@ -442,13 +442,13 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
 
     >>> wd, m = calc_fd_measures(method = 'periodogram', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    4.964
+    5.197
 
     Available methods are 'fft', 'welch' and 'periodogram'. To set another method, do:
 
     >>> wd, m = calc_fd_measures(method = 'fft', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    4.964
+    5.197
 
     If there are no valid peak-peak intervals specified, returned measures are NaN:
     >>> wd['RR_list_cor'] = []

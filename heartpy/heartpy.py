@@ -218,7 +218,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     >>> '%.3f' %m['rmssd']
     '57.070'
     >>> '%.3f' %m['lf/hf']
-    '0.893'
+    '0.847'
 
     High precision mode will upsample 200ms of data surrounding detected peak
     and attempt to estimate the peak's real position with higher accuracy.
