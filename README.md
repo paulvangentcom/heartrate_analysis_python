@@ -58,13 +58,14 @@ Time domain:
 * root mean square of successive differences between adjacend R-R intervals, RMSSD
 * proportion of differences between R-R intervals greater than 20ms, 50ms, pNN20, pNN50
 * median absolute deviation, MAD
-* Poincare analysis (SD1, SD2, S, SD1/SD1)
+* Poincare analysis (SD1, SD2, S, SD1/SD2)
 * Poincare plotting
 
-Frequency domain
-* low frequency component (0.04-0.15Hz), LF
-* high frequency component (0.16-0.5Hz), HF
-* lf/hf ratio, Lf/HF
+Frequency domain (ranges per Shaffer and Ginsberg: https://doi.org/10.3389/fpubh.2017.00258)
+* very low frequency component (0.0033–0.04 Hz), VLF
+* low frequency component (0.04–0.15 Hz), LF
+* high frequency component (0.15–0.4 Hz), HF
+* lf/hf ratio, LF/HF
 
 **When using the package in your research, please cite**:
 
