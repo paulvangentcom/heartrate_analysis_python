@@ -52,19 +52,19 @@ __all__ = ['enhance_peaks',
            'run_tests']
 
 
-def process(hrdata, sample_rate, windowsize=0.75, report_time=False, 
+def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
             calc_freq=False, freq_method='welch', freq_square=True,
-            interp_clipping=False, clipping_scale=False, interp_threshold=1020, 
-            hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False, 
+            interp_clipping=False, clipping_scale=False, interp_threshold=1020,
+            hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False,
             high_precision=False, high_precision_fs=1000.0, breathing_method='welch',
             clean_rr=False, clean_rr_method='quotient-filter', measures=None, working_data=None):
     '''processes passed heart rate data.
-    
+
     Processes the passed heart rate data. Returns measures{} dict containing results.
 
     Parameters
     ----------
-    hrdata : 1d array or list 
+    hrdata : 1d array or list
         array or list containing heart rate data to be analysed
 
     sample_rate : int or float
@@ -80,12 +80,12 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         default : False
 
     calc_freq : bool
-        whether to compute frequency domain measurements 
+        whether to compute frequency domain measurements
         default : False
 
     freq_method : str
-        method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 
-        'periodogram', and 'welch' (Welch's method). 
+        method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis),
+        'periodogram', and 'welch' (Welch's method).
         default : 'welch'
 
     freq_square : bool
@@ -97,24 +97,24 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         default : False
 
     clipping_scale : bool
-        whether to scale the data prior to clipping detection. Can correct errors 
-        if signal amplitude has been affected after digitization (for example through 
-        filtering). Not recommended by default. 
+        whether to scale the data prior to clipping detection. Can correct errors
+        if signal amplitude has been affected after digitization (for example through
+        filtering). Not recommended by default.
         default : False
 
     interp_threshold : int or float
         threshold to use to detect clipping segments. Recommended to be a few
         datapoints below the sensor or ADC's maximum value (to account for
-        slight data line noise). 
+        slight data line noise).
         default : 1020, 4 below max of 1024 for 10-bit ADC
 
-    hampel_correct : bool 
+    hampel_correct : bool
         whether to reduce noisy segments using large median filter. Disabled by
         default due to computational complexity and (small) distortions induced
         into output measures. Generally it is not necessary.
         default : False
 
-    bpmmin : int or float 
+    bpmmin : int or float
         minimum value to see as likely for BPM when fitting peaks
         default : 40
 
@@ -123,17 +123,17 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         default : 180
 
     reject_segmentwise : bool
-        whether to reject segments with more than 30% rejected beats. 
-        By default looks at segments of 10 beats at a time. 
+        whether to reject segments with more than 30% rejected beats.
+        By default looks at segments of 10 beats at a time.
         default : False
 
-    high_precision : bool 
+    high_precision : bool
         whether to estimate peak positions by upsampling signal to sample rate
         as specified in high_precision_fs
         default : False
 
-    high_precision_fs : int or float 
-        the sample rate to which to upsample for more accurate peak position estimation 
+    high_precision_fs : int or float
+        the sample rate to which to upsample for more accurate peak position estimation
         default : 1000 Hz
 
     breathing_method : str
@@ -145,7 +145,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         default : False
 
     clean_rr_method: str
-        how to find and reject outliers. Available methods are ' quotient-filter', 
+        how to find and reject outliers. Available methods are ' quotient-filter',
         'iqr' (interquartile range), and 'z-score'.
         default : 'quotient-filter'
 
@@ -161,7 +161,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     -------
     working_data : dict
         dictionary object used to store temporary values.
-    
+
     measures : dict
         dictionary object used by heartpy to store computed measures.
 
@@ -171,7 +171,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     provided two examples of how to approach heart rate analysis.
 
     The first example contains noisy sections and comes with a timer column that
-    counts miliseconds since start of recording. 
+    counts miliseconds since start of recording.
 
     >>> import heartpy as hp
     >>> data, timer = hp.load_exampledata(1)
@@ -181,7 +181,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     The sample rate is one of the most important characteristics during the
     heart rate analysis, as all measures are relative to this.
-    
+
     With all data loaded and the sample rate determined, analysis is now easy:
 
     >>> wd, m = hp.process(data, sample_rate = sample_rate)
@@ -210,8 +210,8 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     In this segment the clipping is visible around amplitude 980 so let's set that as well:
 
     >>> data, timer = hp.load_exampledata(1)
-    >>> sample_rate = hp.get_samplerate_mstimer(timer)  
-    >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
+    >>> sample_rate = hp.get_samplerate_mstimer(timer)
+    >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True,
     ... interp_clipping = True, interp_threshold = 975)
     >>> '%.3f' %m['bpm']
     '62.376'
@@ -225,19 +225,19 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     Use high_precision_fs to set the virtual sample rate to which the peak
     will be upsampled (e.g. 1000Hz gives an estimated 1ms accuracy)
 
-    >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
+    >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True,
     ... high_precision = True, high_precision_fs = 1000.0)
 
     Finally setting reject_segmentwise will reject segments with more than 30% rejected beats
     See check_binary_quality in the peakdetection.py module.
 
-    >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True, 
+    >>> wd, m = hp.process(data, sample_rate = sample_rate, calc_freq = True,
     ... reject_segmentwise = True)
 
     Final test for code coverage, let's turn all bells and whistles on that haven't been
     tested yet
 
-    >>> wd, m = hp.process(data, sample_rate = 100.0, calc_freq = True, 
+    >>> wd, m = hp.process(data, sample_rate = 100.0, calc_freq = True,
     ... interp_clipping = True, clipping_scale = True, reject_segmentwise = True, clean_rr = True)
     '''
 
@@ -268,6 +268,11 @@ include an index column?'
         hrdata = enhance_peaks(hrdata)
         hrdata = hampel_correcter(hrdata, sample_rate)
 
+    # check that the data has positive baseline for the moving average algorithm to work
+    bl_val = np.percentile(hrdata, 0.1)
+    if bl_val < 0:
+        hrdata = hrdata + abs(bl_val)
+
     working_data['hr'] = hrdata
     working_data['sample_rate'] = sample_rate
 
@@ -275,12 +280,13 @@ include an index column?'
 
     working_data = fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=bpmmin,
                              bpmmax=bpmmax, working_data=working_data)
-    
+
     if high_precision:
-        working_data = interpolate_peaks(hrdata, working_data['peaklist'], sample_rate=sample_rate, 
+        working_data = interpolate_peaks(hrdata, working_data['peaklist'], sample_rate=sample_rate,
                                          desired_sample_rate=high_precision_fs, working_data=working_data)
 
     working_data = calc_rr(working_data['peaklist'], sample_rate, working_data=working_data)
+
     working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
                                reject_segmentwise, working_data=working_data)
 
@@ -288,14 +294,14 @@ include an index column?'
         working_data = clean_rr_intervals(working_data, method = clean_rr_method)
 
     working_data, measures = calc_ts_measures(working_data['RR_list_cor'], working_data['RR_diff'],
-                                              working_data['RR_sqdiff'], measures=measures, 
+                                              working_data['RR_sqdiff'], measures=measures,
                                               working_data=working_data)
-    
+
     measures = calc_poincare(working_data['RR_list'], working_data['RR_masklist'], measures = measures,
                              working_data = working_data)
 
     try:
-        measures, working_data = calc_breathing(working_data['RR_list_cor'], method=breathing_method, 
+        measures, working_data = calc_breathing(working_data['RR_list_cor'], method=breathing_method,
                                                 measures=measures, working_data=working_data)
     except:
         measures['breathingrate'] = np.nan
@@ -303,13 +309,14 @@ include an index column?'
     if calc_freq:
         working_data, measures = calc_fd_measures(method=freq_method, measures=measures,
                                                   working_data = working_data)
-    
+
     #report time if requested. Exclude from tests, output is untestable.
     if report_time: # pragma: no cover
         if sys.version_info[0] >= 3 and sys.version_info[1] >= 3:
             print('\nFinished in %.8s sec' %(time.perf_counter()-t1))
         else:
             print('\nFinished in %.8s sec' %(time.clock()-t1))
+
     return working_data, measures
 
 
@@ -318,13 +325,13 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
                         mode='full', **kwargs):
     '''processes passed heart rate data with a windowed function
 
-    Analyses a long heart rate data array by running a moving window 
+    Analyses a long heart rate data array by running a moving window
     over the data, computing measures in each iteration. Both the window width
     and the overlap with the previous window location are settable.
 
     Parameters
     ----------
-    hrdata : 1d array or list 
+    hrdata : 1d array or list
         array or list containing heart rate data to be analysed
 
     sample_rate : int or float
@@ -341,8 +348,8 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
 
     segment_min_size : int
         often a tail end of the data remains after segmenting into segments.
-        segment_min_size indicates the minimum length (in seconds) the tail 
-        end needs  to be in order to be included in analysis. It is discarded 
+        segment_min_size indicates the minimum length (in seconds) the tail
+        end needs  to be in order to be included in analysis. It is discarded
         if it's shorter.
         default : 20
 
@@ -361,12 +368,12 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     ------------------
     hrdata -- 1-dimensional numpy array or list containing heart rate data
     sample_rate -- the sample rate of the heart rate data
-    segment_width -- the width of the segment, in seconds, within which all measures 
+    segment_width -- the width of the segment, in seconds, within which all measures
                      will be computed.
-    segment_overlap -- the fraction of overlap of adjacent segments, 
+    segment_overlap -- the fraction of overlap of adjacent segments,
                        needs to be 0 <= segment_overlap < 1
     segment_min_size -- After segmenting the data, a tail end will likely remain that is shorter than the specified
-                        segment_size. segment_min_size sets the minimum size for the last segment of the 
+                        segment_size. segment_min_size sets the minimum size for the last segment of the
                         generated series of segments to still be included. Default = 20.
     replace_outliers -- bool, whether to replace outliers (likely caused by peak fitting
                         errors on one or more segments) with the median.
@@ -377,10 +384,10 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     -------
     working_data : dict
         dictionary object used to store temporary values.
-    
+
     measures : dict
         dictionary object used by heartpy to store computed measures.
-        
+
     Examples
     --------
     Given one of the included example datasets we can demonstrate this function:
@@ -402,13 +409,13 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     to compute measures over each segment. Useful for speed ups, but typically
     the full mode has better results.
 
-    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5, 
+    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5,
     ... mode = 'fast', replace_outliers = True)
 
-    You can specify the outlier detection method ('iqr' - interquartile range, or 'z-score' for 
+    You can specify the outlier detection method ('iqr' - interquartile range, or 'z-score' for
     modified z-score approach).
-    
-    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5, 
+
+    >>> wd, m = hp.process_segmentwise(data, sample_rate, segment_width=120, segment_overlap=0.5,
     ... mode = 'fast', replace_outliers = True, outlier_method = 'z-score')
 
     '''
@@ -463,28 +470,28 @@ use either \'iqr\' or \'z-score\''
     if replace_outliers:
         if outlier_method.lower() == 'iqr':
             for k in s_measures.keys():
-                if k not in ['nn20', 'nn50', 'interp_rr_function', 
+                if k not in ['nn20', 'nn50', 'interp_rr_function',
                              'interp_rr_linspace', 'segment_indices']: #skip these measures
                     s_measures[k], _ = outliers_iqr_method(s_measures[k])
         elif outlier_method.lower() == 'z-score':
             for k in s_measures.keys():
-                if k not in ['nn20', 'nn50', 'interp_rr_function', 
+                if k not in ['nn20', 'nn50', 'interp_rr_function',
                              'interp_rr_linspace', 'segment_indices']: #skip these measures
                     s_measures[k], _ = outliers_modified_z(s_measures[k])
 
     return s_working_data, s_measures
 
 
-def process_rr(rr_list, threshold_rr=False, clean_rr=False, 
-               clean_rr_method='quotient-filter', calc_freq=False, 
-               freq_method='welch', square_spectrum=True, 
+def process_rr(rr_list, threshold_rr=False, clean_rr=False,
+               clean_rr_method='quotient-filter', calc_freq=False,
+               freq_method='welch', square_spectrum=True,
                breathing_method='welch', measures={}, working_data={}):
     '''process rr-list
 
     Function that takes and processes a list of peak-peak intervals (tachogram).
     Computes all measures as computed by the regular process() function, and
     sets up all dicts required for plotting poincare plots.
-    
+
     Note: This method assumes ms-based tachogram
 
     Several filtering methods are available as well.
@@ -497,7 +504,7 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
     threshold_rr : bool
         if true, the peak-peak intervals are cleaned using a threshold filter, which
         rejects all intervals that differ 30% from the mean peak-peak interval, with
-        a minimum of 300ms. 
+        a minimum of 300ms.
         default : false
 
     clean_rr : bool
@@ -506,17 +513,17 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
         default : false
 
     clean_rr_method: str
-        how to find and reject outliers. Available methods are ' quotient-filter', 
+        how to find and reject outliers. Available methods are 'quotient-filter',
         'iqr' (interquartile range), and 'z-score'.
         default : 'quotient-filter'
 
     calc_freq : bool
-        whether to compute time-series measurements 
+        whether to compute time-series measurements
         default : False
 
     freq_method : str
-        method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 
-        'periodogram', and 'welch' (Welch's method). 
+        method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis),
+        'periodogram', and 'welch' (Welch's method).
         default : 'welch'
 
     square_spectrum : bool
@@ -535,7 +542,7 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
     -------
     working_data : dict
         dictionary object used to store temporary values.
-    
+
     measures : dict
         dictionary object used by heartpy to store computed measures.
 
@@ -590,20 +597,20 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
         rr_sqdiff = np.power(rr_diff, 2)
 
     #compute ts measures
-    working_data, measures = calc_ts_measures(rr_list = working_data['RR_list_cor'], rr_diff = rr_diff, 
-                                              rr_sqdiff = rr_sqdiff, measures = measures, 
+    working_data, measures = calc_ts_measures(rr_list = working_data['RR_list_cor'], rr_diff = rr_diff,
+                                              rr_sqdiff = rr_sqdiff, measures = measures,
                                               working_data = working_data)
 
-    measures = calc_poincare(rr_list = working_data['RR_list'], rr_mask = working_data['RR_masklist'], 
+    measures = calc_poincare(rr_list = working_data['RR_list'], rr_mask = working_data['RR_masklist'],
                              measures = measures, working_data = working_data)
     if calc_freq:
         #compute freq measures
         working_data, measures = calc_fd_measures(method = freq_method, square_spectrum = square_spectrum,
                                                   measures = measures, working_data = working_data)
-        
+
     #compute breathing
     try:
-        measures, working_data = calc_breathing(working_data['RR_list_cor'], method = breathing_method, 
+        measures, working_data = calc_breathing(working_data['RR_list_cor'], method = breathing_method,
                                                 measures=measures, working_data=working_data)
     except:
         measures['breathingrate'] = np.nan
@@ -618,7 +625,7 @@ def run_tests(verbose=0):
 
     from . import analysis, datautils, filtering, peakdetection, preprocessing, visualizeutils, config
     import doctest
-    
+
     succeeded = 0
 
     print('testing config')
@@ -632,7 +639,7 @@ def run_tests(verbose=0):
     if results.failed == 0: # pragma: no cover
         print('success!')
         succeeded += 1
-        
+
     print('testing datautils')
     results = doctest.testmod(datautils, verbose=verbose)
     if results.failed == 0: # pragma: no cover
@@ -642,7 +649,7 @@ def run_tests(verbose=0):
     print('testing filtering')
     results = doctest.testmod(filtering, verbose=verbose)
     if results.failed == 0: # pragma: no cover
-        print('success!') 
+        print('success!')
         succeeded += 1
 
     print('testing peakdetection')
