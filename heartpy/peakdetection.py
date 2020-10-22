@@ -183,7 +183,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
     rol_mean = rmean + mn
 
     peaksx = np.where((hrdata > rol_mean))[0]
-    peaksy = hrdata[np.where((hrdata > rol_mean))[0]]
+    peaksy = hrdata[peaksx]
     peakedges = np.concatenate((np.array([0]),
                                 (np.where(np.diff(peaksx) > 1)[0]),
                                 np.array([len(peaksx)])))
@@ -279,9 +279,13 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
     >>> wd['RR_list'][0:4]
     array([1020.,  990.,  960., 1000.])
     '''
+
+    # moving average values to test
     ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
+
     rrsd = []
     valid_ma = []
+
     for ma_perc in ma_perc_list:
         working_data = detect_peaks(hrdata, rol_mean, ma_perc, sample_rate,
                                     update_dict=True, working_data=working_data)
@@ -343,18 +347,26 @@ def check_peaks(rr_arr, peaklist, ybeat, reject_segmentwise=False, working_data=
     Part of peak detection pipeline. No standalone examples exist. See docstring
     for hp.process() function for more info
     '''
+
     rr_arr = np.array(rr_arr)
     peaklist = np.array(peaklist)
     ybeat = np.array(ybeat)
 
+    # define RR range as mean +/- 30%, with a minimum of 300
     mean_rr = np.mean(rr_arr)
-    upper_threshold = mean_rr + 300 if (0.3 * mean_rr) <= 300 else mean_rr + (0.3 * mean_rr)
-    lower_threshold = mean_rr - 300 if (0.3 * mean_rr) <= 300 else mean_rr - (0.3 * mean_rr)
+    thirty_perc = 0.3 * mean_rr
+    if thirty_perc <= 300:
+        upper_threshold = mean_rr + 300
+        lower_threshold = mean_rr - 300
+    else:
+        upper_threshold = mean_rr + thirty_perc
+        lower_threshold = mean_rr - thirty_perc
 
-    working_data['removed_beats'] = peaklist[np.where((rr_arr <= lower_threshold) |
-                                                      (rr_arr >= upper_threshold))[0]+1]
-    working_data['removed_beats_y'] = ybeat[np.where((rr_arr <= lower_threshold) |
-                                                     (rr_arr >= upper_threshold))[0]+1]
+    # identify peaks to exclude based on RR interval
+    rem_idx = np.where((rr_arr <= lower_threshold) | (rr_arr >= upper_threshold))[0] + 1
+
+    working_data['removed_beats'] = peaklist[rem_idx]
+    working_data['removed_beats_y'] = ybeat[rem_idx]
     working_data['binary_peaklist'] = np.asarray([0 if x in working_data['removed_beats']
                                                   else 1 for x in peaklist])
 
@@ -363,6 +375,7 @@ def check_peaks(rr_arr, peaklist, ybeat, reject_segmentwise=False, working_data=
                                             working_data=working_data)
 
     working_data = update_rr(working_data=working_data)
+
     return working_data
 
 
