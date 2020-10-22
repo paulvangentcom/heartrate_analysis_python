@@ -19,7 +19,7 @@ __all__ = ['get_data',
            'load_exampledata']
 
 
-def get_data(filename, delim=',', column_name='None', encoding=None, 
+def get_data(filename, delim=',', column_name='None', encoding=None,
              ignore_extension=False):
     '''load data from file
 
@@ -107,7 +107,7 @@ def get_data(filename, delim=',', column_name='None', encoding=None,
                 hrdata = hrdata[column_name]
             except Exception as error:
                 raise LookupError('\nError loading column "%s" from file "%s". \
-Is column name specified correctly?\n The following error was provided: %s' 
+Is column name specified correctly?\n The following error was provided: %s'
                                  %(column_name, filename, error))
         elif column_name == 'None':
             hrdata = np.genfromtxt(filename, delimiter=delim, dtype=np.float64)
@@ -128,7 +128,7 @@ Is column name specified correctly?\n The following error was provided: %s'
                     hrdata = hrdata[column_name]
                 except Exception as error:
                     raise LookupError('\nError loading column "%s" from file "%s". \
-Is column name specified correctly?\n' 
+Is column name specified correctly?\n'
                                       %(column_name, filename))
             elif column_name == 'None': # pragma: no cover
                 hrdata = np.genfromtxt(filename, delimiter=delim, dtype=np.float64)
@@ -137,7 +137,7 @@ Is column name specified correctly?\n'
                                   %(column_name, filename))
         else:
             raise IncorrectFileType('unknown file format')
-            return None 
+            return None
     return hrdata
 
 
@@ -155,13 +155,13 @@ def get_samplerate_mstimer(timerdata):
     -------
     out : float
         the sample rate as determined from the timer sequence provided
-        
+
     Examples
     --------
     first we load a provided example dataset
 
     >>> data, timer = load_exampledata(example = 1)
-    
+
     since it's a timer that counts miliseconds, we use this function.
     Let's also round to three decimals
 
@@ -258,8 +258,8 @@ def rolling_mean(data, windowsize, sample_rate):
     data : 1-dimensional numpy array or list
         sequence containing data over which rolling mean is to be computed
 
-    windowsize : int or float 
-        the window size to use, in seconds 
+    windowsize : int or float
+        the window size to use, in seconds
         calculated as windowsize * sample_rate
 
     sample_rate : int or float
@@ -279,21 +279,26 @@ def rolling_mean(data, windowsize, sample_rate):
            514.45333333, 514.45333333, 514.45333333, 514.45333333,
            514.48      , 514.52      ])
     '''
-    avg_hr = (np.mean(data))
+
+    # calculate rolling mean
     data_arr = np.array(data)
     rol_mean = np.mean(_sliding_window(data_arr, int(windowsize*sample_rate)), axis=1)
-    missing_vals = np.array([avg_hr for i in range(0, int(abs(len(data_arr) - len(rol_mean))/2))])
-    rol_mean = np.insert(rol_mean, 0, missing_vals)
-    rol_mean = np.append(rol_mean, missing_vals)
 
-    #only to catch length errors that sometimes unexplicably occur. 
+    # need to fill 1/2 windowsize gap at the start and end
+    n_missvals = int(abs(len(data_arr) - len(rol_mean))/2)
+    missvals_a = np.array([rol_mean[0]]*n_missvals)
+    missvals_b = np.array([rol_mean[-1]]*n_missvals)
+
+    rol_mean = np.concatenate((missvals_a, rol_mean, missvals_b))
+
+    #only to catch length errors that sometimes unexplicably occur.
     ##Generally not executed, excluded from testing and coverage
     if len(rol_mean) != len(data): # pragma: no cover
         lendiff = len(rol_mean) - len(data)
         if lendiff < 0:
             rol_mean = np.append(rol_mean, 0)
         else:
-            rol_mean = rol_mean[:-1]            
+            rol_mean = rol_mean[:-1]
     return rol_mean
 
 
@@ -306,7 +311,7 @@ def outliers_iqr_method(hrvalues):
 
     Parameters
     ----------
-    hrvalues : 1-d numpy array or list 
+    hrvalues : 1-d numpy array or list
         sequence of values, from which outliers need to be identified
 
     Returns
@@ -345,7 +350,7 @@ def outliers_modified_z(hrvalues):
 
     Parameters
     ----------
-    hrvalues : 1-d numpy array or list 
+    hrvalues : 1-d numpy array or list
         sequence of values, from which outliers need to be identified
 
     Returns
@@ -381,7 +386,7 @@ def MAD(data):
 
     Function that compute median absolute deviation of data slice
     See: https://en.wikipedia.org/wiki/Median_absolute_deviation
-    
+
     Parameters
     ----------
     data : 1-dimensional numpy array or list
@@ -444,7 +449,7 @@ def load_exampledata(example=0):
     '''
 
     timer = []
-    
+
     if example == 0:
         path = path = 'data/data.csv'
         filepath = resource_filename(__name__, path)
