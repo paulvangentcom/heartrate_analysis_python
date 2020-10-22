@@ -88,7 +88,7 @@ def plotter(working_data, measures, show=True, title='Heart Rate Signal Peak Det
     if moving_average:
         plt.plot(plotx, working_data['rolling_mean'], color='gray', alpha=0.5)
 
-    plt.scatter(peaklist/fs, ybeat, color=colorpalette[1], label='BPM:%.2f' %(measures['bpm']))
+    plt.scatter(np.asarray(peaklist)/fs, ybeat, color=colorpalette[1], label='BPM:%.2f' %(measures['bpm']))
     plt.scatter(rejectedpeaks/fs, rejectedpeaks_y, color=colorpalette[2], label='rejected peaks')
 
     #check if rejected segment detection is on and has rejected segments
