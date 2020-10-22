@@ -268,6 +268,11 @@ include an index column?'
         hrdata = enhance_peaks(hrdata)
         hrdata = hampel_correcter(hrdata, sample_rate)
 
+    # check that the data has positive baseline for the moving average algorithm to work
+    bl_val = np.percentile(hrdata, 0.1)
+    if bl_val < 0:
+        hrdata = hrdata + abs(bl_val)
+
     working_data['hr'] = hrdata
     rol_mean = rolling_mean(hrdata, windowsize, sample_rate)
 
@@ -279,6 +284,7 @@ include an index column?'
                                          desired_sample_rate=high_precision_fs, working_data=working_data)
 
     working_data = calc_rr(working_data['peaklist'], sample_rate, working_data=working_data)
+
     working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
                                reject_segmentwise, working_data=working_data)
 
@@ -308,6 +314,7 @@ include an index column?'
             print('\nFinished in %.8s sec' %(time.perf_counter()-t1))
         else:
             print('\nFinished in %.8s sec' %(time.clock()-t1))
+
     return working_data, measures
 
 
@@ -504,7 +511,7 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
         default : false
 
     clean_rr_method: str
-        how to find and reject outliers. Available methods are ' quotient-filter',
+        how to find and reject outliers. Available methods are 'quotient-filter',
         'iqr' (interquartile range), and 'z-score'.
         default : 'quotient-filter'
 
