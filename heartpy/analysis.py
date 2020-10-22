@@ -393,7 +393,7 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     return working_data, measures
 
 
-def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_data={}):
+def calc_fd_measures(method='welch', square_spectrum=False, measures={}, working_data={}):
     '''calculates the frequency-domain measurements.
 
     Function that calculates the frequency-domain measurements for HeartPy.
@@ -407,7 +407,7 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
 
     square_spectrum : bool
         whether to square the power spectrum returned.
-        default : true
+        default : False
 
     measures : dict
         dictionary object used by heartpy to store computed measures. Will be created
@@ -442,13 +442,13 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
 
     >>> wd, m = calc_fd_measures(method = 'periodogram', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    4.964
+    5.197
 
     Available methods are 'fft', 'welch' and 'periodogram'. To set another method, do:
 
     >>> wd, m = calc_fd_measures(method = 'fft', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    4.964
+    5.197
 
     If there are no valid peak-peak intervals specified, returned measures are NaN:
     >>> wd['RR_list_cor'] = []
@@ -532,7 +532,10 @@ def calc_fd_measures(method='welch', square_spectrum=True, measures={}, working_
         raise ValueError("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
 
     working_data['frq'] = frq
-    working_data['psd'] = psd
+    if square_spectrum:
+        working_data['psd'] = np.power(psd, 2)
+    else:
+        working_data['psd'] = psd
     measures['vlf'] = np.trapz(abs(psd[(frq >= 0.0033) & (frq < 0.04)]))
     measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq < 0.15)]))
     measures['hf'] = np.trapz(abs(psd[(frq >= 0.15) & (frq < 0.4)]))

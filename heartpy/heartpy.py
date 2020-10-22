@@ -53,7 +53,7 @@ __all__ = ['enhance_peaks',
 
 
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
-            calc_freq=False, freq_method='welch', freq_square=True,
+            calc_freq=False, freq_method='welch', freq_square=False,
             interp_clipping=False, clipping_scale=False, interp_threshold=1020,
             hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False,
             high_precision=False, high_precision_fs=1000.0, breathing_method='welch',
@@ -90,7 +90,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
 
     freq_square : bool
         whether to square the power spectrum returned when computing frequency measures
-        default : True
+        default : False
 
     interp_clipping : bool
         whether to detect and interpolate clipping segments of the signal
@@ -218,7 +218,7 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
     >>> '%.3f' %m['rmssd']
     '57.070'
     >>> '%.3f' %m['lf/hf']
-    '0.893'
+    '0.847'
 
     High precision mode will upsample 200ms of data surrounding detected peak
     and attempt to estimate the peak's real position with higher accuracy.
@@ -308,7 +308,7 @@ include an index column?'
 
     if calc_freq:
         working_data, measures = calc_fd_measures(method=freq_method, measures=measures,
-                                                  working_data = working_data)
+                                                  working_data = working_data, square_spectrum = freq_square)
 
     #report time if requested. Exclude from tests, output is untestable.
     if report_time: # pragma: no cover
@@ -403,7 +403,7 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     measures (m) dict now contains a list of that measure for each segment.
 
     >>> [round(x, 1) for x in m['bpm']]
-    [100.0, 96.8, 97.2, 97.9, 96.7, 96.8, 96.8, 95.0, 92.9, 96.7, 99.2]
+    [100.0, 96.8, 97.2, 97.9, 97.0, 96.8, 96.8, 95.0, 92.9, 96.7, 99.2]
 
     Specifying mode = 'fast' will run peak detection once and use detections
     to compute measures over each segment. Useful for speed ups, but typically
