@@ -53,7 +53,7 @@ __all__ = ['enhance_peaks',
 
 
 def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
-            calc_freq=False, freq_method='welch', freq_square=False,
+            calc_freq=False, freq_method='welch', welch_wsize=240, freq_square=False,
             interp_clipping=False, clipping_scale=False, interp_threshold=1020,
             hampel_correct=False, bpmmin=40, bpmmax=180, reject_segmentwise=False,
             high_precision=False, high_precision_fs=1000.0, breathing_method='welch',
@@ -87,6 +87,14 @@ def process(hrdata, sample_rate, windowsize=0.75, report_time=False,
         method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis),
         'periodogram', and 'welch' (Welch's method).
         default : 'welch'
+
+    welch_wsize : float
+        Size of window (in sec) when welch method used to compute the spectrogram.
+        This choice is based on a trade-off btw temporal res and freq res of the resulting spectrum
+        60 sec may seem reasonable, but this would greatly limit frequency resolution!
+          1/60 s = 0.017 Hz, so you would only have 2 points in the VLF band
+        Therefore, the default is 4 min (9 points in the VLF band)
+        default : 240
 
     freq_square : bool
         whether to square the power spectrum returned when computing frequency measures
@@ -307,8 +315,8 @@ include an index column?'
         measures['breathingrate'] = np.nan
 
     if calc_freq:
-        working_data, measures = calc_fd_measures(method=freq_method, measures=measures,
-                                                  working_data = working_data, square_spectrum = freq_square)
+        working_data, measures = calc_fd_measures(method=freq_method, welch_wsize=240, square_spectrum=freq_square,
+                                                  measures=measures, working_data=working_data)
 
     #report time if requested. Exclude from tests, output is untestable.
     if report_time: # pragma: no cover
@@ -484,7 +492,7 @@ use either \'iqr\' or \'z-score\''
 
 def process_rr(rr_list, threshold_rr=False, clean_rr=False,
                clean_rr_method='quotient-filter', calc_freq=False,
-               freq_method='welch', square_spectrum=True,
+               freq_method='welch', welch_wsize=240, square_spectrum=True,
                breathing_method='welch', measures={}, working_data={}):
     '''process rr-list
 
@@ -525,6 +533,14 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
         method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis),
         'periodogram', and 'welch' (Welch's method).
         default : 'welch'
+
+    welch_wsize : float
+        Size of window (in sec) when welch method used to compute the spectrogram.
+        This choice is based on a trade-off btw temporal res and freq res of the resulting spectrum
+        60 sec may seem reasonable, but this would greatly limit frequency resolution!
+          1/60 s = 0.017 Hz, so you would only have 2 points in the VLF band
+        Therefore, the default is 4 min (9 points in the VLF band)
+        default : 240
 
     square_spectrum : bool
         whether to square the power spectrum returned.
@@ -605,8 +621,8 @@ def process_rr(rr_list, threshold_rr=False, clean_rr=False,
                              measures = measures, working_data = working_data)
     if calc_freq:
         #compute freq measures
-        working_data, measures = calc_fd_measures(method = freq_method, square_spectrum = square_spectrum,
-                                                  measures = measures, working_data = working_data)
+        working_data, measures = calc_fd_measures(method=freq_method, welch_wsize=240, square_spectrum=square_spectrum,
+                                                  measures=measures, working_data=working_data)
 
     #compute breathing
     try:
