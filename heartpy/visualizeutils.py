@@ -15,7 +15,7 @@ __all__ = ['plotter',
            'plot_poincare',
            'plot_breathing']
 
-def plotter(working_data, measures, show=True, figsize=None, 
+def plotter(working_data, measures, show=True, figsize=None,
             title='Heart Rate Signal Peak Detection', moving_average=False): # pragma: no cover
     '''plots the analysis results.
 
@@ -84,33 +84,33 @@ def plotter(working_data, measures, show=True, figsize=None,
     ybeat = working_data['ybeat']
     rejectedpeaks = working_data['removed_beats']
     rejectedpeaks_y = working_data['removed_beats_y']
-    
-    if figsize and hasattr(figsize, '__iter__') and len(figsize) == 2:
-        plt.figure(figsize=figsize)
 
-    plt.title(title)
-    plt.plot(plotx, working_data['hr'], color=colorpalette[0], label='heart rate signal', zorder=-10)
-    plt.xlabel('Time (s)')
+    fig, ax = plt.subplots(figsize=figsize)
+
+    ax.set_title(title)
+    ax.plot(plotx, working_data['hr'], color=colorpalette[0], label='heart rate signal', zorder=-10)
+    ax.set_xlabel('Time (s)')
 
     if moving_average:
-        plt.plot(plotx, working_data['rolling_mean'], color='gray', alpha=0.5)
+        ax.plot(plotx, working_data['rolling_mean'], color='gray', alpha=0.5)
 
-    plt.scatter(np.asarray(peaklist)/fs, ybeat, color=colorpalette[1], label='BPM:%.2f' %(measures['bpm']))
-    plt.scatter(rejectedpeaks/fs, rejectedpeaks_y, color=colorpalette[2], label='rejected peaks')
+    ax.scatter(np.asarray(peaklist)/fs, ybeat, color=colorpalette[1], label='BPM:%.2f' %(measures['bpm']))
+    ax.scatter(rejectedpeaks/fs, rejectedpeaks_y, color=colorpalette[2], label='rejected peaks')
 
     #check if rejected segment detection is on and has rejected segments
     try:
         if len(working_data['rejected_segments']) >= 1:
             for segment in working_data['rejected_segments']:
-                plt.axvspan(segment[0], segment[1], facecolor='red', alpha=0.5)
+                ax.axvspan(segment[0], segment[1], facecolor='red', alpha=0.5)
     except:
         pass
 
-    plt.legend(loc=4, framealpha=0.6)
+    ax.legend(loc=4, framealpha=0.6)
+
     if show:
-        plt.show()
+        fig.show()
     else:
-        return plt
+        return fig
 
 def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detection',
                     figsize=(6, 6), path='', start=0, end=None, step=1): # pragma: no cover
@@ -247,21 +247,18 @@ def plot_poincare(working_data, measures, show = True, figsize=None,
     sd1 = measures['sd1']
     sd2 = measures['sd2']
 
-    if figsize and hasattr(figsize, '__iter__') and len(figsize) == 2:
-        plt.figure(figsize=figsize)
-
     #define figure
-    fig, ax = plt.subplots(subplot_kw={'aspect': 'equal'})
+    fig, ax = plt.subplots(subplot_kw={'aspect': 'equal'}, figsize=figsize)
 
     #plot scatter
-    plt.scatter(x_plus, x_minus, color = colorpalette[0],
+    ax.scatter(x_plus, x_minus, color = colorpalette[0],
                 alpha = 0.75, label = 'peak-peak intervals')
 
     #plot identity line
     mins = np.min([x_plus, x_minus])
     maxs = np.max([x_plus, x_minus])
     identity_line = np.linspace(np.min(mins), np.max(maxs))
-    plt.plot(identity_line, identity_line, color='black', alpha=0.5,
+    ax.plot(identity_line, identity_line, color='black', alpha=0.5,
              label = 'identity line')
 
     #rotate SD1, SD2 vectors 45 degrees counterclockwise
@@ -269,10 +266,10 @@ def plot_poincare(working_data, measures, show = True, figsize=None,
     sd2_xrot, sd2_yrot = rotate_vec(0, sd2, 45)
 
     #plot rotated SD1, SD2 lines
-    plt.plot([np.mean(x_plus), np.mean(x_plus) + sd1_xrot],
+    ax.plot([np.mean(x_plus), np.mean(x_plus) + sd1_xrot],
              [np.mean(x_minus), np.mean(x_minus) + sd1_yrot],
              color = colorpalette[1], label = 'SD1')
-    plt.plot([np.mean(x_plus), np.mean(x_plus) - sd2_xrot],
+    ax.plot([np.mean(x_plus), np.mean(x_plus) - sd2_xrot],
              [np.mean(x_minus), np.mean(x_minus) + sd2_yrot],
              color = colorpalette[2], label = 'SD2')
 
@@ -284,13 +281,15 @@ def plot_poincare(working_data, measures, show = True, figsize=None,
     el.set_edgecolor((0,0,0))
     el.fill = False
 
-    plt.legend(loc=4, framealpha=0.6)
-    plt.title(title)
+    ax.set_xlabel('RRi_n (ms)')
+    ax.set_ylabel('RRi_n+1 (ms)')
+    ax.legend(loc=4, framealpha=0.6)
+    ax.set_title(title)
 
     if show:
-        plt.show()
+        fig.show()
     else:
-        return plt
+        return fig
 
 
 def rotate_vec(x, y, angle):
@@ -359,7 +358,7 @@ def plot_breathing(working_data, measures, show=True, figsize=None): # pragma: n
     show : bool
         whether to show the plot right away, or return a matplotlib object for
         further manipulation
-        
+
     figsize: tuple
         Set dimensions of image in inches like in matplotlib. figsize=(x, y)
         default: None => (6.4, 4.8)
@@ -374,25 +373,22 @@ def plot_breathing(working_data, measures, show=True, figsize=None): # pragma: n
     This function has no examples. See documentation of heartpy for more info.
     '''
 
-    if figsize and hasattr(figsize, '__iter__') and len(figsize) == 2:
-        plt.figure(figsize=figsize)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
 
-    plt.subplot(211)
-    plt.plot(working_data['breathing_signal'], label='breathing signal')
-    plt.xlabel('ms')
-    plt.title('breathing signal extracted from RR-intervals')
+    ax1.plot(working_data['breathing_signal'], label='breathing signal')
+    ax1.set_xlabel('ms')
+    ax1.set_title('breathing signal extracted from RR-intervals')
 
-    plt.subplot(212)
-    plt.plot(working_data['breathing_frq'], working_data['breathing_psd'], label='spectrogram')
-    plt.xlim(0, 1)
-    plt.xlabel('Hz')
-    plt.title('spectrogram extracted from breathing rate signal')
+    ax2.plot(working_data['breathing_frq'], working_data['breathing_psd'], label='spectrogram')
+    ax2.set_xlim(0, 1)
+    ax2.set_xlabel('Hz')
+    ax2.set_title('spectrogram extracted from breathing rate signal')
 
-    plt.legend()
+    ax2.legend()
     plt.tight_layout()
 
     if show:
-        plt.show()
+        fig.show()
     else:
-        return plt
+        return fig
 
