@@ -393,7 +393,7 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     return working_data, measures
 
 
-def calc_fd_measures(method='welch', square_spectrum=False, measures={}, working_data={}):
+def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, measures={}, working_data={}):
     '''calculates the frequency-domain measurements.
 
     Function that calculates the frequency-domain measurements for HeartPy.
@@ -404,6 +404,14 @@ def calc_fd_measures(method='welch', square_spectrum=False, measures={}, working
         method used to compute the spectrogram of the heart rate.
         available methods: fft, periodogram, and welch
         default : welch
+
+    welch_wsize : float
+        Size of window (in sec) when welch method used to compute the spectrogram.
+        This choice is based on a trade-off btw temporal res and freq res of the resulting spectrum
+        60 sec may seem reasonable, but this would greatly limit frequency resolution!
+          1/60 s = 0.017 Hz, so you would only have 2 points in the VLF band
+        Therefore, the default is 4 min (9 points in the VLF band)
+        default : 240
 
     square_spectrum : bool
         whether to square the power spectrum returned.
@@ -442,13 +450,13 @@ def calc_fd_measures(method='welch', square_spectrum=False, measures={}, working
 
     >>> wd, m = calc_fd_measures(method = 'periodogram', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    5.197
+    5.198
 
     Available methods are 'fft', 'welch' and 'periodogram'. To set another method, do:
 
     >>> wd, m = calc_fd_measures(method = 'fft', measures = m, working_data = wd)
     >>> print('%.3f' %m['lf/hf'])
-    5.197
+    5.198
 
     If there are no valid peak-peak intervals specified, returned measures are NaN:
     >>> wd['RR_list_cor'] = []
@@ -509,25 +517,41 @@ def calc_fd_measures(method='welch', square_spectrum=False, measures={}, working
                        '\n\nThis warning will not repeat'))
         warnings.warn(msg, UserWarning)
 
-    rr_x = []
-    pointer = 0
-    for x in rr_list:
-        pointer += x
-        rr_x.append(pointer)
-    rr_x_new = np.linspace(int(rr_x[0]), int(rr_x[-1]), int(rr_x[-1]))
-    interpolated_func = UnivariateSpline(rr_x, rr_list, k=3)
+    # Aggregate RR-list and interpolate to a uniform sampling rate at 4x resolution
+    rr_x = np.cumsum(rr_list)
 
+    resamp_factor = 4
+    datalen = int((len(rr_x) - 1)*resamp_factor)
+    rr_x_new = np.linspace(int(rr_x[0]), int(rr_x[-1]), datalen)
+
+    interpolation_func = UnivariateSpline(rr_x, rr_list, k=3)   # cubic
+    rr_interp = interpolation_func(rr_x_new)
+
+    # RR-list in units of ms, with the sampling rate at 1 sample per beat
+    dt = np.mean(rr_list)/1000   # in sec
+    fs = 1/dt                    # about 1.1 Hz; 50 BPM would be 0.83 Hz, just enough to get the
+                                 # max of the HF band at 0.4 Hz according to Nyquist
+    fs_new = fs*resamp_factor
+
+    # compute PSD (one-sided, units of ms^2/Hz)
     if method=='fft':
-        datalen = len(rr_x_new)
-        frq = np.fft.fftfreq(datalen, d=((1/1000.0)))
+        frq = np.fft.fftfreq(datalen, d=(1/fs_new))
         frq = frq[range(int(datalen/2))]
-        Y = np.fft.fft(interpolated_func(rr_x_new))/datalen
+        Y = np.fft.fft(rr_interp)/datalen
         Y = Y[range(int(datalen/2))]
         psd = np.power(Y, 2)
+
     elif method=='periodogram':
-        frq, psd = periodogram(interpolated_func(rr_x_new), fs=1000.0)
+        frq, psd = periodogram(rr_interp, fs=fs_new)
+
     elif method=='welch':
-        frq, psd = welch(interpolated_func(rr_x_new), fs=1000.0, nperseg=len(rr_x_new) - 1)
+        # nperseg should be based on trade-off btw temporal res and freq res
+        # default is 4 min to get about 9 points in the VLF band
+        nperseg = welch_wsize*fs_new
+        if nperseg >= len(rr_x_new): # if nperseg is larger than the available data segment
+            nperseg = len(rr_x_new)  # set it to length of data segment to prevent scipy warnings
+                                     # as user is already informed through the signal length warning
+        frq, psd = welch(rr_interp, fs=fs_new, nperseg=nperseg)
     else:
         raise ValueError("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
 
@@ -536,12 +560,30 @@ def calc_fd_measures(method='welch', square_spectrum=False, measures={}, working
         working_data['psd'] = np.power(psd, 2)
     else:
         working_data['psd'] = psd
-    measures['vlf'] = np.trapz(abs(psd[(frq >= 0.0033) & (frq < 0.04)]))
-    measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq < 0.15)]))
-    measures['hf'] = np.trapz(abs(psd[(frq >= 0.15) & (frq < 0.4)]))
+
+    # compute absolute power band measures (units of ms^2)
+    df = frq[1] - frq[0]
+    measures['vlf'] = np.trapz(abs(psd[(frq >= 0.0033) & (frq < 0.04)]), dx=df)
+    measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq < 0.15)]), dx=df)
+    measures['hf'] = np.trapz(abs(psd[(frq >= 0.15) & (frq < 0.4)]), dx=df)
     measures['lf/hf'] = measures['lf'] / measures['hf']
-    working_data['interp_rr_function'] = interpolated_func
-    working_data['interp_rr_linspace'] = (rr_x[0], rr_x[-1], rr_x[-1])
+
+    measures['p_total'] = measures['vlf'] + measures['lf'] + measures['hf']
+
+    # compute relative and normalized power measures
+    perc_factor = 100/measures['p_total']
+    measures['vlf_perc'] = measures['vlf']*perc_factor
+    measures['lf_perc'] = measures['lf']*perc_factor
+    measures['hf_perc'] = measures['hf']*perc_factor
+
+    nu_factor = 100/(measures['lf'] + measures['hf'])
+    measures['lf_nu'] = measures['lf']*nu_factor
+    measures['hf_nu'] = measures['hf']*nu_factor
+
+
+    working_data['interp_rr_function'] = interpolation_func
+    working_data['interp_rr_linspace'] = rr_x_new
+
     return working_data, measures
 
 
