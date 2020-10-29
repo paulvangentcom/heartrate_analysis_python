@@ -548,6 +548,9 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
         # nperseg should be based on trade-off btw temporal res and freq res
         # default is 4 min to get about 9 points in the VLF band
         nperseg = welch_wsize*fs_new
+        if nperseg >= len(rr_x_new): # if nperseg is larger than the available data segment
+            nperseg = len(rr_x_new)  # set it to length of data segment to prevent scipy warnings
+                                     # as user is already informed through the signal length warning
         frq, psd = welch(rr_interp, fs=fs_new, nperseg=nperseg)
     else:
         raise ValueError("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
