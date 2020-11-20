@@ -69,9 +69,9 @@ Frequency domain (ranges per Shaffer and Ginsberg: https://doi.org/10.3389/fpubh
 
 **When using the package in your research, please cite**:
 
-van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data. In Proceedings of the 6th HUMANIST Conference (pp. 173–178).
-
 van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2019). Analysing Noisy Driver Physiology Real-Time Using Off-the-Shelf Sensors: Heart Rate Analysis Software from the Taking the Fast Lane Project. Journal of Open Research Software, 7(1), 32. DOI: http://doi.org/10.5334/jors.241
+
+van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2019). HeartPy: A novel heart rate algorithm for the analysis of noisy signals. Transportation Research Part F: Traffic Psychology and Behaviour, 66, 368–378. https://doi.org/10.1016/j.trf.2019.09.015
 
 ## Documentation
 
@@ -89,12 +89,12 @@ The module is also to some extent described in my tutorial series:
 The module is licensed under the [GNU General Public License Version3, GPL-v3](https://opensource.org/licenses/GPL-3.0)
 
 ## Validation
-Initial results of the validation have been reported in [1, 2]. Updates here are soon to follow once the papers are published.
+Initial results of the validation have been reported in [1, 2].
 
 
 [1]van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2018). Heart Rate Analysis for Human Factors: Development and Validation of an Open Source Toolkit for Noisy Naturalistic Heart Rate Data. In Proceedings of the 6th HUMANIST Conference (pp. 173–178).
 
-[2] van Gent, P. Van, Farah, H., Nes, N. Van, & Arem, B. Van. (manuscript submitted for publication). A Novel Heart Rate Algorithm for the Analysis of Noisy Signals.
+[2] van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2019). HeartPy: A novel heart rate algorithm for the analysis of noisy signals. Transportation Research Part F: Traffic Psychology and Behaviour, 66, 368–378. https://doi.org/10.1016/j.trf.2019.09.015
 
 
 
