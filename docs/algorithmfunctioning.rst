@@ -132,7 +132,7 @@ One interesting property of the heart is that the frequency with which it beats 
 .. image:: images/CO2_RRbreath.jpg
    :align: center
 
-The problem is now reduced to one of peak finding. Breathing rate can be extracted using the toolkit. After calling the 'process' function, breathing rate (in Hz) is available in the dict{} object that is returned.
+The problem is now reduced to one of frequency domain transformation. Breathing rate can be extracted using the toolkit. After calling the 'process' function, breathing rate (in Hz) is available in the dict{} object that is returned.
 
 .. code-block:: python
 
