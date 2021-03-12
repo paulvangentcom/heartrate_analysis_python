@@ -393,8 +393,8 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     return working_data, measures
 
 
-def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, measures={}, working_data={}):
-    '''calculates the frequency-domain measurements.
+def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, measures={}, working_data={}, degree_smoothing_spline=3):
+    """calculates the frequency-domain measurements.
 
     Function that calculates the frequency-domain measurements for HeartPy.
 
@@ -424,6 +424,10 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
     working_data : dict
         dictionary object that contains all heartpy's working data (temp) objects.
         will be created if not passed to function
+
+    degree_smoothing_spline : int, optional
+        Degree of the smoothing spline for UnivariateSpline function in fitpack2.  Must be 1 <= `k` <= 5.
+        Default is `k` = 3, a cubic spline.
 
     Returns
     -------
@@ -488,7 +492,7 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
 
     This warning will not repeat'
     --------------
-    '''
+    """
     rr_list = working_data['RR_list_cor']
 
     if len(rr_list) <= 1:
@@ -524,7 +528,12 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
     datalen = int((len(rr_x) - 1)*resamp_factor)
     rr_x_new = np.linspace(int(rr_x[0]), int(rr_x[-1]), datalen)
 
-    interpolation_func = UnivariateSpline(rr_x, rr_list, k=3)   # cubic
+
+    # Added to prevent it crashes when rr_list contains less rr intervals than the degree of the smoothing spline
+    if len(rr_x) <= degree_smoothing_spline:
+        degree_smoothing_spline = degree_smoothing_spline - 1 - (degree_smoothing_spline - len(rr_x))
+
+    interpolated_func = UnivariateSpline(rr_x, rr_list, k=degree_smoothing_spline)
     rr_interp = interpolation_func(rr_x_new)
 
     # RR-list in units of ms, with the sampling rate at 1 sample per beat
