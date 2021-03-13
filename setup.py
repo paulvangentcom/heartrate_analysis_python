@@ -11,7 +11,7 @@ setuptools.setup(
     description="Heart Rate Analysis Toolkit",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/arritmic/heartrate_analysis_python",
+    url="https://github.com/paulvangentcom/heartrate_analysis_python",
     packages=["heartpy"],
     install_requires=[
         "cycler==0.10.0;python_version<='3.5'",
