@@ -28,7 +28,7 @@ setuptools.setup(
         "matplotlib==2.2.3;python_version=='2.7'",
         "matplotlib<=2.2.3;python_version=='3.4'",
         "matplotlib<=3.0.0;python_version=='3.5'",
-        "matplotlib;python_version>='3.6'"],
+        "matplotlib<=3.1.2;python_version=='3.6'"],
     include_package_data=True,
     package_data={
         '': ['data/*.csv', 'data/*.mat', 'data/*.log']       
