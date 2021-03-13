@@ -503,8 +503,8 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
         measures['hf'] = np.nan
         measures['lf/hf'] = np.nan
         return working_data, measures
-    elif np.sum(rr_list) <= 300000: # pragma: no cover
-        #warn if signal is short
+    elif np.sum(rr_list) <= 300000:   # pragma: no cover
+        # warn if signal is short
         msg = ''.join(('Short signal.\n',
                        '\n---------Warning:---------\n',
                        'too few peak-peak intervals for (reliable) frequency domain measure computation, ',
@@ -528,12 +528,11 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
     datalen = int((len(rr_x) - 1)*resamp_factor)
     rr_x_new = np.linspace(int(rr_x[0]), int(rr_x[-1]), datalen)
 
-
     # Added to prevent it crashes when rr_list contains less rr intervals than the degree of the smoothing spline
     if len(rr_x) <= degree_smoothing_spline:
         degree_smoothing_spline = degree_smoothing_spline - 1 - (degree_smoothing_spline - len(rr_x))
 
-    interpolated_func = UnivariateSpline(rr_x, rr_list, k=degree_smoothing_spline)
+    interpolation_func = UnivariateSpline(rr_x, rr_list, k=degree_smoothing_spline)
     rr_interp = interpolation_func(rr_x_new)
 
     # RR-list in units of ms, with the sampling rate at 1 sample per beat
@@ -543,17 +542,17 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
     fs_new = fs*resamp_factor
 
     # compute PSD (one-sided, units of ms^2/Hz)
-    if method=='fft':
+    if method == 'fft':
         frq = np.fft.fftfreq(datalen, d=(1/fs_new))
         frq = frq[range(int(datalen/2))]
         Y = np.fft.fft(rr_interp)/datalen
         Y = Y[range(int(datalen/2))]
         psd = np.power(Y, 2)
 
-    elif method=='periodogram':
+    elif method == 'periodogram':
         frq, psd = periodogram(rr_interp, fs=fs_new)
 
-    elif method=='welch':
+    elif method == 'welch':
         # nperseg should be based on trade-off btw temporal res and freq res
         # default is 4 min to get about 9 points in the VLF band
         nperseg = welch_wsize*fs_new
