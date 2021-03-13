@@ -42,7 +42,7 @@ jobs:
           # Install the codecov pip dependency
           pip install codecov
           # run install to get dependencies and heartpy installed
-          python setup.py install
+          python setup.py install --user
           
 
       # Runs a set of commands using the runners shell
