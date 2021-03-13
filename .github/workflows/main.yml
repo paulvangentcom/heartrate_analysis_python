@@ -39,6 +39,8 @@ jobs:
       # Install pip and pytest
       - name: Install dependencies
         run: |
+          python --version
+          pip --version
           # Install the codecov pip dependency
           pip install codecov
           # run install to get dependencies and heartpy installed
