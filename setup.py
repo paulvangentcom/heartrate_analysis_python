@@ -26,12 +26,14 @@ setuptools.setup(
         "scipy<=1.2.0;python_version=='3.4'",
         "scipy<=1.4.1;python_version=='3.5'",
         "scipy<=1.4.1;python_version=='3.6'",
-        "scipy;python_version>='3.7'",
+        "scipy;python_version=='3.7'",
+        "scipy;python_version>='3.8'",
         "matplotlib==2.2.3;python_version=='2.7'",
         "matplotlib<=2.2.3;python_version=='3.4'",
         "matplotlib<=3.0.0;python_version=='3.5'",
         "matplotlib<=3.1.2;python_version=='3.6'",
-        "matplotlib;python_version>='3.7'"],
+        "matplotlib<=3.3.4;python_version=='3.7'",
+        "matplotlib;python_version>='3.8'"],
     include_package_data=True,
     package_data={
         '': ['data/*.csv', 'data/*.mat', 'data/*.log']       
