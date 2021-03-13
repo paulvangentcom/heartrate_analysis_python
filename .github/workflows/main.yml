@@ -31,6 +31,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+          
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
       
       # Install pip and pytest
       - name: Install dependencies
@@ -40,9 +44,6 @@ jobs:
           # run install to get dependencies and heartpy installed
           python setup.py install
           
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
 
       # Runs a set of commands using the runners shell
       - name: Run the unit test
