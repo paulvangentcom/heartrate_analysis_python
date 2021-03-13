@@ -21,7 +21,7 @@ setuptools.setup(
         "numpy<=1.15;python_version=='3.4'",
         "numpy<=1.15;python_version=='3.5'",
         "numpy<=1.17;python_version=='3.6'",
-        "numpy;python_version>='3.7'",
+        "numpy>=1.17;python_version>='3.7'",
         "scipy<=1.1.0;python_version=='2.7'",
         "scipy<=1.2.0;python_version=='3.4'",
         "scipy<=1.4.1;python_version=='3.5'",
