@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="heartpy",
-    version="1.2.6",
+    version="1.2.7",
     author="Paul van Gent",
     author_email="P.vanGent@tudelft.nl",
     description="Heart Rate Analysis Toolkit",
