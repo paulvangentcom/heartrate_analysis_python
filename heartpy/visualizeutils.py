@@ -195,6 +195,7 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
         wd_segment['removed_beats_y'] = working_data['removed_beats_y'][i]
         wd_segment['hr'] = working_data['hr'][i]
         wd_segment['rolling_mean'] = working_data['rolling_mean'][i]
+        wd_segment['sample_rate'] = working_data['sample_rate'][i]
         m_segment['bpm'] = measures['bpm'][i]
         try:
             wd_segment['rejected_segments'] = working_data['rejected_segments'][i]
@@ -205,7 +206,7 @@ def segment_plotter(working_data, measures, title='Heart Rate Signal Peak Detect
         plt.figure(figsize = figsize)
         p = plotter(wd_segment, m_segment, show=False)
         p.savefig('%s%i.png' %(path, filenum))
-        p.close()
+        plt.close('all')
         filenum += 1
 
 
