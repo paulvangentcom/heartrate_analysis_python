@@ -79,7 +79,15 @@ def plotter(working_data, measures, show=True, figsize=None,
     # create plot x-var
     fs = working_data['sample_rate']
     plotx = np.arange(0, len(working_data['hr'])/fs, 1/fs)
-
+    #check if there's a rounding error causing differing lengths of plotx and signal
+    diff = len(plotx) - len(working_data['hr'])
+    if diff < 0:
+        #add to linspace
+        plotx = np.append(plotx, plotx[-1] + (plotx[-2] - plotx[-1]))
+    elif diff > 0:
+        #trim linspace
+        plotx = plotx[0:-diff]
+        
     peaklist = working_data['peaklist']
     ybeat = working_data['ybeat']
     rejectedpeaks = working_data['removed_beats']
