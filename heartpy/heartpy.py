@@ -458,8 +458,8 @@ use either \'iqr\' or \'z-score\''
         for i, ii in slice_indices:
             #pks = [x for x in peaklist if i <= x < ii]
             pks = peaklist[np.where((peaklist >= i) & (peaklist < ii))]
-            pks_b = working_data['binary_peaklist'][np.int(np.where(peaklist == pks[0])[0]):
-                                                    np.int(np.where(peaklist == pks[-1])[-1]) + 1]
+            pks_b = working_data['binary_peaklist'][int(np.where(peaklist == pks[0])[0]):
+                                                    int(np.where(peaklist == pks[-1])[-1]) + 1]
             rr_list = (np.diff(pks) / sample_rate) * 1000.0
             rr_list, rr_diff, rr_sqdiff = calc_rr_segment(rr_list, pks_b)
             _, tmp = calc_ts_measures(rr_list, rr_diff, rr_sqdiff)
