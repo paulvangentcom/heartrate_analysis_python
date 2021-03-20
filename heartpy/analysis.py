@@ -393,8 +393,8 @@ def calc_ts_measures(rr_list, rr_diff, rr_sqdiff, measures={}, working_data={}):
     return working_data, measures
 
 
-def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, measures={}, working_data={}):
-    '''calculates the frequency-domain measurements.
+def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, measures={}, working_data={}, degree_smoothing_spline=3):
+    """calculates the frequency-domain measurements.
 
     Function that calculates the frequency-domain measurements for HeartPy.
 
@@ -424,6 +424,10 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
     working_data : dict
         dictionary object that contains all heartpy's working data (temp) objects.
         will be created if not passed to function
+
+    degree_smoothing_spline : int, optional
+        Degree of the smoothing spline for UnivariateSpline function in fitpack2.  Must be 1 <= `k` <= 5.
+        Default is `k` = 3, a cubic spline.
 
     Returns
     -------
@@ -488,7 +492,7 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
 
     This warning will not repeat'
     --------------
-    '''
+    """
     rr_list = working_data['RR_list_cor']
 
     if len(rr_list) <= 1:
@@ -499,8 +503,8 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
         measures['hf'] = np.nan
         measures['lf/hf'] = np.nan
         return working_data, measures
-    elif np.sum(rr_list) <= 300000: # pragma: no cover
-        #warn if signal is short
+    elif np.sum(rr_list) <= 300000:   # pragma: no cover
+        # warn if signal is short
         msg = ''.join(('Short signal.\n',
                        '\n---------Warning:---------\n',
                        'too few peak-peak intervals for (reliable) frequency domain measure computation, ',
@@ -524,65 +528,87 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
     datalen = int((len(rr_x) - 1)*resamp_factor)
     rr_x_new = np.linspace(int(rr_x[0]), int(rr_x[-1]), datalen)
 
-    interpolation_func = UnivariateSpline(rr_x, rr_list, k=3)   # cubic
-    rr_interp = interpolation_func(rr_x_new)
+    if len(rr_x) > degree_smoothing_spline:
+        interpolation_func = UnivariateSpline(rr_x, rr_list, k=degree_smoothing_spline)
+        rr_interp = interpolation_func(rr_x_new)
 
-    # RR-list in units of ms, with the sampling rate at 1 sample per beat
-    dt = np.mean(rr_list)/1000   # in sec
-    fs = 1/dt                    # about 1.1 Hz; 50 BPM would be 0.83 Hz, just enough to get the
-                                 # max of the HF band at 0.4 Hz according to Nyquist
-    fs_new = fs*resamp_factor
+        # RR-list in units of ms, with the sampling rate at 1 sample per beat
+        dt = np.mean(rr_list) / 1000  # in sec
+        fs = 1 / dt  # about 1.1 Hz; 50 BPM would be 0.83 Hz, just enough to get the
+        # max of the HF band at 0.4 Hz according to Nyquist
+        fs_new = fs * resamp_factor
 
-    # compute PSD (one-sided, units of ms^2/Hz)
-    if method=='fft':
-        frq = np.fft.fftfreq(datalen, d=(1/fs_new))
-        frq = frq[range(int(datalen/2))]
-        Y = np.fft.fft(rr_interp)/datalen
-        Y = Y[range(int(datalen/2))]
-        psd = np.power(Y, 2)
+        # compute PSD (one-sided, units of ms^2/Hz)
+        if method == 'fft':
+            frq = np.fft.fftfreq(datalen, d=(1 / fs_new))
+            frq = frq[range(int(datalen / 2))]
+            Y = np.fft.fft(rr_interp) / datalen
+            Y = Y[range(int(datalen / 2))]
+            psd = np.power(Y, 2)
 
-    elif method=='periodogram':
-        frq, psd = periodogram(rr_interp, fs=fs_new)
+        elif method == 'periodogram':
+            frq, psd = periodogram(rr_interp, fs=fs_new)
 
-    elif method=='welch':
-        # nperseg should be based on trade-off btw temporal res and freq res
-        # default is 4 min to get about 9 points in the VLF band
-        nperseg = welch_wsize*fs_new
-        if nperseg >= len(rr_x_new): # if nperseg is larger than the available data segment
-            nperseg = len(rr_x_new)  # set it to length of data segment to prevent scipy warnings
-                                     # as user is already informed through the signal length warning
-        frq, psd = welch(rr_interp, fs=fs_new, nperseg=nperseg)
+        elif method == 'welch':
+            # nperseg should be based on trade-off btw temporal res and freq res
+            # default is 4 min to get about 9 points in the VLF band
+            nperseg = welch_wsize * fs_new
+            if nperseg >= len(rr_x_new):  # if nperseg is larger than the available data segment
+                nperseg = len(rr_x_new)  # set it to length of data segment to prevent scipy warnings
+                # as user is already informed through the signal length warning
+            frq, psd = welch(rr_interp, fs=fs_new, nperseg=nperseg)
+        else:
+            raise ValueError("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
+
+        working_data['frq'] = frq
+        if square_spectrum:
+            working_data['psd'] = np.power(psd, 2)
+        else:
+            working_data['psd'] = psd
+
+        # compute absolute power band measures (units of ms^2)
+        df = frq[1] - frq[0]
+        measures['vlf'] = np.trapz(abs(psd[(frq >= 0.0033) & (frq < 0.04)]), dx=df)
+        measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq < 0.15)]), dx=df)
+        measures['hf'] = np.trapz(abs(psd[(frq >= 0.15) & (frq < 0.4)]), dx=df)
+        measures['lf/hf'] = measures['lf'] / measures['hf']
+
+        measures['p_total'] = measures['vlf'] + measures['lf'] + measures['hf']
+
+        # compute relative and normalized power measures
+        perc_factor = 100 / measures['p_total']
+        measures['vlf_perc'] = measures['vlf'] * perc_factor
+        measures['lf_perc'] = measures['lf'] * perc_factor
+        measures['hf_perc'] = measures['hf'] * perc_factor
+
+        nu_factor = 100 / (measures['lf'] + measures['hf'])
+        measures['lf_nu'] = measures['lf'] * nu_factor
+        measures['hf_nu'] = measures['hf'] * nu_factor
+
+        working_data['interp_rr_function'] = interpolation_func
+        working_data['interp_rr_linspace'] = rr_x_new
+
     else:
-        raise ValueError("specified method incorrect, use 'fft', 'periodogram' or 'welch'")
+        working_data['frq'] = np.nan
+        working_data['psd'] = np.nan
+        measures['vlf'] = np.nan
+        measures['lf'] = np.nan
+        measures['hf'] = np.nan
+        measures['lf/hf'] = np.nan
 
-    working_data['frq'] = frq
-    if square_spectrum:
-        working_data['psd'] = np.power(psd, 2)
-    else:
-        working_data['psd'] = psd
+        measures['p_total'] = np.nan
 
-    # compute absolute power band measures (units of ms^2)
-    df = frq[1] - frq[0]
-    measures['vlf'] = np.trapz(abs(psd[(frq >= 0.0033) & (frq < 0.04)]), dx=df)
-    measures['lf'] = np.trapz(abs(psd[(frq >= 0.04) & (frq < 0.15)]), dx=df)
-    measures['hf'] = np.trapz(abs(psd[(frq >= 0.15) & (frq < 0.4)]), dx=df)
-    measures['lf/hf'] = measures['lf'] / measures['hf']
+        # compute relative and normalized power measures
+        measures['vlf_perc'] = np.nan
+        measures['lf_perc'] = np.nan
+        measures['hf_perc'] = np.nan
 
-    measures['p_total'] = measures['vlf'] + measures['lf'] + measures['hf']
+        measures['lf_nu'] = np.nan
+        measures['hf_nu'] = np.nan
 
-    # compute relative and normalized power measures
-    perc_factor = 100/measures['p_total']
-    measures['vlf_perc'] = measures['vlf']*perc_factor
-    measures['lf_perc'] = measures['lf']*perc_factor
-    measures['hf_perc'] = measures['hf']*perc_factor
-
-    nu_factor = 100/(measures['lf'] + measures['hf'])
-    measures['lf_nu'] = measures['lf']*nu_factor
-    measures['hf_nu'] = measures['hf']*nu_factor
-
-
-    working_data['interp_rr_function'] = interpolation_func
-    working_data['interp_rr_linspace'] = rr_x_new
+        working_data['interp_rr_function'] = np.nan
+        working_data['interp_rr_linspace'] = rr_x_new
+        # TODO: Warning about degree of the interpolation function.
 
     return working_data, measures
 
