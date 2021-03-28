@@ -502,6 +502,12 @@ def calc_fd_measures(method='welch', welch_wsize=240, square_spectrum=False, mea
         measures['lf'] = np.nan
         measures['hf'] = np.nan
         measures['lf/hf'] = np.nan
+        measures['p_total'] = np.nan
+        measures['vlf_perc'] = np.nan
+        measures['lf_perc'] = np.nan
+        measures['hf_perc'] = np.nan
+        measures['lf_nu'] = np.nan
+        measures['hf_nu'] = np.nan
         return working_data, measures
     elif np.sum(rr_list) <= 300000:   # pragma: no cover
         # warn if signal is short
