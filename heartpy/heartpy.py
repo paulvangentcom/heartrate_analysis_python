@@ -10,6 +10,7 @@ import sys
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.signal import butter, filtfilt, welch, periodogram, resample_poly, resample
+from statistics import mode
 
 from . import exceptions
 from .datautils import get_data, get_samplerate_mstimer, get_samplerate_datetime,\
@@ -294,6 +295,23 @@ include an index column?'
                                          desired_sample_rate=high_precision_fs, working_data=working_data)
 
     working_data = calc_rr(working_data['peaklist'], sample_rate, working_data=working_data)
+    
+    # Obtain Mode
+    mode_v = mode(working_data['RR_list'])
+    measures['Mo'] = mode_v
+
+    # Obtain AMo (mode amplitude %)
+    amo = np.max(working_data['RR_list']) - np.min(working_data['RR_list'])
+    measures['AMo'] = amo
+
+    # Obtain VR (variational range)
+    num_mode = np.count_nonzero(working_data['RR_list'] == mode_v)
+    vr = (num_mode/len(working_data['RR_list']))*100
+    measures['VR'] = vr
+
+    # Calculate Baevsky Stress Index
+    si = (amo/(2*vr*mode_v)) * 100
+    measures['SI'] = si
 
     working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
                                reject_segmentwise, working_data=working_data)
