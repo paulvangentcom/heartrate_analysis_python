@@ -301,13 +301,13 @@ include an index column?'
     measures['Mo'] = mode_v
 
     # Obtain AMo (mode amplitude %)
-    amo = np.max(working_data['RR_list']) - np.min(working_data['RR_list'])
-    measures['AMo'] = amo
+    vr = np.max(working_data['RR_list']) - np.min(working_data['RR_list'])
+    measures['VR'] = vr
 
     # Obtain VR (variational range)
     num_mode = np.count_nonzero(working_data['RR_list'] == mode_v)
-    vr = (num_mode/len(working_data['RR_list']))*100
-    measures['VR'] = vr
+    amo = (num_mode/len(working_data['RR_list']))*100
+    measures['AMo'] = amo
 
     # Calculate Baevsky Stress Index
     si = (amo/(2*vr*mode_v)) * 100
