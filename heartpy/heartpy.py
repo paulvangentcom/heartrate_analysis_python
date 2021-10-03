@@ -300,11 +300,11 @@ include an index column?'
     mode_v = mode(working_data['RR_list'])
     measures['Mo'] = mode_v
 
-    # Obtain AMo (mode amplitude %)
+    # Obtain VR (variational range)
     vr = np.max(working_data['RR_list']) - np.min(working_data['RR_list'])
     measures['VR'] = vr
 
-    # Obtain VR (variational range)
+    # Obtain AMo (mode amplitude %)
     num_mode = np.count_nonzero(working_data['RR_list'] == mode_v)
     amo = (num_mode/len(working_data['RR_list']))*100
     measures['AMo'] = amo
