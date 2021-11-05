@@ -263,10 +263,10 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
     Now the wd dict contains the best fit paramater(s):
 
     >>> wd['best']
-    20
+    25
 
     This indicates the best fit can be obtained by raising the moving average
-    with 20%.
+    with 25% of the standard deviation of the signal.
 
     The results of the peak detection using these parameters are included too.
     To illustrate, these are the first five detected peaks:
