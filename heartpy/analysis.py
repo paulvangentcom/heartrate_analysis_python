@@ -139,8 +139,8 @@ def update_rr(working_data={}):
     '''
     rr_source = working_data['RR_list']
     b_peaklist = working_data['binary_peaklist']
-    rr_list = [rr_source[i] for i in range(len(rr_source)) if b_peaklist[i] + b_peaklist[i+1] == 2]
-    rr_mask = [0 if (b_peaklist[i] + b_peaklist[i+1] == 2) else 1 for i in range(len(rr_source))]
+    rr_list = np.array([rr_source[i] for i in range(len(rr_source)) if b_peaklist[i] + b_peaklist[i+1] == 2])
+    rr_mask = np.array([0 if (b_peaklist[i] + b_peaklist[i+1] == 2) else 1 for i in range(len(rr_source))])
     rr_masked = np.ma.array(rr_source, mask=rr_mask)
     rr_diff = np.abs(np.diff(rr_masked))
     rr_diff = rr_diff[~rr_diff.mask]
