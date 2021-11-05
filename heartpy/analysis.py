@@ -71,8 +71,8 @@ def calc_rr(peaklist, sample_rate, working_data={}):
     if len(peaklist) > 0:
         if peaklist[0] <= ((sample_rate / 1000.0) * 150):
             peaklist = np.delete(peaklist, 0)
-            working_data['peaklist'] = peaklist
             working_data['ybeat'] = np.delete(working_data['ybeat'], 0)
+    working_data['peaklist'] = peaklist # Make sure, peaklist is always an np.array
 
     rr_list = (np.diff(peaklist) / sample_rate) * 1000.0
     rr_indices = [(peaklist[i], peaklist[i+1]) for i in range(len(peaklist) - 1)]
