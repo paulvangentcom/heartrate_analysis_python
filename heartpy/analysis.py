@@ -132,7 +132,7 @@ def update_rr(working_data={}):
     This will have generated a corrected RR_list object in the dictionary:
 
     >>> wd['RR_list_cor']
-    [800.0, 1250.0, 1140.0]
+    array([ 800., 1250., 1140.])
 
     As well as updated the lists RR_diff (differences between adjacent peak-peak intervals) and
     RR_sqdiff (squared differences between adjacent peak-peak intervals).

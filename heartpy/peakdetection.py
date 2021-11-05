@@ -174,7 +174,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
     at the first five peak positions:
 
     >>> wd['peaklist'][0:5]
-    [63, 165, 264, 360, 460]
+    array([ 63, 165, 264, 360, 460], dtype=int64)
     '''
     rmean = np.array(rol_mean)
 
@@ -272,7 +272,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
     To illustrate, these are the first five detected peaks:
 
     >>> wd['peaklist'][0:5]
-    [63, 165, 264, 360, 460]
+    array([ 63, 165, 264, 360, 460], dtype=int64)
 
     and the corresponding peak-peak intervals:
 
@@ -468,9 +468,9 @@ def interpolate_peaks(data, peaks, sample_rate, desired_sample_rate=1000.0, work
 
     >>> import heartpy as hp
     >>> data, _ = hp.load_exampledata(0)
-    >>> wd, m = hp.process(data, 100.0)
+    >>> wd, m = process(data, 100.0)
     >>> wd['peaklist'][0:5]
-    [63, 165, 264, 360, 460]
+    array([ 63, 165, 264, 360, 460], dtype=int64)
 
     Now, the resolution is at max 10ms as that's the distance between data points.
     We can use the high precision mode for example to approximate a more precise
@@ -479,7 +479,7 @@ def interpolate_peaks(data, peaks, sample_rate, desired_sample_rate=1000.0, work
     >>> wd = interpolate_peaks(data = data, peaks = wd['peaklist'],
     ... sample_rate = 100.0, desired_sample_rate = 1000.0, working_data = wd)
     >>> wd['peaklist'][0:5]
-    [63.5, 165.4, 263.6, 360.4, 460.2]
+    array([ 63.5, 165.4, 263.6, 360.4, 460.2])
 
     As you can see the accuracy of peak positions has increased.
     Note that you cannot magically upsample nothing into something. Be reasonable.
@@ -498,6 +498,6 @@ this would result in downsampling which will hurt accuracy."
         peakpos = np.argmax(resampled)
         peaks.append((i[0] + (peakpos * ratio)))
 
-    working_data['peaklist'] = peaks
+    working_data['peaklist'] = np.asarray(peaks)
 
     return working_data
