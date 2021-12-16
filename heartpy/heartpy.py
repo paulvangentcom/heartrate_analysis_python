@@ -411,7 +411,7 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
     measures (m) dict now contains a list of that measure for each segment.
 
     >>> [round(x, 1) for x in m['bpm']]
-    [100.0, 96.8, 97.2, 97.9, 97.0, 96.8, 96.8, 95.0, 92.9, 96.7, 99.2]
+    [100.0, 96.8, 97.2, 97.9, 96.7, 96.8, 96.8, 95.0, 92.9, 96.7, 99.2]
 
     Specifying mode = 'fast' will run peak detection once and use detections
     to compute measures over each segment. Useful for speed ups, but typically

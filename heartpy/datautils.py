@@ -7,11 +7,11 @@ from pkg_resources import resource_filename
 
 import numpy as np
 from scipy.io import loadmat
+from scipy.ndimage.filters import uniform_filter1d
 
 __all__ = ['get_data',
            'get_samplerate_mstimer',
            'get_samplerate_datetime',
-           '_sliding_window',
            'rolling_mean',
            'outliers_iqr_method',
            'outliers_modified_z',
@@ -216,38 +216,6 @@ def get_samplerate_datetime(datetimedata, timeformat='%H:%M:%S.%f'):
     return sample_rate
 
 
-def _sliding_window(data, windowsize):
-    '''segments data into windows
-
-    Function to segment data into windows for rolling mean function.
-    Function returns the data segemented into sections.
-
-    Parameters
-    ----------
-    data : 1d array or list
-        array or list containing data over which sliding windows are computed
-
-    windowsize : int
-        size of the windows to be created by the function
-
-    Returns
-    -------
-    out : array of arrays
-        data segmented into separate windows.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> data = np.array([1, 2, 3, 4, 5])
-    >>> windows = _sliding_window(data, windowsize = 3)
-    >>> windows.shape
-    (3, 3)
-    '''
-    shape = data.shape[:-1] + (data.shape[-1] - windowsize + 1, windowsize)
-    strides = data.strides + (data.strides[-1],)
-    return np.lib.stride_tricks.as_strided(data, shape=shape, strides=strides)
-
-
 def rolling_mean(data, windowsize, sample_rate):
     '''calculates rolling mean
 
@@ -280,25 +248,7 @@ def rolling_mean(data, windowsize, sample_rate):
            514.48      , 514.52      ])
     '''
 
-    # calculate rolling mean
-    data_arr = np.array(data)
-    rol_mean = np.mean(_sliding_window(data_arr, int(windowsize*sample_rate)), axis=1)
-
-    # need to fill 1/2 windowsize gap at the start and end
-    n_missvals = int(abs(len(data_arr) - len(rol_mean))/2)
-    missvals_a = np.array([rol_mean[0]]*n_missvals)
-    missvals_b = np.array([rol_mean[-1]]*n_missvals)
-
-    rol_mean = np.concatenate((missvals_a, rol_mean, missvals_b))
-
-    #only to catch length errors that sometimes unexplicably occur.
-    ##Generally not executed, excluded from testing and coverage
-    if len(rol_mean) != len(data): # pragma: no cover
-        lendiff = len(rol_mean) - len(data)
-        if lendiff < 0:
-            rol_mean = np.append(rol_mean, 0)
-        else:
-            rol_mean = rol_mean[:-1]
+    rol_mean = uniform_filter1d(np.asarray(data, dtype='float'), size=int(windowsize*sample_rate))
     return rol_mean
 
 

@@ -165,7 +165,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
     it would work like this:
 
     >>> import heartpy as hp
-    >>> from heartpy.datautils import rolling_mean, _sliding_window
+    >>> from heartpy.datautils import rolling_mean
     >>> data, _ = hp.load_exampledata(0)
     >>> rol_mean = rolling_mean(data, windowsize = 0.75, sample_rate = 100.0)
     >>> wd = detect_peaks(data, rol_mean, ma_perc = 20, sample_rate = 100.0)
@@ -252,7 +252,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
     Given included example data let's show how this works
 
     >>> import heartpy as hp
-    >>> from heartpy.datautils import rolling_mean, _sliding_window
+    >>> from heartpy.datautils import rolling_mean
     >>> data, _ = hp.load_exampledata(0)
     >>> rol_mean = rolling_mean(data, windowsize = 0.75, sample_rate = 100.0)
 
