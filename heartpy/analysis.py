@@ -71,8 +71,8 @@ def calc_rr(peaklist, sample_rate, working_data={}):
     if len(peaklist) > 0:
         if peaklist[0] <= ((sample_rate / 1000.0) * 150):
             peaklist = np.delete(peaklist, 0)
-            working_data['peaklist'] = peaklist
             working_data['ybeat'] = np.delete(working_data['ybeat'], 0)
+    working_data['peaklist'] = peaklist # Make sure, peaklist is always an np.array
 
     rr_list = (np.diff(peaklist) / sample_rate) * 1000.0
     rr_indices = [(peaklist[i], peaklist[i+1]) for i in range(len(peaklist) - 1)]
@@ -132,15 +132,15 @@ def update_rr(working_data={}):
     This will have generated a corrected RR_list object in the dictionary:
 
     >>> wd['RR_list_cor']
-    [800.0, 1250.0, 1140.0]
+    array([ 800., 1250., 1140.])
 
     As well as updated the lists RR_diff (differences between adjacent peak-peak intervals) and
     RR_sqdiff (squared differences between adjacent peak-peak intervals).
     '''
     rr_source = working_data['RR_list']
     b_peaklist = working_data['binary_peaklist']
-    rr_list = [rr_source[i] for i in range(len(rr_source)) if b_peaklist[i] + b_peaklist[i+1] == 2]
-    rr_mask = [0 if (b_peaklist[i] + b_peaklist[i+1] == 2) else 1 for i in range(len(rr_source))]
+    rr_list = np.array([rr_source[i] for i in range(len(rr_source)) if b_peaklist[i] + b_peaklist[i+1] == 2])
+    rr_mask = np.array([0 if (b_peaklist[i] + b_peaklist[i+1] == 2) else 1 for i in range(len(rr_source))])
     rr_masked = np.ma.array(rr_source, mask=rr_mask)
     rr_diff = np.abs(np.diff(rr_masked))
     rr_diff = rr_diff[~rr_diff.mask]
