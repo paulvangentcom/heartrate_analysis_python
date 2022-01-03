@@ -290,8 +290,8 @@ def plot_poincare(working_data, measures, show = True, figsize=None,
     el.set_edgecolor((0,0,0))
     el.fill = False
 
-    ax.set_xlabel('RRi_n (ms)')
-    ax.set_ylabel('RRi_n+1 (ms)')
+    ax.set_xlabel(r'RRi$_n$ (ms)')
+    ax.set_ylabel(r'RRi$_{n+1}$ (ms)')
     ax.legend(loc=4, framealpha=0.6)
     ax.set_title(title)
 

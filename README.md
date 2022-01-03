@@ -88,7 +88,7 @@ The module is also to some extent described in my tutorial series:
 
 
 ## License
-The module is licensed under the [GNU General Public License Version3, GPL-v3](https://opensource.org/licenses/GPL-3.0)
+The module is licensed under the [MIT License](https://opensource.org/licenses/MIT)
 
 ## Validation
 Initial results of the validation have been reported in [1, 2].
