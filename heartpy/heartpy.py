@@ -330,7 +330,7 @@ include an index column?'
 
 def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=0,
                         segment_min_size=20, replace_outliers=False, outlier_method='iqr',
-                        mode='full', **kwargs):
+                        mode='full', ignore_badsignalwarning=True, **kwargs):
     '''processes passed heart rate data with a windowed function
 
     Analyses a long heart rate data array by running a moving window
@@ -371,6 +371,11 @@ def process_segmentwise(hrdata, sample_rate, segment_width=120, segment_overlap=
 
     mode : str
         'full' or 'fast'
+        
+    ignore_badsignalwarning: bool
+        Whether to ignore errors in analysis. If set to true, segments with errors in the analysis
+        will be places in the final measures array as np.nan values. If set to False, they will
+        be omitted.
 
     Keyword arguments:
     ------------------
@@ -450,7 +455,13 @@ use either \'iqr\' or \'z-score\''
                 s_measures = append_dict(s_measures, 'segment_indices', (i, ii))
                 s_working_data = append_dict(s_working_data, 'segment_indices', (i, ii))
             except exceptions.BadSignalWarning:
-                pass
+                if ignore_badsignalwarning:
+                    for k in measures.keys():
+                        s_measures = append_dict(s_measures, k, np.nan)
+                    for k in working_data.keys():
+                        s_working_data = append_dict(s_working_data, k, working_data[k])
+                else:
+                    pass
 
     elif mode == 'fast':
         working_data, measures = process(hrdata, sample_rate, **kwargs)
