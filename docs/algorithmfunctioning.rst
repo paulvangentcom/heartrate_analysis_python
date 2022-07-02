@@ -47,7 +47,6 @@ A Butterworth filter implementation is available to remove high frequency noise.
     
     import heartpy as hp
     
-    filtered = hp.butter_lowpass_filter(data, cutoff=5, sample_rate=100.0, order=3)
     filtered = hp.filter_signal(data, cutoff=5, sample_rate=100.0, order=3, filtertype='lowpass')
     
 .. image:: images/butterworth.jpeg
