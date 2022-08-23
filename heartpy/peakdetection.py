@@ -89,7 +89,7 @@ def make_windows(data, sample_rate, windowsize=120, overlap=0, min_size=20):
 def append_dict(dict_obj, measure_key, measure_value):
     '''appends data to keyed dict.
 
-    Function that appends key to continuous dict, creates if doesn't exist. EAFP
+    Function that appends key to continuous dict, creates if doesn't exist.
 
     Parameters
     ----------
@@ -468,7 +468,7 @@ def interpolate_peaks(data, peaks, sample_rate, desired_sample_rate=1000.0, work
 
     >>> import heartpy as hp
     >>> data, _ = hp.load_exampledata(0)
-    >>> wd, m = process(data, 100.0)
+    >>> wd, m = hp.process(data, 100.0)
     >>> wd['peaklist'][0:5]
     array([ 63, 165, 264, 360, 460], dtype=int64)
 
