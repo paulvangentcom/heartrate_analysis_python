@@ -179,7 +179,7 @@ def detect_peaks(hrdata, rol_mean, ma_perc, sample_rate, update_dict=True, worki
     rmean = np.array(rol_mean)
 
     #rol_mean = rmean + ((rmean / 100) * ma_perc)
-    mn = np.mean(rmean / 100) * ma_perc
+    mn = np.std(hrdata)*4*ma_perc/100 
     rol_mean = rmean + mn
 
     peaksx = np.where((hrdata > rol_mean))[0]
@@ -263,10 +263,10 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
     Now the wd dict contains the best fit paramater(s):
 
     >>> wd['best']
-    20
+    25
 
     This indicates the best fit can be obtained by raising the moving average
-    with 20%.
+    with 25% of the standard deviation of the signal.
 
     The results of the peak detection using these parameters are included too.
     To illustrate, these are the first five detected peaks:
@@ -281,7 +281,7 @@ def fit_peaks(hrdata, rol_mean, sample_rate, bpmmin=40, bpmmax=180, working_data
     '''
 
     # moving average values to test
-    ma_perc_list = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
+    ma_perc_list = [-50, -40, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200, 300]
 
     rrsd = []
     valid_ma = []
