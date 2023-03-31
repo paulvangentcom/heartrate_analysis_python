@@ -60,7 +60,6 @@ Several optional arguments are available:
 
 * **windowsize:** _optional_ `windowsize` is the window size used for the calculation of the moving average. The windowsize is defined as `windowsize * samplerate`. Default windowsize=0.75.
 * **report_time:** _optional_ whether to report total processing time of process() loop.
-* **calc_fft:** _optional_ whether to calculate frequency domain measures. Default = false Note: can cause slowdowns in some cases.
 * **calc_freq:** _optional_ whether to calculate frequency domain measures. Default = false Note: can cause slowdowns in some cases.
 * **freq_method:** _optional_ method used to extract the frequency spectrum. Available: 'fft' (Fourier Analysis), 'periodogram', and 'welch' (Welch's method), Default = 'welch'
 * **interp_clipping:** if True, clipping parts of the signal are identified and the implied peak shape is interpolated. Default=False
