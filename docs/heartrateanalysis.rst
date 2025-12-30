@@ -4,7 +4,9 @@
 Heart Rate Analysis
 *******************
 
-A complete description of the algorithm can be found in: <ref embedded paper>.
+A complete description of the algorithm can be found in these papers:
+- van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2019). Analysing Noisy Driver Physiology Real-Time Using Off-the-Shelf Sensors: Heart Rate Analysis Software from the Taking the Fast Lane Project. Journal of Open Research Software, 7(1), 32. DOI: http://doi.org/10.5334/jors.241
+- van Gent, P., Farah, H., van Nes, N., & van Arem, B. (2019). HeartPy: A novel heart rate algorithm for the analysis of noisy signals. Transportation Research Part F: Traffic Psychology and Behaviour, 66, 368–378. https://doi.org/10.1016/j.trf.2019.09.015
 
 
 Background
