@@ -8,3 +8,5 @@ build/
 dist/
 heartpy.egg-info/
 papers/
+venv/
+.DS_Store

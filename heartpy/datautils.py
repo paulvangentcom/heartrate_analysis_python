@@ -3,7 +3,6 @@ Functions for loading and slicing data
 '''
 
 from datetime import datetime
-from pkg_resources import resource_filename
 
 import numpy as np
 from scipy.io import loadmat
@@ -398,24 +397,26 @@ def load_exampledata(example=0):
     [0.0, 8.55, 17.1, 25.64, 34.19]
     '''
 
+    from importlib.resources import files
+
     timer = []
 
     if example == 0:
-        path = path = 'data/data.csv'
-        filepath = resource_filename(__name__, path)
+        path = 'data/data.csv'
+        filepath = str(files(__name__).joinpath(path))
         data = get_data(filepath)
     elif example == 1:
-        path = path = 'data/data2.csv'
-        filepath = resource_filename(__name__, path)
+        path = 'data/data2.csv'
+        filepath = str(files(__name__).joinpath(path))
         data = get_data(filepath, column_name = 'hr')
         timer = get_data(filepath, column_name = 'timer')
     elif example == 2:
-        path = path = 'data/data3.csv'
-        filepath = resource_filename(__name__, path)
+        path = 'data/data3.csv'
+        filepath = str(files(__name__).joinpath(path))
         data = get_data(filepath, column_name = 'hr')
         timer = get_data(filepath, column_name = 'datetime')
     else:
         raise ValueError('Incorrect data file specified.\
-available datafiles are data.csv (0), data2.csv(1), data3.csv(2).')
+available datafiles are data.csv (0), data2.csv (1), data3.csv (2).')
 
     return data, timer
