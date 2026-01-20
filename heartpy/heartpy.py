@@ -276,11 +276,6 @@ include an index column?'
         hrdata = enhance_peaks(hrdata)
         hrdata = hampel_correcter(hrdata, sample_rate)
 
-    # check that the data has positive baseline for the moving average algorithm to work
-    bl_val = np.percentile(hrdata, 0.1)
-    if bl_val < 0:
-        hrdata = hrdata + abs(bl_val)
-
     working_data['hr'] = hrdata
     working_data['sample_rate'] = sample_rate
 
